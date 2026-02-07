@@ -39,6 +39,6 @@ decisions:
 ## Lifecycle
 
 1. **CAPTURE** — discovered during TDD, added to `important_decisions` in handoff
-2. **CONSOLIDATE** — sw-quality approves and appends to `memory/decisions.yml`
+2. **CONSOLIDATE** — sw-quality approves and appends to `.shaktra/memory/decisions.yml`
 3. **APPLY** — planner and architect reference in future story planning
 4. **SUPERSEDE** — new decision replaces old (set `status: superseded`, never delete)

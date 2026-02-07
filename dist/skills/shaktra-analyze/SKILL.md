@@ -107,14 +107,13 @@ D8: Critical Paths & Risk           → .shaktra/analysis/critical-paths.yml
 You are the shaktra-cba-analyzer agent. Execute analysis dimension {dimension_id}.
 
 Dimension: {dimension_name}
-Scope: {dimension_scope from analysis-dimensions-core.md (D1-D4) or analysis-dimensions-health.md (D5-D8)}
 Static data: .shaktra/analysis/static.yml
 Overview: .shaktra/analysis/overview.yml
 Decisions: .shaktra/memory/decisions.yml
 Output path: .shaktra/analysis/{output_file}
 
-Follow the checks, evidence requirements, and output schema defined in analysis-dimensions-core.md / analysis-dimensions-health.md
-for dimension {dimension_id}. Ground all findings in static.yml data where possible.
+Read your dimension specification from analysis-dimensions-core.md (D1-D4) or analysis-dimensions-health.md (D5-D8).
+Follow the checks, evidence requirements, and output schema for dimension {dimension_id}. Ground all findings in static.yml data where possible.
 
 Your output file MUST begin with a summary: section (300-600 tokens, self-contained).
 ```

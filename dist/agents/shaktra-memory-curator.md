@@ -27,8 +27,8 @@ You receive:
 
 1. **Read** the handoff file and any quality findings at the artifacts path.
 2. **Identify** insights that meet the capture bar (see below).
-3. **Read** existing `memory/lessons.yml` to check for duplicates and current count.
-4. **Archive** oldest entries to `memory/lessons-archive.yml` if count would exceed 100.
+3. **Read** existing `.shaktra/memory/lessons.yml` to check for duplicates and current count.
+4. **Archive** oldest entries to `.shaktra/memory/lessons-archive.yml` if count would exceed 100.
 5. **Append** new lessons with sequential IDs, today's date, and the source story ID.
 6. **Set** `memory_captured: true` in the handoff file.
 

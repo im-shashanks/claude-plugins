@@ -139,7 +139,7 @@ user-project/
 | 5 | shaktra-sw-engineer | Dev skill | Create implementation + test plans | opus |
 | 6 | shaktra-test-agent | Dev skill | Write tests — RED phase | opus |
 | 7 | shaktra-developer | Dev skill | Implement code — GREEN phase | opus |
-| 8 | shaktra-sw-quality | Dev skill | Review dev artifacts per story | opus |
+| 8 | shaktra-sw-quality | Dev skill | Review dev artifacts per story | sonnet |
 | 9 | shaktra-cba-analyzer | Analyze skill | Execute codebase analysis dimensions | opus |
 | 10 | shaktra-cr-analyzer | Review skill | Execute code review dimensions | opus |
 | 11 | shaktra-memory-curator | All main skills | Capture actionable memory from workflow sessions | haiku |

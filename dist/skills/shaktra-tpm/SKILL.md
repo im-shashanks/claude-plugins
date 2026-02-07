@@ -172,7 +172,7 @@ You are the shaktra-tpm-quality agent. Review this artifact for quality.
 
 Artifact: {artifact_path}
 Type: {design|story}
-Context: {prior_findings or "First review"}
+Review context: {review_context or "First review"}
 
 Apply the {design|story} review checklist. Emit QUALITY_PASS or QUALITY_BLOCKED with findings.
 ```
