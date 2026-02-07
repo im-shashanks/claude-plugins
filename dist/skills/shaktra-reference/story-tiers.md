@@ -1,6 +1,6 @@
 # Story Tiers
 
-4-tier classification system for user stories. Tier determines required fields, quality gates, and coverage thresholds. Full story YAML schema is defined in the shaktra-stories skill — this file defines only the tier matrix.
+4-tier classification system for user stories. Tier determines required fields, quality gates, and coverage thresholds. Field definitions and YAML schema live in `schemas/story-schema.md` — this file defines only the tier matrix, detection logic, and gate behavior.
 
 ## Tier Summary
 
@@ -8,8 +8,8 @@
 |---|---|---|---|---|
 | **Trivial** | Typo fix, config change, docs update | 3 | `settings.tdd.hotfix_coverage_threshold` | Quick |
 | **Small** | Single-function change, minor bugfix | 5 | 80% | Quick |
-| **Medium** | Feature addition, multi-file change | 10 | `settings.tdd.coverage_threshold` | Full |
-| **Large** | Cross-cutting feature, architectural change | 15+ | 95% | Thorough |
+| **Medium** | Feature addition, multi-file change | 12 | `settings.tdd.coverage_threshold` | Full |
+| **Large** | Cross-cutting feature, architectural change | 18+ | 95% | Thorough |
 
 ## Auto-Detection Logic
 
@@ -25,16 +25,6 @@ else:
 ```
 
 The auto-detected tier is a suggestion. The user or TPM can override it explicitly in the story file.
-
-## Required Fields Per Tier
-
-**Trivial (3 fields):** title, description, acceptance_criteria
-
-**Small (5 fields):** title, description, acceptance_criteria, affected_files, test_approach
-
-**Medium (10 fields):** title, description, acceptance_criteria, affected_files, test_approach, dependencies, design_notes, error_handling, edge_cases, rollback_plan
-
-**Large (15+ fields):** All Medium fields plus: architecture_impact, performance_considerations, security_review, migration_plan, monitoring_plan
 
 ## Gate Behavior Matrix
 

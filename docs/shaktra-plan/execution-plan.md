@@ -19,22 +19,22 @@
 
 ## Phases
 
-| Phase | File | Description |
-|-------|------|-------------|
-| Overview | [architecture-overview.md](architecture-overview.md) | Plugin structure, components, token budget, design constraints |
-| 1 | [phase-01-foundation.md](phases/phase-01-foundation.md) | Plugin scaffold, init skill, templates |
-| 2 | [phase-02-reference-system.md](phases/phase-02-reference-system.md) | Shared constants — severity, principles, guard tokens, dimensions |
-| 3 | [phase-03-state-schemas.md](phases/phase-03-state-schemas.md) | State file schemas + memory curator agent |
-| 4 | [phase-04-tpm-workflow.md](phases/phase-04-tpm-workflow.md) | TPM workflow — design docs, stories, PM, sprints |
-| 5 | [phase-05-sdm-workflow.md](phases/phase-05-sdm-workflow.md) | SDM workflow — TDD pipeline (PLAN/RED/GREEN/QUALITY) |
-| 6 | [phase-06-code-reviewer.md](phases/phase-06-code-reviewer.md) | Code reviewer — app-level review, PR review |
-| 7 | [phase-07-codebase-analyzer.md](phases/phase-07-codebase-analyzer.md) | Codebase analyzer — brownfield analysis |
-| 8 | [phase-08-general-purpose.md](phases/phase-08-general-purpose.md) | General purpose agent — domain-flexible |
-| 9 | [phase-09-hooks.md](phases/phase-09-hooks.md) | Hooks — external enforcement (block, not warn) |
-| 10 | [phase-10-sprint-planning.md](phases/phase-10-sprint-planning.md) | Sprint planning integration |
-| 11 | [phase-11-workflow-router.md](phases/phase-11-workflow-router.md) | Workflow router — NL intent classification |
-| 12 | [phase-12-integration.md](phases/phase-12-integration.md) | Integration testing, doctor skill, packaging |
-| — | [appendices.md](appendices.md) | Anti-patterns, Forge patterns to port, dependency graph, file counts |
+| Phase | File | Description | Status |
+|-------|------|-------------|--------|
+| Overview | [architecture-overview.md](architecture-overview.md) | Plugin structure, components, token budget, design constraints | — |
+| 1 | [phase-01-foundation.md](phases/phase-01-foundation.md) | Plugin scaffold, init skill, templates | Complete |
+| 2 | [phase-02-reference-system.md](phases/phase-02-reference-system.md) | Shared constants — severity, principles, guard tokens, dimensions | Complete |
+| 3 | [phase-03-state-schemas.md](phases/phase-03-state-schemas.md) | State file schemas + memory curator agent | Complete |
+| 4 | [phase-04-tpm-workflow.md](phases/phase-04-tpm-workflow.md) | TPM workflow — design docs, stories, PM, sprints | — |
+| 5 | [phase-05-sdm-workflow.md](phases/phase-05-sdm-workflow.md) | SDM workflow — TDD pipeline (PLAN/RED/GREEN/QUALITY) | — |
+| 6 | [phase-06-code-reviewer.md](phases/phase-06-code-reviewer.md) | Code reviewer — app-level review, PR review | — |
+| 7 | [phase-07-codebase-analyzer.md](phases/phase-07-codebase-analyzer.md) | Codebase analyzer — brownfield analysis | — |
+| 8 | [phase-08-general-purpose.md](phases/phase-08-general-purpose.md) | General purpose agent — domain-flexible | — |
+| 9 | [phase-09-hooks.md](phases/phase-09-hooks.md) | Hooks — external enforcement (block, not warn) | — |
+| 10 | [phase-10-sprint-planning.md](phases/phase-10-sprint-planning.md) | Sprint planning integration | — |
+| 11 | [phase-11-workflow-router.md](phases/phase-11-workflow-router.md) | Workflow router — NL intent classification | — |
+| 12 | [phase-12-integration.md](phases/phase-12-integration.md) | Integration testing, doctor skill, packaging | — |
+| — | [appendices.md](appendices.md) | Anti-patterns, Forge patterns to port, dependency graph, file counts | — |
 
 ---
 
