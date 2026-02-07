@@ -50,7 +50,25 @@ Skills are namespaced as `/shaktra:skill-name` when installed by users.
 
 **SKILL.md files require YAML frontmatter** with at least `name` and `description` fields for Claude Code to discover them.
 
-For local dev testing: `claude --plugin-dir dist/`
+## Testing the Plugin
+
+**Quick dev iteration:** `claude --plugin-dir dist/` — loads the plugin directly, no install step. Fast but skips the real install path.
+
+**Full install testing (preferred before marking a phase complete):**
+
+```bash
+# Local file path — simulates a real install from a local checkout
+/plugin install /absolute/path/to/shaktra-plugin/dist
+
+# Git remote — simulates how end users will install
+/plugin install https://github.com/im-shashanks/shaktra-plugin.git
+
+# Marketplace — the intended distribution path
+/plugin marketplace add https://github.com/im-shashanks/shaktra-plugin.git
+/plugin install shaktra@shaktra-marketplace
+```
+
+Always validate at least the local file path install before finalizing a phase. The `--plugin-dir` flag is convenient for rapid iteration but does not exercise the install/discovery pipeline.
 
 ## Key Design Decisions
 
