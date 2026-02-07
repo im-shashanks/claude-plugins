@@ -13,6 +13,10 @@ tdd:
 quality:
   p1_threshold: 2
 
+review:
+  verification_test_persistence: ask   # auto | always | never | ask
+  min_verification_tests: 5
+
 sprints:
   enabled: true
   velocity_tracking: true

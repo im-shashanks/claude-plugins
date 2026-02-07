@@ -123,7 +123,7 @@ user-project/
 
 | # | Skill | Loaded By | Purpose |
 |---|-------|-----------|---------|
-| 9 | shaktra-quality | sw-quality, tpm-quality, cr-analyzer | Quality standards, P0-P3, dimensions, checks |
+| 9 | shaktra-quality | sw-quality, tpm-quality | Quality standards, P0-P3, dimensions, checks |
 | 10 | shaktra-tdd | sw-engineer, test-agent, developer | TDD patterns, testing practices, coding practices |
 | 11 | shaktra-reference | All agents | Shared constants: severity, guard tokens, principles |
 | 12 | shaktra-stories | scrummaster | Story schema, tier definitions, creation rules |
@@ -195,7 +195,8 @@ Optimization is **architectural, not format-based**. YAML and Markdown remain th
 | shaktra-tdd | testing-practices.md | test-agent, sw-engineer | Behavioral testing, test isolation, mocking discipline |
 | shaktra-tdd | coding-practices.md | developer, sw-engineer | Implementation patterns, error handling, anti-patterns |
 | shaktra-quality | quick-check.md | sw-quality, tpm-quality | ~35 quality checks organized by severity and gate |
-| shaktra-quality | comprehensive-review.md | sw-quality, cr-analyzer | Full 13-dimension review template |
+| shaktra-quality | comprehensive-review.md | sw-quality | Full 13-dimension review template |
+| shaktra-review | review-dimensions.md | cr-analyzer | App-level review dimensions, evidence enforcement, edge-case matrix |
 | shaktra-reference | quality-principles.md | All agents | 10 core quality principles |
 | shaktra-reference | quality-dimensions.md | Quality agents | 13 review dimensions (A-M) |
 | shaktra-stories | story-creation.md | scrummaster | Story crafting rules, enrichment rules, tier detection |

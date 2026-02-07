@@ -1,4 +1,4 @@
-# Phase 6 — Code Reviewer
+# Phase 6 — Code Reviewer [COMPLETE]
 
 > **Context Required:** Read [architecture-overview.md](../architecture-overview.md) before starting.
 > **Depends on:** Phase 3 (State Schemas — for review-dimensions.md to reference quality-dimensions.md). Phase 5 (SDM) recommended but not required.
@@ -8,7 +8,7 @@
 
 ## Objective
 
-Build the app-level code review workflow. This is distinct from SW Quality (story-level): Code Reviewer examines how code fits the overall application, reviews PRs, and generates independent test scenarios.
+Build the app-level code review workflow. This is distinct from SW Quality (story-level): Code Reviewer examines how code fits the overall application, reviews PRs, and generates independent test scenarios. This workflow reviews, with slightly higher importance, for code quality, tech debt, maintainability, reliability, security, performance among others, at the application level.
 
 ## Deliverables
 
@@ -71,13 +71,19 @@ Three "dimensions" files exist in the framework. They serve different purposes a
 
 ## Validation
 
-- [ ] Story review produces app-level findings (not just story-level)
-- [ ] PR review works with `gh pr diff`
-- [ ] Independent test scenarios are generated
-- [ ] Parallel analyzer spawning works
-- [ ] No overlap with SW Quality findings (different scope)
-- [ ] Memory capture invoked as final step
-- [ ] review-dimensions.md references quality-dimensions.md without duplicating content
+- [x] Story review produces app-level findings (not just story-level)
+- [x] PR review works with `gh pr diff`
+- [x] Independent test scenarios are generated (5 categories, min from settings)
+- [x] Parallel analyzer spawning works (4 dimension groups)
+- [x] No overlap with SW Quality findings (different scope)
+- [x] Memory capture invoked as final step
+- [x] review-dimensions.md references quality-dimensions.md without duplicating content
+- [x] Evidence enforcement with 6 evidence types and escalation rules
+- [x] Edge-case matrix with 10 systematic categories
+- [x] Per-dimension reviewer deliverables with structured tables
+- [x] Reviewer discipline anti-patterns (7 anti-patterns)
+- [x] Structured output templates for both review modes
+- [x] Verification test persistence from settings.yml
 
 ## Forge Reference
 
