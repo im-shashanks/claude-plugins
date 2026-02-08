@@ -35,6 +35,24 @@ Section 3 "Proposed Solution" must include a **Pattern Justification** subsectio
 - Don't catalog every GoF pattern — only document patterns you're actively choosing for this feature.
 - Don't repeat quality principles (those are applied during implementation, not design).
 
+### Architecture Style Selection Guide
+
+When `settings.project.architecture` is empty (greenfield, first design), use this matrix to evaluate which style fits the project. Match the project's dominant characteristics — not every row needs to match, but the strongest signals should align.
+
+| Characteristic | Layered | Hexagonal / Clean | MVC | Feature-Based | Event-Driven |
+|---|---|---|---|---|---|
+| **Best for** | CRUD apps, internal tools, scripts | Domain-heavy apps, external integrations | Web apps with server rendering | Large apps with independent features | Async processing, real-time, workflows |
+| **Team size** | 1-3 devs | 3-10 devs | 1-5 devs | 5+ devs (parallel feature work) | 3+ devs |
+| **Domain complexity** | Low-medium | Medium-high | Low-medium | Varies per feature | Medium-high |
+| **External integrations** | Few, stable | Many or changing | Few | Per-feature | Many async sources |
+| **Testability need** | Standard | High (ports mockable) | Standard | Per-feature isolation | High (handler isolation) |
+| **Example** | Admin dashboard, CLI tool | Payment service, marketplace | Blog, CMS, traditional web | SaaS platform, large monolith | Order pipeline, notification system |
+
+**Decision process for the architect:**
+1. If `project.architecture` is set → use it. Justify alignment in Section 3.
+2. If brownfield with `structure.yml` → match detected patterns. Justify any deviation.
+3. If greenfield with no architecture set → evaluate the matrix against PRD requirements. Propose the best fit in Section 3 and record as an `important_decision` (category: consistency) so all future designs inherit it.
+
 ## Tier Mapping
 
 | Story Tier | Required Sections |

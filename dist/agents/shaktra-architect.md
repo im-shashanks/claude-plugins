@@ -83,7 +83,7 @@ For each section:
 **Section 3 — Pattern Justification (mandatory):**
 - Verify the proposed solution aligns with `settings.project.architecture`. If `architecture` is set, the design must fit that style. If deviating, explain why and propose a `decisions.yml` update.
 - For brownfield: cross-reference `structure.yml` detected patterns and `practices.yml` canonical examples. New components must match existing patterns unless the design explicitly justifies a deviation.
-- For greenfield with no `architecture` set: propose an architecture style in Section 3 and recommend the user update `settings.project.architecture`. Record the choice as an `important_decision` (category: consistency).
+- For greenfield with no `architecture` set: use the Architecture Style Selection Guide in `design-doc-schema.md` to evaluate which style fits the project based on PRD characteristics. Propose the best fit in Section 3 and recommend the user update `settings.project.architecture`. Record the choice as an `important_decision` (category: consistency).
 - Name specific design patterns used (repository, factory, strategy, etc.) and why they fit this feature.
 
 Store at `.shaktra/designs/<project-name>-design.md`.

@@ -143,7 +143,21 @@ After each agent completes, update `manifest.yml` with that dimension's completi
 - Record completion timestamp
 - Record analysis version (from plugin.json)
 
-### Step 6: Memory Capture
+### Step 6: Update Settings from Analysis
+
+After all dimensions are validated, back-fill `settings.project.architecture` if it's currently empty:
+
+1. Read `.shaktra/analysis/structure.yml` → `details.patterns.detected` and `details.patterns.consistency`
+2. Read `.shaktra/settings.yml` → `project.architecture`
+3. If `project.architecture` is empty and `structure.yml` detected a single dominant pattern with `consistency: high`:
+   - Update `settings.project.architecture` to the detected style
+   - Report: "Detected architecture: {style} (high consistency) — updated settings.project.architecture"
+4. If `project.architecture` is empty and `consistency` is `mixed` or `low`:
+   - Do NOT auto-populate — report the detected styles and ask the user to choose:
+   - "Detected mixed architecture: {styles}. Please set `project.architecture` in `.shaktra/settings.yml` to the intended target style."
+5. If `project.architecture` is already set: validate it matches the detected patterns. If it conflicts, report the mismatch as a finding.
+
+### Step 7: Memory Capture
 
 Mandatory final step — never skip.
 
@@ -157,7 +171,7 @@ Artifacts path: .shaktra/analysis/
 Extract lessons that meet the capture bar. Append to .shaktra/memory/lessons.yml.
 ```
 
-### Step 7: Report Summary
+### Step 8: Report Summary
 
 Display to user:
 
@@ -178,6 +192,9 @@ Display to user:
 |---|---|---|
 | D1: Architecture & Structure | complete | {one-line summary} |
 | ... | ... | ... |
+
+### Architecture
+- {project.architecture setting status — auto-populated, user action needed, or already set}
 
 ### Next Steps
 - Run `/shaktra:tpm` to start planning — architect will consume analysis automatically
