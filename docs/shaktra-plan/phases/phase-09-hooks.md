@@ -1,4 +1,4 @@
-# Phase 9 — Hooks & External Enforcement
+# Phase 9 — Hooks & External Enforcement [COMPLETE]
 
 > **Context Required:** Read [architecture-overview.md](../architecture-overview.md) before starting.
 > **Depends on:** Phase 1 (Foundation), Phase 3 (State Schemas) for validation.
