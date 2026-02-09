@@ -1,6 +1,9 @@
 # OS files
 .DS_Store
 
+# Release build artifacts
+release-build/
+
 # Claude Code local state
 .claude/
 
