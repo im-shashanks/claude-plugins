@@ -2,13 +2,15 @@
 
 **Opinionated software development framework for Claude Code.**
 
-Shaktra is a Claude Code plugin that orchestrates specialized AI agents through agile-inspired workflows to produce industry-standard, production-quality code.
+Shaktra is a Claude Code plugin that orchestrates 12 specialized AI agents through agile-inspired workflows to produce industry-standard, production-quality code.
 
 | | |
 |---|---|
 | **Version** | 0.1.0 |
 | **License** | MIT |
-| **Plugin files** | ~60 files, ~7,000 lines |
+| **Agents** | 12 specialized sub-agents |
+| **Skills** | 14 total (10 user-invocable) |
+| **Quality** | 36 checks per TDD gate, 13 review dimensions |
 
 ---
 
@@ -19,12 +21,32 @@ Shaktra turns Claude Code into a full software development team. Instead of a si
 **Five pillars:**
 
 1. **TDD-first development** — tests are written before code, always
-2. **Multi-agent orchestration** — 11 specialized agents, each with a distinct role
+2. **Multi-agent orchestration** — 12 specialized agents, each with a distinct role
 3. **Quality gates at every phase** — P0-P3 severity taxonomy with automated enforcement
 4. **Sprint-based planning** — velocity tracking, capacity allocation, backlog management
 5. **Ceremony scaling** — story tiers (XS/S/M/L) determine how much process each task gets
 
 Quality enforcement is built into the workflow, not bolted on. Every code change passes through story-level quality checks during TDD and app-level review after completion. P0 findings block merge — no exceptions.
+
+---
+
+## How It Works
+
+![Shaktra Architecture](https://raw.githubusercontent.com/im-shashanks/shaktra-plugin/main/Resources/workflow.drawio.png)
+
+Shaktra uses a layered agent system where **skills orchestrate** and **agents execute**:
+
+- **TPM** receives a feature request → dispatches Architect, Scrummaster, Product Manager
+- **Dev Manager** receives a story → orchestrates SW Engineer, Test Agent, Developer through TDD
+- **Code Reviewer** receives completed work → runs 13-dimension review with independent verification tests
+- **Codebase Analyzer** receives a brownfield project → executes 9-dimension parallel analysis
+
+Two quality tiers operate at different scopes:
+
+- **SW Quality** checks story-level quality during TDD (36 checks per gate)
+- **Code Reviewer** checks app-level quality after completion (13 dimensions)
+
+Every implementation follows a strict TDD state machine: **PLAN → RED → GREEN → QUALITY → MEMORY → COMPLETE**. Quality gates must pass at each transition — there are no shortcuts.
 
 ---
 
@@ -61,13 +83,13 @@ claude --plugin-dir dist/
 
 1. **Initialize** — `/shaktra:init` to create `.shaktra/` config and project structure
 2. **Plan** — `/shaktra:tpm` to create a design doc, break it into user stories, and plan your sprint
-3. **Build** — `/shaktra:dev` to implement stories with TDD (red-green-refactor)
-4. **Review** — `/shaktra:review` to run a comprehensive code review or review a PR
+3. **Build** — `/shaktra:dev ST-001` to implement stories with TDD (PLAN → RED → GREEN → QUALITY)
+4. **Review** — `/shaktra:review ST-001` to run a 13-dimension code review with verification tests
 
 ### Brownfield project
 
 1. **Initialize** — `/shaktra:init` (select "brownfield")
-2. **Analyze** — `/shaktra:analyze` to assess the existing codebase across 8 dimensions
+2. **Analyze** — `/shaktra:analyze` to assess the existing codebase across 9 dimensions
 3. **Plan and build** — same as greenfield, informed by analysis results
 
 ### Hotfix
@@ -76,21 +98,30 @@ claude --plugin-dir dist/
 /shaktra:tpm hotfix: <description of the issue>
 ```
 
-Creates a hotfix story and routes directly to development.
+Creates a hotfix story and routes directly to development. Minimal ceremony, 70% coverage threshold.
+
+### Bug fix
+
+```
+/shaktra:bugfix <bug description or error message>
+```
+
+Runs 5-step diagnosis (triage → reproduce → root cause → blast radius → story) then TDD remediation.
 
 ---
 
 ## Commands
 
-### Workflow Agents
+### Workflow Commands
 
 | Command | Agent | Purpose |
 |---|---|---|
 | `/shaktra:tpm` | Technical Project Manager | Design docs, user stories, sprint planning, hotfixes |
-| `/shaktra:dev` | Developer | TDD implementation — red, green, refactor |
-| `/shaktra:review` | Code Reviewer | PR reviews, app-level quality checks |
-| `/shaktra:analyze` | Analyzer | Brownfield codebase analysis (8 dimensions) |
-| `/shaktra:general` | General Assistant | Domain expertise, architectural guidance, questions |
+| `/shaktra:dev` | Dev Manager | TDD implementation — PLAN → RED → GREEN → QUALITY |
+| `/shaktra:review` | Code Reviewer | Story reviews, PR reviews, 13-dimension quality checks |
+| `/shaktra:analyze` | Codebase Analyzer | Brownfield codebase analysis (9 dimensions) |
+| `/shaktra:bugfix` | Bug Fix Lead | Bug diagnosis (5-step) + TDD remediation |
+| `/shaktra:general` | Domain Expert | Domain expertise, architectural guidance, technical questions |
 
 ### Utility Commands
 
@@ -99,23 +130,7 @@ Creates a hotfix story and routes directly to development.
 | `/shaktra:init` | Initialize Shaktra in a project (creates `.shaktra/`) |
 | `/shaktra:doctor` | Diagnose framework health — plugin structure, config, constraints |
 | `/shaktra:workflow` | Natural language router — describe what you need, get routed to the right agent |
-
----
-
-## Architecture
-
-Shaktra uses a layered agent system:
-
-- **Skill layer** — user-facing commands (8 invocable skills) define the workflow and orchestrate agents
-- **Agent layer** — 11 specialized sub-agents execute specific tasks (architect, developer, test engineer, etc.)
-- **Reference layer** — shared constants, schemas, and quality standards (single source of truth)
-- **Hook layer** — 4 blocking hooks enforce constraints at commit/push time
-
-**Quality system:** Two distinct reviewers operate at different scopes:
-- **SW Quality** checks story-level quality during TDD (after each implementation cycle)
-- **Code Reviewer** checks app-level quality after completion and reviews PRs
-
-**TDD pipeline:** Every implementation follows red-green-refactor with a structured handoff schema tracking phase transitions, test counts, and coverage.
+| `/shaktra:help` | Show all commands, workflows, architecture, and usage guide |
 
 ---
 
@@ -123,14 +138,32 @@ Shaktra uses a layered agent system:
 
 All thresholds and settings live in `.shaktra/settings.yml` — nothing is hardcoded in the plugin.
 
-| Section | Controls |
+| Setting | Default | Controls |
+|---|---|---|
+| `tdd.coverage_threshold` | 90% | Minimum test coverage for stories |
+| `tdd.hotfix_threshold` | 70% | Coverage for hotfix stories |
+| `quality.p1_threshold` | 2 | Max P1 findings before merge block |
+| `review.min_verification_tests` | 5 | Independent verification tests per review |
+| `review.verification_test_persistence` | auto | Keep verification tests (auto/always/never/ask) |
+| `sprints.sprint_duration_days` | 14 | Sprint length |
+| `sprints.default_velocity` | — | Story points per sprint (estimated at init) |
+
+Story tiers (XS/S/M/L) automatically scale process ceremony — trivial stories get 70% coverage with minimal process; large stories get 95% coverage with full architecture review.
+
+---
+
+## Enforcement
+
+Four blocking hooks enforce constraints automatically:
+
+| Hook | Blocks |
 |---|---|
-| `project` | Name, type (greenfield/brownfield), language, test framework, coverage tool |
-| `tdd` | Coverage threshold (default: 90%), hotfix threshold (default: 70%) |
-| `quality` | Max P1 findings allowed (default: 2) |
-| `review` | Verification test count, persistence behavior |
-| `analysis` | Summary token budget, incremental refresh toggle |
-| `sprints` | Sprint duration, default velocity, tracking toggle |
+| **block-main-branch** | Git operations on main/master/prod |
+| **validate-story-scope** | File changes outside the current story's scope |
+| **validate-schema** | YAML files that don't match Shaktra schemas |
+| **check-p0-findings** | Completion when unresolved P0 findings exist |
+
+Hooks are all-or-nothing — they block or they don't exist. No warn-only mode.
 
 ---
 

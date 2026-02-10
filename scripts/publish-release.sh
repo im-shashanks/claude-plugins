@@ -125,8 +125,8 @@ if [ "$agent_count" -ne 12 ]; then
 fi
 
 skill_count=$(ls -d "$BUILD/skills/"*/ 2>/dev/null | wc -l | tr -d ' ')
-if [ "$skill_count" -ne 13 ]; then
-  echo "  FAIL: expected 13 skills, found $skill_count"
+if [ "$skill_count" -ne 14 ]; then
+  echo "  FAIL: expected 14 skills, found $skill_count"
   errors=$((errors + 1))
 fi
 

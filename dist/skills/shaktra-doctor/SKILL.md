@@ -30,12 +30,12 @@ FAIL: List missing files or files with invalid frontmatter.
 
 ### Check 2 — Skill Directories
 
-Glob `${CLAUDE_PLUGIN_ROOT}/skills/*/SKILL.md`. Verify all 13 skill directories exist and each SKILL.md has valid YAML frontmatter (opening and closing `---` with at least `name` and `description` fields).
+Glob `${CLAUDE_PLUGIN_ROOT}/skills/*/SKILL.md`. Verify all 14 skill directories exist and each SKILL.md has valid YAML frontmatter (opening and closing `---` with at least `name` and `description` fields).
 
 **Expected skills:**
-shaktra-analyze, shaktra-bugfix, shaktra-dev, shaktra-doctor, shaktra-general, shaktra-init, shaktra-quality, shaktra-reference, shaktra-review, shaktra-stories, shaktra-tdd, shaktra-tpm, shaktra-workflow
+shaktra-analyze, shaktra-bugfix, shaktra-dev, shaktra-doctor, shaktra-general, shaktra-help, shaktra-init, shaktra-quality, shaktra-reference, shaktra-review, shaktra-stories, shaktra-tdd, shaktra-tpm, shaktra-workflow
 
-PASS: All 13 skill SKILL.md files exist with valid frontmatter.
+PASS: All 14 skill SKILL.md files exist with valid frontmatter.
 FAIL: List missing skills or invalid frontmatter.
 
 ### Check 3 — Hook Scripts
@@ -131,7 +131,7 @@ Present results as a structured report:
 
 ### Category 1: Plugin Structure
 - [PASS] Check 1 — Agent Files: 12/12 agents found with valid frontmatter
-- [PASS] Check 2 — Skill Directories: 13/13 skills found with valid frontmatter
+- [PASS] Check 2 — Skill Directories: 14/14 skills found with valid frontmatter
 - [PASS] Check 3 — Hook Scripts: 4/4 scripts found and executable
 - [PASS] Check 4 — Sub-File References: All references resolve
 - [PASS] Check 10 — Python Dependencies: PyYAML installed
