@@ -17,11 +17,13 @@ Dimensions that answer "What IS this codebase?" — its structure, domain model,
 2. **Module relationships** — which modules depend on which (from `static.yml` dependency graph). Identify intended boundaries and violations.
 3. **Architectural patterns** — layering (MVC, hexagonal, clean), domain separation, dependency direction. Detect if patterns are consistent or mixed.
 4. **Boundary violations** — cases where module A reaches into module B's internals, circular dependencies, layers skipping levels.
+5. **Convention violations** — identify the codebase's own architectural conventions (import patterns, module boundaries, layering direction), then catalog instances that deviate. Dominant pattern identified first, then deviating instance cited.
 
 **Evidence requirements:**
 - Module purposes derived from directory names, README files, docstrings, and code content — not guessed
 - Dependency relationships verified against `static.yml` dependency graph
 - Boundary violations cite specific import paths
+- Convention violations: dominant pattern identified first, then deviating instance cited with file:line
 
 **Output structure:**
 ```yaml
@@ -53,6 +55,12 @@ details:
   diagrams:
     architecture: |
       {Mermaid diagram of module relationships}
+  convention_violations:
+    - module: string
+      violation: string
+      expected_pattern: string
+      location: string
+      severity: minor | moderate | significant
 ```
 
 ---
@@ -67,11 +75,13 @@ details:
 3. **Business invariants** — rules that must always hold (e.g., order total = sum of line items, user email is unique). Where enforced (DB, app layer, both).
 4. **Business rules** — conditional logic encoding domain knowledge (e.g., "free shipping over $50", "3 failed logins = account lock").
 5. **Edge cases & lessons learned** — non-obvious behaviors discovered from: code comments (TODO, HACK, FIXME, WORKAROUND), test edge cases, error handling special cases, git history patterns (files with many bug-fix commits).
+6. **Error propagation** — trace error flow from origin through handler chains. For each significant error type: where it's thrown/created, how it propagates through the call chain, where it's finally caught/handled, and whether it's swallowed or reaches the user.
 
 **Evidence requirements:**
 - Entities traced to actual class/type definitions
 - State machines traced to actual code (enum, state field, transition methods)
 - Edge cases cite the specific comment, test, or code pattern
+- Error propagation traced through actual throw/catch/return chains in code
 
 **Output structure:**
 ```yaml
@@ -107,6 +117,13 @@ details:
       source: comment | test | error_handling | git_history
       location: string
       lesson: string
+  error_propagation:
+    - error_origin: string
+      propagation_path: [string]
+      terminal_handler: string
+      transforms: [string]
+      swallowed: boolean
+      user_visible: boolean
 ```
 
 ---
@@ -204,10 +221,13 @@ details:
 
 **Canonical examples:** For each detected pattern, extract a 10-40 line code snippet from the actual codebase showing exactly how to implement that pattern in THIS project. These examples teach the developer agent "how we do things here."
 
+**Violation catalog:** For each detected pattern, catalog instances that deviate from the established convention. Cite the canonical pattern first, then the deviating file:line. This turns practices from a style guide into a bug-finding tool.
+
 **Evidence requirements:**
 - Practice detection based on actual code samples, not filenames
 - Canonical examples are real code from the codebase, not generated
 - Naming conventions verified across minimum 5 files
+- Violation catalog entries: cite canonical pattern + deviating file:line
 
 **Output structure:**
 ```yaml
@@ -238,4 +258,10 @@ details:
     - area: string
       description: string
       location: string
+  violation_catalog:
+    - area: string
+      canonical_pattern: string
+      violation: string
+      location: string
+      impact: low | medium | high
 ```

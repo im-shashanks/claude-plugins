@@ -43,8 +43,9 @@ Read the story YAML at `story_path`. Understand:
 - Read `decisions.yml` for prior decisions that constrain this implementation — especially category "consistency" entries that define established patterns
 - Read `lessons.yml` for past insights that inform approach
 - If brownfield (or analysis artifacts exist):
-  - Read `.shaktra/analysis/structure.yml` for detected architectural patterns and layer boundaries
   - Read `.shaktra/analysis/practices.yml` for canonical code examples per practice area
+  - Read `.shaktra/analysis/domain-model.yml` summary for entity names, state machines, and business invariants — use for naming consistency and domain-aware component design
+  - Read `.shaktra/analysis/critical-paths.yml` summary for risk-aware planning — files with high `composite_risk` in `cross_cutting_risk` need extra test coverage and defensive error handling in the plan
 - Read `performance-practices.md` and `data-layer-practices.md` for performance and data access patterns relevant to the plan
 - Identify existing patterns in the codebase relevant to this story (Glob/Grep for similar modules)
 

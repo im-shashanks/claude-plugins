@@ -3,7 +3,7 @@ name: shaktra-analyze
 description: >
   Codebase Analyzer workflow — brownfield analysis producing structured, token-efficient output
   for downstream agents. 2-stage model: tool-based pre-analysis for ground truth, then parallel
-  LLM-driven deep analysis across 8 dimensions. Outputs 12 YAML artifacts to .shaktra/analysis/.
+  LLM-driven deep analysis across 9 dimensions. Outputs 13 YAML artifacts to .shaktra/analysis/.
 ---
 
 # /shaktra:analyze — Codebase Analyzer
@@ -52,11 +52,17 @@ Read `.shaktra/analysis/manifest.yml`. If it exists and has incomplete stages:
 
 If manifest does not exist or all stages are incomplete, start fresh.
 
-### Step 3: Stage 1 — Pre-Analysis (Sequential)
+### Step 3: Choose Execution Mode
+
+Check if agent teams are available (TeamCreate tool accessible):
+- **IF available** → Run Stage 1 (Step 4), then delegate Stages 2-4 to `deep-analysis-workflow.md`. After deep workflow completes, run Step 7 (Update Settings) and Step 9 (Report).
+- **ELSE** → Warn user: "Teams unavailable — running enhanced single-session analysis." Proceed with Steps 4-9 below.
+
+### Step 4: Stage 1 — Pre-Analysis (Sequential)
 
 This stage runs in the main thread using tools directly. No LLM analysis — only factual extraction.
 
-**3a. Static Extraction → `static.yml`**
+**4a. Static Extraction → `static.yml`**
 
 Use Glob, Grep, and Bash to extract:
 
@@ -69,7 +75,7 @@ Use Glob, Grep, and Bash to extract:
 
 Write results to `.shaktra/analysis/static.yml`.
 
-**3b. System Overview → `overview.yml`**
+**4b. System Overview → `overview.yml`**
 
 Scan project root to determine:
 1. **Project identity** — name, primary language, framework(s), runtime version
@@ -82,15 +88,15 @@ Write results to `.shaktra/analysis/overview.yml` with a `summary:` section (~30
 
 Update `manifest.yml` with Stage 1 completion state.
 
-### Step 4: Stage 2 — Parallel Deep Dimensions
+### Step 5: Stage 2 — Parallel Deep Dimensions
 
-Spawn **8 CBA Analyzer agents** in parallel. Each receives its dimension specification from the analysis dimensions files, plus:
+Spawn **9 CBA Analyzer agents** in parallel. Each receives its dimension specification from the analysis dimensions files, plus:
 
 - Path to `static.yml` (ground truth input)
 - Path to `overview.yml` (project context)
 - Path to `.shaktra/memory/decisions.yml` (if exists)
 
-**Dispatch all 8 dimensions simultaneously:**
+**Dispatch all 9 dimensions simultaneously:**
 
 ```
 D1: Architecture & Structure        → .shaktra/analysis/structure.yml
@@ -101,6 +107,7 @@ D5: Dependencies & Tech Stack       → .shaktra/analysis/dependencies.yml
 D6: Technical Debt & Security       → .shaktra/analysis/tech-debt.yml
 D7: Data Flows & Integration        → .shaktra/analysis/data-flows.yml
 D8: Critical Paths & Risk           → .shaktra/analysis/critical-paths.yml
+D9: Git Intelligence                → .shaktra/analysis/git-intelligence.yml
 ```
 
 **CBA Analyzer prompt template:**
@@ -114,7 +121,7 @@ Overview: .shaktra/analysis/overview.yml
 Decisions: .shaktra/memory/decisions.yml
 Output path: .shaktra/analysis/{output_file}
 
-Read your dimension specification from analysis-dimensions-core.md (D1-D4) or analysis-dimensions-health.md (D5-D8).
+Read your dimension specification from analysis-dimensions-core.md (D1-D4), analysis-dimensions-health.md (D5-D8), or analysis-dimensions-git.md (D9).
 Follow the output schema from analysis-output-schemas.md for your artifact format.
 Follow the checks, evidence requirements, and output schema for dimension {dimension_id}. Ground all findings in static.yml data where possible.
 
@@ -123,29 +130,34 @@ Your output file MUST begin with a summary: section (300-600 tokens, self-contai
 
 After each agent completes, update `manifest.yml` with that dimension's completion state.
 
-### Step 5: Stage 3 — Finalize (Sequential)
+### Step 6: Stage 3 — Finalize (Sequential)
 
-**5a. Validate artifacts:**
+**6a. Validate artifacts:**
 - Read each output file in `.shaktra/analysis/`
 - Verify every artifact (except static, manifest, checksum) has a `summary:` key at the top level
 - If any artifact is missing or malformed, report which dimensions need re-execution
 
-**5b. Generate checksums:**
+**6b. Cross-cutting risk correlation:**
+- Read `tech-debt.yml`, `critical-paths.yml`, and `git-intelligence.yml`
+- If `critical-paths.yml` does not already contain a `cross_cutting_risk` section (D8 may have produced it), compute it: for each file on a critical path, combine debt presence (D6), test coverage (D6), change frequency (D9), and coupling to produce a composite risk score
+- Append `cross_cutting_risk` to `critical-paths.yml` under `details:`
+
+**6c. Generate checksums:**
 - Compute SHA256 of all analyzed source files (from static.yml file inventory)
 - Map each file to the dimensions it was analyzed by
 - Write to `.shaktra/analysis/checksum.yml`
 
-**5c. Generate Mermaid diagrams:**
+**6d. Generate Mermaid diagrams:**
 - Read `structure.yml` for module relationships
 - Generate architecture diagram showing module dependencies and boundaries
 - Include in `structure.yml` under a `diagrams:` key
 
-**5d. Update manifest:**
+**6e. Update manifest:**
 - Set all stages/dimensions to `complete`
 - Record completion timestamp
 - Record analysis version (from plugin.json)
 
-### Step 6: Update Settings from Analysis
+### Step 7: Update Settings from Analysis
 
 After all dimensions are validated, back-fill `settings.project.architecture` if it's currently empty:
 
@@ -159,7 +171,7 @@ After all dimensions are validated, back-fill `settings.project.architecture` if
    - "Detected mixed architecture: {styles}. Please set `project.architecture` in `.shaktra/settings.yml` to the intended target style."
 5. If `project.architecture` is already set: validate it matches the detected patterns. If it conflicts, report the mismatch as a finding.
 
-### Step 7: Memory Capture
+### Step 8: Memory Capture
 
 Mandatory final step — never skip.
 
@@ -173,7 +185,7 @@ Artifacts path: .shaktra/analysis/
 Extract lessons that meet the capture bar. Append to .shaktra/memory/lessons.yml.
 ```
 
-### Step 8: Report Summary
+### Step 9: Report Summary
 
 Display to user:
 
@@ -181,7 +193,7 @@ Display to user:
 ## Codebase Analysis Complete
 
 **Project:** {name} ({language})
-**Artifacts:** .shaktra/analysis/ (12 files)
+**Artifacts:** .shaktra/analysis/ (13 files)
 
 ### Key Findings
 {Top 3-5 findings from across all dimensions, highest severity first}
@@ -208,7 +220,7 @@ Display to user:
 ## Targeted Analysis
 
 When user specifies a dimension (e.g., "analyze practices"):
-1. Map user intent to dimension ID (D1-D8)
+1. Map user intent to dimension ID (D1-D9)
 2. Check if `static.yml` exists — if not, run Stage 1 first
 3. Spawn single CBA Analyzer for the requested dimension
 4. Update manifest for that dimension only

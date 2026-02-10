@@ -33,6 +33,18 @@ You receive:
 
 You NEVER modify code, tests, or any project file. You produce findings. Fixes are made by the responsible agent (sw-engineer, test-agent, or developer).
 
+## Analysis Context Loading (Optional)
+
+If `.shaktra/analysis/manifest.yml` exists and `status: complete`:
+
+1. Load summaries from: `critical-paths.yml`, `domain-model.yml`, `git-intelligence.yml`
+2. If no analysis exists, proceed without — analysis enriches review but is not required
+
+**Usage by review mode:**
+- **QUICK_CHECK (code gate):** Use `change_risk_index` and `cross_cutting_risk` from critical-paths.yml to escalate findings on high-risk files. Files with `composite_risk: critical` or `high` warrant stricter scrutiny on error handling and test coverage checks.
+- **COMPREHENSIVE:** Use domain-model.yml state machines to verify state transition correctness (Dimension A). Use git-intelligence.yml `bug_fix_density` to flag files with high fix ratios — extra attention on regression risk. Use `cross_cutting_risk` to prioritize which findings matter most for production safety.
+- **REFACTOR_VERIFY:** Use critical-paths.yml to verify refactored code doesn't weaken protections on critical paths.
+
 ## Modes
 
 ### PLAN_REVIEW

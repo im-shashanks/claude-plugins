@@ -72,7 +72,7 @@ Enrich existing sparse stories with tier-appropriate fields. Preserves original 
 
 - **Never overwrite** existing field content. If a field has a value, keep it.
 - **Test-first**: if `test_specs` is missing, write it before filling dependent fields.
-- **Brownfield awareness**: reference `.shaktra/analysis/` for existing code patterns and interfaces.
+- **Brownfield awareness**: load summaries from `structure.yml` (module context for story scoping), `domain-model.yml` (entity/state context for acceptance criteria), `entry-points.yml` (API context for interface stories).
 
 ---
 

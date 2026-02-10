@@ -4,7 +4,7 @@ Dimensions that answer "How HEALTHY is this codebase?" — its dependencies, deb
 
 **Used by:** shaktra-cba-analyzer agent during `/shaktra:analyze` workflow.
 **Input dependency:** All dimensions consume `static.yml` (ground truth) and `overview.yml` (project context).
-**Companion:** `analysis-dimensions-core.md` defines D1-D4.
+**Companion:** `analysis-dimensions-core.md` defines D1-D4, `analysis-dimensions-git.md` defines D9.
 
 ---
 
@@ -61,7 +61,7 @@ details:
 
 **What to analyze:**
 1. **Debt indicators** — TODO/FIXME/HACK counts with context, dead code, unused imports, disabled tests, commented-out code blocks
-2. **Complexity hotspots** — files/functions with high cyclomatic complexity, deeply nested logic, long functions/methods
+2. **Complexity hotspots** — files/functions with high cyclomatic complexity, deeply nested logic, long functions/methods. Produce quantitative metrics: total files/lines, avg/max function length, avg/max file length, nesting depth counts, test-to-source ratio.
 3. **Test health** — test-to-source ratio, test coverage gaps (modules with no tests), flaky test indicators
 4. **Security posture** — hardcoded secrets, SQL injection risks, XSS vectors, insecure dependencies, missing auth on endpoints, overly permissive CORS
 5. **Health score** — aggregate 1-10 score based on debt density, test coverage, security issues, code consistency
@@ -103,6 +103,18 @@ details:
     test_to_source_ratio: string
     untested_modules: [string]
     coverage_estimate: string
+  quantitative_metrics:
+    total_source_files: integer
+    total_source_lines: integer
+    avg_function_length: integer
+    max_function_length: {file: string, function: string, lines: integer}
+    avg_file_length: integer
+    max_file_length: {file: string, lines: integer}
+    deeply_nested_functions: integer
+    long_functions: integer
+    test_to_source_ratio: float
+    files_without_tests: integer
+    percent_files_tested: float
 ```
 
 ---
@@ -179,12 +191,14 @@ details:
    - Error handling: defensive code suggesting past incidents
    - Test edge cases: regression tests suggesting past bugs
 4. **Change risk index** — which files/modules require the most caution when modifying? Based on: criticality, complexity, coupling, historical bug density.
+5. **Cross-cutting risk** — combine critical path membership, tech debt, test coverage, git change frequency, and coupling into a composite risk score per file. Requires reading `tech-debt.yml` (D6 output) and `git-intelligence.yml` (D9 output, if available). Reference the source dimension for each risk factor.
 
 **Evidence requirements:**
 - Critical paths traced to actual code locations, not theoretical
 - Blast radius derived from dependency graph (who calls this code?)
 - Lessons learned cite specific commits, comments, or test names
 - Change risk index based on measurable factors
+- Cross-cutting risk: reference source dimension for each risk factor
 
 **Output structure:**
 ```yaml
@@ -209,5 +223,17 @@ details:
     - file: string
       risk: high | medium | low
       factors: [string]  # criticality, complexity, coupling, bug_density
+      recommendation: string
+  cross_cutting_risk:
+    - file: string
+      risk_factors:
+        on_critical_path: boolean
+        categories: [string]
+        tech_debt_present: boolean
+        debt_items: [string]
+        test_coverage: none | partial | adequate
+        change_frequency: high | medium | low
+        coupling_score: high | medium | low
+      composite_risk: critical | high | medium | low
       recommendation: string
 ```

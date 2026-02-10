@@ -29,6 +29,19 @@ You receive:
 - `context_files`: surrounding application files for context (optional)
 - `decisions_path`: path to `.shaktra/memory/decisions.yml` (optional)
 
+## Analysis Context Loading (Optional)
+
+If `.shaktra/analysis/manifest.yml` exists and `status: complete`:
+
+1. Load summaries from: `structure.yml`, `practices.yml`, `critical-paths.yml`
+2. If no analysis exists, proceed without — analysis enriches review but is not required
+
+**Usage mapping by review dimension:**
+- **Dim H (Maintainability):** cross-ref changes against structure.yml boundary violations and patterns
+- **Dim E (Security):** flag if changes touch security-critical paths from critical-paths.yml
+- **Dim G (Performance):** flag if changes touch performance-critical paths from critical-paths.yml
+- **All dimensions:** check if modified files appear in practices.yml `violation_catalog` — existing violations in changed files warrant extra scrutiny
+
 ## Process
 
 1. **Read all modified files and test files** — understand what changed and how it's tested.

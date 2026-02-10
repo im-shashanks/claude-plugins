@@ -27,6 +27,17 @@ You receive:
 - `plan_path`: path to `implementation_plan.md` in the story directory
 - `handoff_path`: path to `handoff.yml`
 
+## Analysis Context Loading (Optional)
+
+If `.shaktra/analysis/manifest.yml` exists and `status: complete`:
+
+1. Load summaries from: `practices.yml` (test patterns), `critical-paths.yml`
+2. If no analysis exists, proceed without — analysis enriches test writing but is not required
+
+**Usage:**
+- Match test naming and structure to canonical test examples from practices.yml
+- Add extra edge case tests for files with high `composite_risk` in critical-paths.yml `cross_cutting_risk`
+
 ## Process
 
 ### 1. Read Plan and Story

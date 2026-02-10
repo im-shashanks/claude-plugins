@@ -28,6 +28,20 @@ You receive:
 - `decisions_path`: (optional) path to `.shaktra/memory/decisions.yml`
 - `lessons_path`: (optional) path to `.shaktra/memory/lessons.yml`
 
+## Analysis Context Loading (Optional)
+
+If `.shaktra/analysis/manifest.yml` exists and `status: complete`:
+
+1. Load summaries from: `data-flows.yml`, `critical-paths.yml`, `domain-model.yml`, `git-intelligence.yml`, `entry-points.yml`
+2. If no analysis exists, proceed without — analysis enriches diagnosis but is not required
+
+**Usage mapping by diagnosis step:**
+- **Triage:** `cross_cutting_risk` from critical-paths.yml informs severity — bugs in critical+high composite risk files are more likely P0/P1
+- **Hypothesize:** git-intelligence hotspots + bug_fix_density narrow candidate root causes to historically buggy areas
+- **Gather Evidence:** data-flows trace the exact data path through the system; error_propagation (domain-model.yml) shows where errors get swallowed
+- **Blast Radius:** pre-computed `cross_cutting_risk` in critical-paths.yml identifies which other high-risk files share the same pattern
+- **State Bugs:** domain-model state machines reveal invalid state transitions as root cause candidates
+
 ## Read-Only Constraint (Code)
 
 You NEVER modify production code or existing tests. You may write a reproduction test to a temporary location or suggest one, but you do not alter the codebase. Your output is a diagnosis artifact and story draft.

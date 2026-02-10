@@ -1,6 +1,6 @@
 # Analysis Output Schemas
 
-This file defines the YAML schemas for all output files produced by `/shaktra:analyze` — 12 primary artifacts from the analysis pipeline plus 2 derivative artifacts from strategy workflows. Used by the orchestrator for validation in Stage 3 and by downstream agents to understand available data.
+This file defines the YAML schemas for all output files produced by `/shaktra:analyze` — 13 primary artifacts from the analysis pipeline (9 dimensions + static, overview, manifest, checksum) plus 2 derivative artifacts from strategy workflows. Used by the orchestrator for validation in Stage 3 and by downstream agents to understand available data.
 
 **Used by:** shaktra-analyze SKILL.md (validation), downstream agents (consumption reference).
 
@@ -20,16 +20,17 @@ Every analysis artifact (except `static.yml`, `manifest.yml`, `checksum.yml`) MU
 | Artifact | Summary Budget | Must Include |
 |---|---|---|
 | `overview.yml` | ~300 tokens | Project identity, tech stack, structure overview |
-| `structure.yml` | ~400 tokens | Module count, architecture style, boundary violations, health |
-| `domain-model.yml` | ~500 tokens | Entity count, state machines, critical invariants, edge cases |
+| `structure.yml` | ~450 tokens | Module count, architecture style, boundary violations, convention violations |
+| `domain-model.yml` | ~550 tokens | Entity count, state machines, critical invariants, error propagation |
 | `entry-points.yml` | ~400 tokens | Endpoint count by type, auth coverage, gaps |
-| `practices.yml` | ~600 tokens | Dominant practices, naming conventions, deviations, consistency |
+| `practices.yml` | ~650 tokens | Dominant practices, naming conventions, violation catalog, consistency |
 | `dependencies.yml` | ~300 tokens | Total deps, health distribution, CVEs, risks |
-| `tech-debt.yml` | ~350 tokens | Health score, debt density, security issues, test coverage |
+| `tech-debt.yml` | ~400 tokens | Health score, debt density, security issues, quantitative metrics |
 | `data-flows.yml` | ~500 tokens | Flow count by tier, integration points, critical gotchas |
-| `critical-paths.yml` | ~400 tokens | Critical path count, highest-risk areas, key lessons |
+| `critical-paths.yml` | ~500 tokens | Critical path count, highest-risk areas, cross-cutting risk |
+| `git-intelligence.yml` | ~400 tokens | Hotspots, churn, bug-fix density, knowledge risks |
 
-**Total summary budget:** ~3,750 tokens — all primary summaries loadable simultaneously without context pressure.
+**Total summary budget:** ~4,450 tokens — all primary summaries loadable simultaneously without context pressure.
 
 Derivative artifacts (`debt-strategy.yml`, `dependency-audit.yml`) define their own ~400 token summary budgets in their respective workflow files. These are loaded on-demand, not with the primary summaries.
 
@@ -113,6 +114,7 @@ version: string          # plugin version from plugin.json
 started_at: ISO-8601
 completed_at: ISO-8601 | null
 status: pending | in_progress | complete | partial
+execution_mode: standard | deep  # which mode produced this analysis
 
 stages:
   pre_analysis:
@@ -120,15 +122,15 @@ stages:
     overview: {status: pending | complete, completed_at: ISO-8601 | null}
 
   dimensions:
-    # D1 through D8 — each dimension has this structure:
+    # D1 through D9 — each dimension has this structure:
     D1:
       name: Architecture & Structure     # D2: Domain Model, D3: Entry Points, D4: Practices
       status: pending | in_progress | complete | failed  # D5: Dependencies, D6: Tech Debt
-      output_file: structure.yml         # D7: Data Flows, D8: Critical Paths
+      output_file: structure.yml         # D7: Data Flows, D8: Critical Paths, D9: Git Intelligence
       started_at: ISO-8601 | null
       completed_at: ISO-8601 | null
       error: string | null
-    # D2-D8 follow identical structure with their respective name and output_file
+    # D2-D9 follow identical structure with their respective name and output_file
 
   finalize:
     validation: {status: pending | complete}
@@ -160,6 +162,7 @@ dimension_file_counts:
   D6: integer
   D7: integer
   D8: integer
+  D9: integer
 ```
 
 ---
@@ -269,10 +272,13 @@ Agents do NOT need to read this file. This section documents how agents should c
 
 **Agent-specific loading:**
 
-| Agent | Read Summaries | Read Full Details | When |
-|---|---|---|---|
-| Architect | overview, structure, practices, dependencies | structure.details.modules | Brownfield design |
-| Scrummaster | structure, entry-points, domain-model | domain-model.details.entities | Story enrichment |
-| SW Engineer | practices, domain-model, critical-paths | practices.details.practices | Implementation planning |
-| Developer | practices, domain-model | practices.details (full — needs examples) | Code generation |
-| SW Quality | critical-paths, domain-model | critical-paths.details.change_risk_index | Risk-aware review |
+| Agent | Read Summaries | Read Full Details |
+|---|---|---|
+| Architect | overview, structure, practices, dependencies | structure.details.modules |
+| Scrummaster | structure, domain-model, entry-points | domain-model.details.entities |
+| SW Engineer | practices, domain-model, critical-paths | practices.details.practices |
+| Developer | practices, domain-model | practices.details (full — needs examples) |
+| SW Quality | critical-paths, domain-model, git-intelligence | critical-paths.details.change_risk_index |
+| Bug Diagnostician | data-flows, critical-paths, domain-model, git-intelligence, entry-points | critical-paths.details.cross_cutting_risk |
+| CR Analyzer | structure, practices, critical-paths | practices.details.violation_catalog |
+| Test Agent | practices, critical-paths | practices.details.practices (test patterns) |

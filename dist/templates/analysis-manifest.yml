@@ -6,6 +6,7 @@ version: ""
 started_at: null
 completed_at: null
 status: pending  # pending | in_progress | complete | partial
+execution_mode: standard  # standard | deep
 
 stages:
   pre_analysis:
@@ -70,6 +71,13 @@ stages:
       name: Critical Paths & Risk
       status: pending
       output_file: critical-paths.yml
+      started_at: null
+      completed_at: null
+      error: null
+    D9:
+      name: Git Intelligence
+      status: pending
+      output_file: git-intelligence.yml
       started_at: null
       completed_at: null
       error: null

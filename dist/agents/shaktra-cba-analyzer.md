@@ -24,7 +24,7 @@ Execute a single analysis dimension assigned by the `/shaktra:analyze` orchestra
 
 You receive:
 - `mode`: "dimension" | "debt-strategy" | "dependency-audit" — determines which workflow to execute
-- `dimension_id`: D1-D8 — which dimension to execute (dimension mode only)
+- `dimension_id`: D1-D9 — which dimension to execute (dimension mode only)
 - `dimension_name`: human-readable name (dimension mode only)
 - `static_path`: path to `.shaktra/analysis/static.yml` (ground truth — dimension mode)
 - `overview_path`: path to `.shaktra/analysis/overview.yml` (project context — dimension mode)
@@ -35,10 +35,10 @@ You receive:
 ## Process
 
 1. **Read ground truth** — load `static.yml` and `overview.yml`. Understand what the codebase contains before analyzing it.
-2. **Read dimension specification** — load your assigned dimension from `analysis-dimensions-core.md` (D1-D4) or `analysis-dimensions-health.md` (D5-D8). Understand scope, checks, evidence requirements, and output schema.
+2. **Read dimension specification** — load your assigned dimension from `analysis-dimensions-core.md` (D1-D4), `analysis-dimensions-health.md` (D5-D8), or `analysis-dimensions-git.md` (D9). Understand scope, checks, evidence requirements, and output schema. For D9: purely tool-based extraction. Run git commands via Bash. No LLM interpretation of git data.
 3. **Execute analysis** — use Glob, Grep, Read, and Bash tools to explore the codebase. Follow the dimension's "What to analyze" checklist systematically.
 4. **Gather evidence** — every finding must cite a specific file, line, code pattern, or tool output. "Likely" or "probably" findings without evidence are dropped.
-5. **Write artifact** — produce the YAML file at `output_path` following the exact schema from `analysis-dimensions-core.md` (D1-D4) or `analysis-dimensions-health.md` (D5-D8). The `summary:` section comes first and is self-contained.
+5. **Write artifact** — produce the YAML file at `output_path` following the exact schema from `analysis-dimensions-core.md` (D1-D4), `analysis-dimensions-health.md` (D5-D8), or `analysis-dimensions-git.md` (D9). The `summary:` section comes first and is self-contained.
 
 ## Tool Usage Protocol
 
@@ -75,7 +75,7 @@ Findings without evidence are opinions. Drop them.
 
 1. **YAML validity** — output must be parseable YAML. Use literal block scalars (`|`) for multi-line strings.
 2. **Summary first** — the `summary:` key is the first key in the document. It contains a self-contained overview within the token budget specified in `analysis-output-schemas.md`.
-3. **Schema compliance** — follow the exact structure defined in your dimension file (`analysis-dimensions-core.md` for D1-D4, `analysis-dimensions-health.md` for D5-D8).
+3. **Schema compliance** — follow the exact structure defined in your dimension file (`analysis-dimensions-core.md` for D1-D4, `analysis-dimensions-health.md` for D5-D8, `analysis-dimensions-git.md` for D9).
 4. **Evidence density** — every detail-level entry should reference specific files, lines, or code patterns.
 
 ## Critical Rules

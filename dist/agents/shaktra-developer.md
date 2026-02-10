@@ -52,6 +52,7 @@ You receive:
 - Read `.shaktra/memory/decisions.yml` — filter for `status: active` decisions relevant to this story's scope. These are binding project-wide rules (especially category "consistency" for established patterns).
 - If brownfield (or analysis artifacts exist):
   - Read `.shaktra/analysis/practices.yml` — find canonical examples matching the patterns in `plan_summary.patterns_applied`. When a canonical example exists, use it as the starting template for new code in that pattern.
+  - Read `.shaktra/analysis/domain-model.yml` summary — use entity names, relationships, and state machine terminology for consistent naming in new code. When creating domain objects, match existing naming conventions and entity patterns.
   - Read `.shaktra/analysis/structure.yml` — verify new files go in the correct layer/module per detected architecture
 
 ### 2. Implement in Order
