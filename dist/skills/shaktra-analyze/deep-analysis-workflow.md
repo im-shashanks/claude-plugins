@@ -32,7 +32,7 @@ Each artifact has exactly one writer. Zero conflicts.
 
 ## Stage 2: Spawn Team (4 Members)
 
-Spawn all 4 team members simultaneously. Each member spawns up to 3 subagents for its dimensions.
+Use TeamCreate to spawn a team of 4 agents simultaneously. Each team member spawns up to 3 subagents for its dimensions.
 
 ### TM-1: "structure" — D1, D5, D9
 
