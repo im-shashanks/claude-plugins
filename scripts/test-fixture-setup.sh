@@ -1,23 +1,23 @@
 #!/bin/bash
 #
 # test-fixture-setup.sh
-# Copies dist/ contents to the test directory for manual testing
+# Copies shaktra/ contents to the test directory for manual testing
 #
 
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(dirname "$SCRIPT_DIR")"
-DIST_DIR="${REPO_ROOT}/dist"
+PLUGIN_DIR="${REPO_ROOT}/shaktra"
 TEST_DIR="${HOME}/workspace/project_tests/shaktra-plugin-test"
 CLAUDE_DIR="${TEST_DIR}/.claude"
 
 echo "=== Shaktra Plugin Test Fixture Setup ==="
 echo ""
 
-# Check dist/ exists
-if [ ! -d "$DIST_DIR" ]; then
-    echo "Error: dist/ directory not found at ${DIST_DIR}"
+# Check shaktra/ exists
+if [ ! -d "$PLUGIN_DIR" ]; then
+    echo "Error: shaktra/ directory not found at ${PLUGIN_DIR}"
     exit 1
 fi
 
@@ -36,13 +36,13 @@ fi
 # Create .claude/ directory
 mkdir -p "$CLAUDE_DIR"
 
-# Copy all contents from dist/ to .claude/
-echo "Copying from dist/ to .claude/..."
-cp -r "${DIST_DIR}/agents" "$CLAUDE_DIR/"
-cp -r "${DIST_DIR}/skills" "$CLAUDE_DIR/"
-cp -r "${DIST_DIR}/templates" "$CLAUDE_DIR/"
-cp -r "${DIST_DIR}/hooks" "$CLAUDE_DIR/"
-cp -r "${DIST_DIR}/scripts" "$CLAUDE_DIR/"
+# Copy all contents from shaktra/ to .claude/
+echo "Copying from shaktra/ to .claude/..."
+cp -r "${PLUGIN_DIR}/agents" "$CLAUDE_DIR/"
+cp -r "${PLUGIN_DIR}/skills" "$CLAUDE_DIR/"
+cp -r "${PLUGIN_DIR}/templates" "$CLAUDE_DIR/"
+cp -r "${PLUGIN_DIR}/hooks" "$CLAUDE_DIR/"
+cp -r "${PLUGIN_DIR}/scripts" "$CLAUDE_DIR/"
 
 # Create sample test file if it doesn't exist
 if [ ! -f "${TEST_DIR}/product-idea.md" ]; then

@@ -1,13 +1,13 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
-  "name": "shaktra-marketplace",
+  "name": "claude-skills-marketplace",
   "owner": {
     "name": "Shashank"
   },
   "plugins": [
     {
       "name": "shaktra",
-      "source": "./dist",
+      "source": "./shaktra",
       "description": "Opinionated software development framework with TDD, quality gates, and multi-agent orchestration"
     }
   ]

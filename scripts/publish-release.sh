@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Publish the release branch locally.
-# Promotes dist/ to root, transforms marketplace.json, validates, and
+# Promotes shaktra/ to root, transforms marketplace.json, validates, and
 # creates/updates the local 'release' branch.
 #
 # Usage: ./scripts/publish-release.sh [--push]
@@ -38,13 +38,13 @@ mkdir "$BUILD"
 
 echo "Building release tree..."
 
-# Promote dist/ contents to root
-cp -r dist/agents "$BUILD/"
-cp -r dist/skills "$BUILD/"
-cp -r dist/hooks "$BUILD/"
-cp -r dist/scripts "$BUILD/"
-cp -r dist/templates "$BUILD/"
-cp dist/LICENSE "$BUILD/"
+# Promote shaktra/ contents to root
+cp -r shaktra/agents "$BUILD/"
+cp -r shaktra/skills "$BUILD/"
+cp -r shaktra/hooks "$BUILD/"
+cp -r shaktra/scripts "$BUILD/"
+cp -r shaktra/templates "$BUILD/"
+cp shaktra/LICENSE "$BUILD/"
 
 # Copy workflow diagram for README
 mkdir -p "$BUILD/Resources"
@@ -55,15 +55,15 @@ find "$BUILD" -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
 
 # .claude-plugin with both files
 mkdir -p "$BUILD/.claude-plugin"
-cp dist/.claude-plugin/plugin.json "$BUILD/.claude-plugin/"
+cp shaktra/.claude-plugin/plugin.json "$BUILD/.claude-plugin/"
 
-# Transform marketplace.json: source "./dist" -> "."
+# Transform marketplace.json: source "./shaktra" -> "."
 python3 -c "
 import json, pathlib
 p = pathlib.Path('.claude-plugin/marketplace.json')
 data = json.loads(p.read_text())
 for plugin in data.get('plugins', []):
-    if plugin.get('source') == './dist':
+    if plugin.get('source') == './shaktra':
         plugin['source'] = '.'
 (pathlib.Path('$BUILD') / '.claude-plugin' / 'marketplace.json').write_text(
     json.dumps(data, indent=2) + '\n')
@@ -88,7 +88,7 @@ text = re.sub(
     flags=re.DOTALL,
 )
 # Add development note
-text = text.rstrip() + '\n\n---\n\n## Development\n\nDevelopment happens on the [\`main\`](https://github.com/im-shashanks/shaktra-plugin/tree/main) branch. See the main branch for architecture docs, phase plans, and contribution guidelines.\n'
+text = text.rstrip() + '\n\n---\n\n## Development\n\nDevelopment happens on the [\`main\`](https://github.com/im-shashanks/claude-skills/tree/main) branch. See the main branch for architecture docs, phase plans, and contribution guidelines.\n'
 pathlib.Path('$BUILD/README.md').write_text(text)
 "
 

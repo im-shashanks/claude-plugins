@@ -31,8 +31,8 @@ For phase index and dependency graph: `docs/shaktra-plan/execution-plan.md`
 This is a **Claude Code plugin** (NOT a regular project). The directory layout follows the plugin spec:
 
 ```
-.claude-plugin/marketplace.json  # Marketplace catalog (source: "./dist") — stays at repo root
-dist/                            # THE PLUGIN — all plugin code lives here
+.claude-plugin/marketplace.json  # Marketplace catalog (source: "./shaktra") — stays at repo root
+shaktra/                         # THE PLUGIN — all plugin code lives here
   .claude-plugin/plugin.json     # Plugin manifest (required)
   agents/                        # Sub-agent definitions
   skills/                        # Skill definitions
@@ -44,7 +44,7 @@ Resources/                       # Dev-only — diagrams, reference docs
 CLAUDE.md                        # Dev-only — this file (not installed)
 ```
 
-**All plugin development happens in `dist/`.** Dev files (docs, Resources, CLAUDE.md) stay at repo root and are never installed.
+**All plugin development happens in `shaktra/`.** Dev files (docs, Resources, CLAUDE.md) stay at repo root and are never installed.
 
 Skills are namespaced as `/shaktra:skill-name` when installed by users.
 
@@ -52,20 +52,20 @@ Skills are namespaced as `/shaktra:skill-name` when installed by users.
 
 ## Testing the Plugin
 
-**Quick dev iteration:** `claude --plugin-dir dist/` — loads the plugin directly, no install step. Fast but skips the real install path.
+**Quick dev iteration:** `claude --plugin-dir shaktra/` — loads the plugin directly, no install step. Fast but skips the real install path.
 
 **Full install testing (preferred before marking a phase complete):**
 
 ```bash
 # Local file path — simulates a real install from a local checkout
-/plugin install /absolute/path/to/shaktra-plugin/dist
+/plugin install /absolute/path/to/claude-skills/shaktra
 
 # Git remote — simulates how end users will install
-/plugin install https://github.com/im-shashanks/shaktra-plugin.git
+/plugin install https://github.com/im-shashanks/claude-skills.git
 
 # Marketplace — the intended distribution path
-/plugin marketplace add https://github.com/im-shashanks/shaktra-plugin.git
-/plugin install shaktra@shaktra-marketplace
+/plugin marketplace add https://github.com/im-shashanks/claude-skills.git
+/plugin install shaktra@claude-skills-marketplace
 ```
 
 Always validate at least the local file path install before finalizing a phase. The `--plugin-dir` flag is convenient for rapid iteration but does not exercise the install/discovery pipeline.
@@ -79,8 +79,8 @@ These were explicitly chosen and must not be overridden:
 - **SW Quality and Code Reviewer are separate** — SW Quality checks story-level during TDD, Code Reviewer checks app-level after completion and reviews PRs
 - **Quality depth must match or exceed Forge** — we reduce bloat, not capability
 - **Plugin distribution** via `/plugin install shaktra` (marketplace.json at `.claude-plugin/marketplace.json`)
-- **dist/ is the plugin** — Claude Code has no include/exclude mechanism for plugin installs, so all plugin code lives directly in `dist/`. Marketplace.json uses `"source": "./dist"` to scope what gets installed. Dev files (docs/, Resources/, CLAUDE.md) stay at repo root and are never shipped.
-- **Future: separate distribution repo** — `marketplace add` clones the full repo (including dev files) into the user's marketplaces directory. Post-completion, split into a public distribution repo containing only `dist/` contents.
+- **shaktra/ is the plugin** — Claude Code has no include/exclude mechanism for plugin installs, so all plugin code lives directly in `shaktra/`. Marketplace.json uses `"source": "./shaktra"` to scope what gets installed. Dev files (docs/, Resources/, CLAUDE.md) stay at repo root and are never shipped.
+- **Multi-plugin marketplace** — The repo is structured as a marketplace (`claude-skills`) where Shaktra is one plugin. Future plugins can be added as sibling directories (e.g., `another-plugin/`).
 
 ## Design Constraints
 
@@ -89,7 +89,7 @@ Check every file against these before considering any phase complete:
 - No single file over 300 lines
 - No content duplication across layers (skill defines, agent references — never both)
 - No dead code, disabled stubs, or orphaned files
-- Severity taxonomy (P0-P3) defined in exactly ONE file: `dist/skills/shaktra-reference/severity-taxonomy.md`
+- Severity taxonomy (P0-P3) defined in exactly ONE file: `shaktra/skills/shaktra-reference/severity-taxonomy.md`
 - All threshold values read from `.shaktra/settings.yml` — never hardcoded
 - All hook scripts in Python (cross-platform, no `grep -oP`)
 - Hooks block or don't exist — no warn-only
