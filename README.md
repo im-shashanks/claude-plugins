@@ -56,7 +56,7 @@ Every implementation follows a strict TDD state machine: **PLAN → RED → GREE
 
 ```
 /plugin marketplace add https://github.com/im-shashanks/claude-plugins.git
-/plugin install shaktra@claude-code-plugins
+/plugin install shaktra@plugins
 ```
 
 ### Direct from GitHub

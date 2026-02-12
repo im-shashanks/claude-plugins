@@ -65,7 +65,7 @@ Skills are namespaced as `/shaktra:skill-name` when installed by users.
 
 # Marketplace — the intended distribution path
 /plugin marketplace add https://github.com/im-shashanks/claude-plugins.git
-/plugin install shaktra@claude-code-plugins
+/plugin install shaktra@plugins
 ```
 
 Always validate at least the local file path install before finalizing a phase. The `--plugin-dir` flag is convenient for rapid iteration but does not exercise the install/discovery pipeline.
