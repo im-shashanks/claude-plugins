@@ -58,14 +58,14 @@ Skills are namespaced as `/shaktra:skill-name` when installed by users.
 
 ```bash
 # Local file path — simulates a real install from a local checkout
-/plugin install /absolute/path/to/claude-skills/shaktra
+/plugin install /absolute/path/to/claude-plugins/shaktra
 
 # Git remote — simulates how end users will install
-/plugin install https://github.com/im-shashanks/claude-skills.git
+/plugin install https://github.com/im-shashanks/claude-plugins.git
 
 # Marketplace — the intended distribution path
-/plugin marketplace add https://github.com/im-shashanks/claude-skills.git
-/plugin install shaktra@claude-skills-marketplace
+/plugin marketplace add https://github.com/im-shashanks/claude-plugins.git
+/plugin install shaktra@claude-plugins-marketplace
 ```
 
 Always validate at least the local file path install before finalizing a phase. The `--plugin-dir` flag is convenient for rapid iteration but does not exercise the install/discovery pipeline.
@@ -80,7 +80,7 @@ These were explicitly chosen and must not be overridden:
 - **Quality depth must match or exceed Forge** — we reduce bloat, not capability
 - **Plugin distribution** via `/plugin install shaktra` (marketplace.json at `.claude-plugin/marketplace.json`)
 - **shaktra/ is the plugin** — Claude Code has no include/exclude mechanism for plugin installs, so all plugin code lives directly in `shaktra/`. Marketplace.json uses `"source": "./shaktra"` to scope what gets installed. Dev files (docs/, Resources/, CLAUDE.md) stay at repo root and are never shipped.
-- **Multi-plugin marketplace** — The repo is structured as a marketplace (`claude-skills`) where Shaktra is one plugin. Future plugins can be added as sibling directories (e.g., `another-plugin/`).
+- **Multi-plugin marketplace** — The repo is structured as a marketplace (`claude-plugins`) where Shaktra is one plugin. Future plugins can be added as sibling directories (e.g., `another-plugin/`).
 
 ## Design Constraints
 

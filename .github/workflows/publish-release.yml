@@ -78,7 +78,7 @@ jobs:
               flags=re.DOTALL,
           )
           # Add development note at the bottom
-          text = text.rstrip() + '\n\n---\n\n## Development\n\nDevelopment happens on the [\`main\`](https://github.com/im-shashanks/claude-skills/tree/main) branch. See the main branch for architecture docs, phase plans, and contribution guidelines.\n'
+          text = text.rstrip() + '\n\n---\n\n## Development\n\nDevelopment happens on the [\`main\`](https://github.com/im-shashanks/claude-plugins/tree/main) branch. See the main branch for architecture docs, phase plans, and contribution guidelines.\n'
           pathlib.Path('$BUILD/README.md').write_text(text)
           "
 

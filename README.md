@@ -55,14 +55,14 @@ Every implementation follows a strict TDD state machine: **PLAN → RED → GREE
 ### Marketplace (recommended)
 
 ```
-/plugin marketplace add https://github.com/im-shashanks/claude-skills.git
-/plugin install shaktra@claude-skills-marketplace
+/plugin marketplace add https://github.com/im-shashanks/claude-plugins.git
+/plugin install shaktra@claude-plugins-marketplace
 ```
 
 ### Direct from GitHub
 
 ```
-/plugin install https://github.com/im-shashanks/claude-skills.git
+/plugin install https://github.com/im-shashanks/claude-plugins.git
 ```
 
 ### Local development
@@ -72,7 +72,7 @@ Every implementation follows a strict TDD state machine: **PLAN → RED → GREE
 claude --plugin-dir shaktra/
 
 # Full install from local path
-/plugin install /absolute/path/to/claude-skills/shaktra
+/plugin install /absolute/path/to/claude-plugins/shaktra
 ```
 
 ---
