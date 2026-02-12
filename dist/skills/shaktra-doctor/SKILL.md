@@ -131,7 +131,7 @@ Present results as a structured report:
 
 ### Category 1: Plugin Structure
 - [PASS] Check 1 — Agent Files: 12/12 agents found with valid frontmatter
-- [PASS] Check 2 — Skill Directories: 14/14 skills found with valid frontmatter
+- [PASS] Check 2 — Skill Directories: 15/15 skills found with valid frontmatter
 - [PASS] Check 3 — Hook Scripts: 4/4 scripts found and executable
 - [PASS] Check 4 — Sub-File References: All references resolve
 - [PASS] Check 10 — Python Dependencies: PyYAML installed
