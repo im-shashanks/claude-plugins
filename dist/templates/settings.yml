@@ -34,3 +34,10 @@ sprints:
   velocity_tracking: true
   sprint_duration_weeks: 2
   default_velocity: 15       # story points per sprint, used when no velocity history exists
+
+pm:
+  default_framework: rice    # rice | weighted | moscow
+  quick_win_effort_threshold: 3    # max story points for Quick Win
+  big_bet_impact_threshold: 7      # min impact score for Big Bet
+  min_persona_evidence: 2          # minimum evidence entries per persona
+  min_journey_stages: 3            # minimum stages in a journey map

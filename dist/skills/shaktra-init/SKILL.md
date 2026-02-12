@@ -146,7 +146,8 @@ Created:
 
 Next steps:
   1. Review .shaktra/settings.yml and adjust thresholds if needed
-  2. Place your PRD at .shaktra/prd.md and architecture doc at .shaktra/architecture.md
-  3. For brownfield projects: run /shaktra:analyze to understand the existing codebase
-  4. Run /shaktra:tpm to start planning your first sprint
+  2. Create your PRD: /shaktra:pm (or /shaktra:pm prd for just PRD)
+  3. Place architecture doc at .shaktra/architecture.md
+  4. For brownfield projects: run /shaktra:analyze to understand the existing codebase
+  5. Run /shaktra:tpm to create design docs and stories
 ```

@@ -41,6 +41,13 @@ sprints:
   velocity_tracking: boolean    # default: true
   sprint_duration_weeks: integer # default: 2
   default_velocity: integer     # default: 15 — story points per sprint, used when no velocity history exists
+
+pm:
+  default_framework: string           # default: "rice" — "rice" | "weighted" | "moscow"
+  quick_win_effort_threshold: integer # default: 3 — max story points for Quick Win classification
+  big_bet_impact_threshold: integer   # default: 7 — min impact score for Big Bet classification
+  min_persona_evidence: integer       # default: 2 — minimum evidence entries per persona
+  min_journey_stages: integer         # default: 3 — minimum stages in a journey map
 ```
 
 ## Consumer Reference
@@ -70,6 +77,11 @@ sprints:
 | `sprints.velocity_tracking` | scrummaster |
 | `sprints.sprint_duration_weeks` | scrummaster |
 | `sprints.default_velocity` | scrummaster (fallback when no velocity history) |
+| `pm.default_framework` | product-manager (prioritize mode), pm skill (prioritization workflow) |
+| `pm.quick_win_effort_threshold` | product-manager (RICE classification) |
+| `pm.big_bet_impact_threshold` | product-manager (RICE classification) |
+| `pm.min_persona_evidence` | product-manager (persona-create validation) |
+| `pm.min_journey_stages` | product-manager (journey-create validation) |
 
 ## Environment Variable Overrides
 

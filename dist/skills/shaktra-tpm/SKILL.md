@@ -224,13 +224,23 @@ Extract lessons that meet the capture bar. Append to .shaktra/memory/lessons.yml
 
 | Workflow | Requires | If Missing |
 |---|---|---|
-| Full | `.shaktra/prd.md`, `.shaktra/architecture.md`, `.shaktra/settings.yml` | Inform user to place PRD and architecture doc; settings → run `/shaktra:init` |
+| Full | `.shaktra/prd.md`, `.shaktra/architecture.md`, `.shaktra/settings.yml` | PRD missing → run `/shaktra:pm prd` first; architecture → place at `.shaktra/architecture.md`; settings → run `/shaktra:init` |
 | Design Only | `.shaktra/prd.md`, `.shaktra/architecture.md`, `.shaktra/settings.yml` | Same as Full |
 | Stories Only | Design doc in `.shaktra/designs/`, `.shaktra/settings.yml` | Run design workflow first |
 | Enrich | Story files in `.shaktra/stories/`, `.shaktra/settings.yml` | Run stories workflow first |
 | Hotfix | `.shaktra/settings.yml` | Run `/shaktra:init` |
 | Sprint | Stories in `.shaktra/stories/`, `.shaktra/settings.yml` | Run stories workflow first |
 | Close Sprint | `.shaktra/sprints.yml` with active `current_sprint` | Run sprint planning first |
+
+**PRD Guidance:**
+
+If `.shaktra/prd.md` is missing when starting Full or Design workflows:
+
+> "PRD not found at `.shaktra/prd.md`.
+>
+> Create one with `/shaktra:pm` — describe your product idea and I'll guide you through.
+>
+> Or for just PRD creation: `/shaktra:pm prd`"
 
 ---
 
