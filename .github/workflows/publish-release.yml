@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'shaktra/**'
+      - 'dist/shaktra/**'
       - '.claude-plugin/marketplace.json'
       - 'README.md'
 
@@ -28,13 +28,8 @@ jobs:
           rm -rf "$BUILD"
           mkdir "$BUILD"
 
-          # Promote shaktra/ contents to root
-          cp -r shaktra/agents "$BUILD/"
-          cp -r shaktra/skills "$BUILD/"
-          cp -r shaktra/hooks "$BUILD/"
-          cp -r shaktra/scripts "$BUILD/"
-          cp -r shaktra/templates "$BUILD/"
-          cp shaktra/LICENSE "$BUILD/"
+          # Copy entire dist/ structure as-is (preserves plugin organization)
+          cp -r dist/* "$BUILD/"
 
           # Copy workflow diagram for README
           mkdir -p "$BUILD/Resources"
@@ -43,18 +38,15 @@ jobs:
           # Remove __pycache__ if copied
           find "$BUILD" -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
 
-          # .claude-plugin with both files
+          # Copy marketplace.json and transform sources: "./dist/shaktra" -> "./shaktra" for release
           mkdir -p "$BUILD/.claude-plugin"
-          cp shaktra/.claude-plugin/plugin.json "$BUILD/.claude-plugin/"
-
-          # Transform marketplace.json: source "./shaktra" -> "./"
           python3 -c "
           import json, pathlib
           p = pathlib.Path('.claude-plugin/marketplace.json')
           data = json.loads(p.read_text())
           for plugin in data.get('plugins', []):
-              if plugin.get('source') == './shaktra':
-                  plugin['source'] = './'
+              if plugin.get('source') == './dist/shaktra':
+                  plugin['source'] = './shaktra'
           (pathlib.Path('$BUILD') / '.claude-plugin' / 'marketplace.json').write_text(
               json.dumps(data, indent=2) + '\n')
           "
@@ -98,52 +90,55 @@ jobs:
           BUILD="release-build"
           errors=0
 
-          # plugin.json exists
-          if [ ! -f "$BUILD/.claude-plugin/plugin.json" ]; then
-            echo "FAIL: plugin.json missing"
+          # marketplace.json exists at root
+          if [ ! -f "$BUILD/.claude-plugin/marketplace.json" ]; then
+            echo "FAIL: marketplace.json missing"
             errors=$((errors + 1))
           fi
 
-          # marketplace.json source is "./"
-          source_val=$(python3 -c "
+          # Validate each plugin listed in marketplace.json
+          plugin_count=$(python3 -c "
           import json
           data = json.load(open('$BUILD/.claude-plugin/marketplace.json'))
-          print(data['plugins'][0]['source'])
+          print(len(data.get('plugins', [])))
           ")
-          if [ "$source_val" != "./" ]; then
-            echo "FAIL: marketplace.json source is '$source_val', expected './'"
+          echo "Found $plugin_count plugin(s)"
+
+          # Check shaktra plugin structure
+          if [ ! -f "$BUILD/shaktra/.claude-plugin/plugin.json" ]; then
+            echo "FAIL: shaktra/plugin.json missing"
             errors=$((errors + 1))
           fi
 
-          # Count agents (12 expected)
-          agent_count=$(ls "$BUILD/agents/"*.md 2>/dev/null | wc -l | tr -d ' ')
+          # Count agents in shaktra (12 expected)
+          agent_count=$(ls "$BUILD/shaktra/agents/"*.md 2>/dev/null | wc -l | tr -d ' ')
           if [ "$agent_count" -ne 12 ]; then
-            echo "FAIL: expected 12 agents, found $agent_count"
+            echo "FAIL: expected 12 agents in shaktra, found $agent_count"
             errors=$((errors + 1))
           fi
 
-          # Count skills (15 expected)
-          skill_count=$(ls -d "$BUILD/skills/"*/ 2>/dev/null | wc -l | tr -d ' ')
+          # Count skills in shaktra (15 expected)
+          skill_count=$(ls -d "$BUILD/shaktra/skills/"*/ 2>/dev/null | wc -l | tr -d ' ')
           if [ "$skill_count" -ne 15 ]; then
-            echo "FAIL: expected 15 skills, found $skill_count"
+            echo "FAIL: expected 15 skills in shaktra, found $skill_count"
             errors=$((errors + 1))
           fi
 
-          # Count scripts (4 expected)
-          script_count=$(ls "$BUILD/scripts/"*.py 2>/dev/null | wc -l | tr -d ' ')
+          # Count scripts in shaktra (4 expected)
+          script_count=$(ls "$BUILD/shaktra/scripts/"*.py 2>/dev/null | wc -l | tr -d ' ')
           if [ "$script_count" -ne 4 ]; then
-            echo "FAIL: expected 4 scripts, found $script_count"
+            echo "FAIL: expected 4 scripts in shaktra, found $script_count"
             errors=$((errors + 1))
           fi
 
-          # hooks.json present
-          if [ ! -f "$BUILD/hooks/hooks.json" ]; then
-            echo "FAIL: hooks.json missing"
+          # hooks.json present in shaktra
+          if [ ! -f "$BUILD/shaktra/hooks/hooks.json" ]; then
+            echo "FAIL: shaktra/hooks/hooks.json missing"
             errors=$((errors + 1))
           fi
 
           # No dev-only files
-          for devfile in CLAUDE.md docs .claude .local .venv; do
+          for devfile in CLAUDE.md docs .claude .local .venv dist; do
             if [ -e "$BUILD/$devfile" ]; then
               echo "FAIL: dev-only '$devfile' found in release build"
               errors=$((errors + 1))
