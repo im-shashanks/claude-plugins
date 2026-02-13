@@ -189,6 +189,21 @@ When user requests dependency audit or upgrade planning:
 
 ---
 
+## Sub-Files
+
+| File | Purpose |
+|---|---|
+| `deep-analysis-workflow.md` | Team-based execution — 4 parallel team members with subagents |
+| `standard-analysis-workflow.md` | Single-session execution — 9 parallel CBA Analyzer agents |
+| `analysis-dimensions-core.md` | Dimension specs for D1-D4 (structure, domain, entry points, practices) |
+| `analysis-dimensions-health.md` | Dimension specs for D5-D8 (dependencies, debt, data flows, critical paths) |
+| `analysis-dimensions-git.md` | Dimension spec for D9 (git intelligence) |
+| `analysis-output-schemas.md` | YAML artifact format, summary budgets, and field definitions |
+| `debt-strategy.md` | Debt prioritization, categorization, and story generation rules |
+| `dependency-audit.md` | Dependency risk categorization and upgrade assessment rules |
+
+---
+
 ## Guard Tokens
 
 | Token | When |

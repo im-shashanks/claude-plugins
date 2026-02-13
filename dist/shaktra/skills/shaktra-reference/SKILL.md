@@ -31,6 +31,10 @@ Agents load this skill via their `skills` frontmatter. Only load the sub-files y
 | `schemas/sprint-schema.md` | Sprint state — velocity tracking, backlog |
 | `schemas/design-doc-schema.md` | Design doc sections — tier-scaled structure |
 | `schemas/refactoring-handoff-schema.md` | Refactoring state machine — phases, transitions, baseline metrics |
+| `schemas/prd-schema.md` | PRD validation — required sections, quality checks |
+| `schemas/persona-schema.md` | Persona YAML — fields, evidence requirements |
+| `schemas/journey-schema.md` | Journey map YAML — stages, touchpoints, opportunities |
+| `schemas/research-schema.md` | Research synthesis YAML — themes, patterns, recommendations |
 | `schemas/analysis-manifest-schema.md` | Analysis checkpoint — dimension progress, resumability, status transitions |
 
 ## Agent Loading Guide
@@ -47,4 +51,4 @@ Agents load this skill via their `skills` frontmatter. Only load the sub-files y
 | Memory Curator | schemas/lessons-schema, schemas/handoff-schema |
 | Bug Diagnostician | severity-taxonomy, guard-tokens, schemas/story-schema |
 | CBA Analyzer | quality-principles, schemas/decisions-schema, schemas/analysis-manifest-schema |
-| Product Manager | story-tiers, schemas/story-schema, schemas/decisions-schema, schemas/sprint-schema |
+| Product Manager | story-tiers, schemas/story-schema, schemas/decisions-schema, schemas/sprint-schema, schemas/prd-schema, schemas/persona-schema, schemas/journey-schema, schemas/research-schema |
