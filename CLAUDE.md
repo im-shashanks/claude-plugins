@@ -105,6 +105,7 @@ Source of truth: `dist/shaktra/.claude-plugin/plugin.json`
 When bumping the plugin version, update these files to match:
 - `dist/shaktra/README.md` — Version table at the top
 - `README.md` — "Current version" near the bottom
+- `CHANGELOG.md` — Add a new version entry with release notes
 
 Do **not** touch `dist/shaktra/skills/shaktra-status-dash/SKILL.md` — the version in its output format section is an example only. Status-dash reads the real version dynamically from `plugin.json` via `check_version.py`.
 
