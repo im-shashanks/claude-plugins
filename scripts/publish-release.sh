@@ -129,14 +129,14 @@ if [ "$agent_count" -ne 12 ]; then
 fi
 
 skill_count=$(ls -d "$BUILD/skills/"*/ 2>/dev/null | wc -l | tr -d ' ')
-if [ "$skill_count" -ne 15 ]; then
-  echo "  FAIL: expected 15 skills, found $skill_count"
+if [ "$skill_count" -ne 16 ]; then
+  echo "  FAIL: expected 16 skills, found $skill_count"
   errors=$((errors + 1))
 fi
 
 script_count=$(ls "$BUILD/scripts/"*.py 2>/dev/null | wc -l | tr -d ' ')
-if [ "$script_count" -ne 4 ]; then
-  echo "  FAIL: expected 4 scripts, found $script_count"
+if [ "$script_count" -ne 5 ]; then
+  echo "  FAIL: expected 5 scripts, found $script_count"
   errors=$((errors + 1))
 fi
 
