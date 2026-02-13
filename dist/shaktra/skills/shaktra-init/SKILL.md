@@ -80,6 +80,7 @@ Read template files from `${CLAUDE_PLUGIN_ROOT}/templates/` and write them into 
 | `templates/lessons.yml` | `.shaktra/memory/lessons.yml` | Copy as-is |
 | `templates/sprints.yml` | `.shaktra/sprints.yml` | Copy as-is |
 | `templates/analysis-manifest.yml` | `.shaktra/analysis/manifest.yml` | Copy as-is |
+| `templates/framework-reference.md` | `.shaktra/framework-reference.md` | Copy as-is |
 
 For `settings.yml`, populate the `project:` section with the gathered values:
 
@@ -102,22 +103,25 @@ All other sections (`tdd`, `quality`, `analysis`, `sprints`) retain their templa
 
 ### Step 5: Handle Project CLAUDE.md
 
-Read the framework CLAUDE.md template from `${CLAUDE_PLUGIN_ROOT}/templates/CLAUDE.md`.
+Read the project CLAUDE.md template from `${CLAUDE_PLUGIN_ROOT}/templates/CLAUDE.md`.
+
+This template is a skeleton for documenting the **specific project** (architecture decisions, conventions, development workflow). It includes:
+- Project overview section with placeholders for name, purpose, technologies
+- Development workflow and code style guidance
+- Architecture section with component descriptions
+- Quality standards and testing requirements
+- Deployment and operations procedures
+- Decision log (referencing `.shaktra/memory/decisions.yml`)
+- Contributing guidelines
+
+The template also mentions that users can run `/shaktra:init CLAUDE.md` to have Claude fill in the sections with project details.
 
 **If no CLAUDE.md exists** in the project root:
 - Create `CLAUDE.md` with the template content.
 
 **If CLAUDE.md already exists** in the project root:
-- Append the Shaktra section, wrapped in markers so it can be identified:
-
-```markdown
-
-<!-- SHAKTRA-FRAMEWORK-START -->
-<content from templates/CLAUDE.md>
-<!-- SHAKTRA-FRAMEWORK-END -->
-```
-
-Do NOT overwrite or modify existing CLAUDE.md content — only append.
+- Do NOT overwrite the existing file.
+- Report to user: "CLAUDE.md already exists. Shaktra initialization complete. You can update CLAUDE.md with your project-specific information, or run `/shaktra:init CLAUDE.md` to have Claude fill it in."
 
 ### Step 6: Report Results
 
@@ -135,6 +139,7 @@ Package Manager: <package_manager>
 Created:
   .shaktra/settings.yml
   .shaktra/sprints.yml
+  .shaktra/framework-reference.md        # Shaktra framework docs (for reference)
   .shaktra/memory/decisions.yml
   .shaktra/memory/lessons.yml
   .shaktra/analysis/manifest.yml
@@ -142,12 +147,13 @@ Created:
   .shaktra/stories/
   .shaktra/designs/
   .shaktra/analysis/
-  CLAUDE.md (created | updated)
+  CLAUDE.md (created | already exists)
 
 Next steps:
-  1. Review .shaktra/settings.yml and adjust thresholds if needed
-  2. Create your PRD: /shaktra:pm (or /shaktra:pm prd for just PRD)
-  3. Place architecture doc at .shaktra/architecture.md
-  4. For brownfield projects: run /shaktra:analyze to understand the existing codebase
-  5. Run /shaktra:tpm to create design docs and stories
+  1. Update CLAUDE.md with your project-specific information (or run `/shaktra:init CLAUDE.md` for Claude to do it)
+  2. Review .shaktra/settings.yml and adjust thresholds if needed
+  3. For brownfield projects: run /shaktra:analyze to understand the existing codebase
+  4. Run /shaktra:tpm to create design docs and stories
+
+For Shaktra framework reference: see .shaktra/framework-reference.md
 ```
