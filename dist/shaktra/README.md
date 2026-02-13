@@ -59,6 +59,22 @@ Every implementation follows a strict TDD state machine: **PLAN → RED → GREE
 /plugin install https://github.com/im-shashanks/claude-plugins.git
 ```
 
+### Updating
+
+Claude Code's plugin cache does not always refresh automatically when a new version is published. If you're running an older version or seeing stale behavior after an update:
+
+```bash
+# 1. Clear the plugin cache
+rm -rf ~/.claude/plugins/cache/
+
+# 2. Restart Claude Code
+
+# 3. Reinstall
+/plugin install shaktra@cc-plugins
+```
+
+You can check your installed version with `/shaktra:status-dash` — it compares your local version against the latest release.
+
 ---
 
 ## Quick Start
@@ -744,6 +760,23 @@ These principles guide Shaktra's design:
 1. Plugin installed correctly: `/plugin list` should show shaktra
 2. Claude Code recent version (February 2025+)
 3. Try full reinstall: `/plugin uninstall shaktra` then `/plugin install https://github.com/im-shashanks/claude-plugins.git`
+
+### Plugin not updating / stale version
+
+**Symptoms:** You updated Shaktra but still see old behavior, missing commands, or `/shaktra:status-dash` shows an outdated version
+
+**Cause:** Claude Code's plugin cache (`~/.claude/plugins/cache/`) does not always invalidate when a plugin is updated on the marketplace. This is a [known issue](https://github.com/anthropics/claude-code/issues/17361) — `/plugin update` and `autoUpdate` may report success without actually refreshing cached files.
+
+**Fix:**
+```bash
+# Clear the stale cache
+rm -rf ~/.claude/plugins/cache/
+
+# Restart Claude Code, then reinstall
+/plugin install shaktra@cc-plugins
+```
+
+This forces a fresh download from the marketplace.
 
 ### Hooks blocking unexpectedly
 
