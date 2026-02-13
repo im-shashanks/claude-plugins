@@ -31,20 +31,21 @@ For phase index and dependency graph: `docs/shaktra-plan/execution-plan.md`
 This is a **Claude Code plugin** (NOT a regular project). The directory layout follows the plugin spec:
 
 ```
-.claude-plugin/marketplace.json  # Marketplace catalog (source: "./shaktra") — stays at repo root
-shaktra/                         # THE PLUGIN — all plugin code lives here
+.claude-plugin/marketplace.json  # Marketplace catalog (source: "./dist/shaktra") — stays at repo root
+dist/shaktra/                    # THE PLUGIN — all plugin code lives here
   .claude-plugin/plugin.json     # Plugin manifest (required)
   agents/                        # Sub-agent definitions
   skills/                        # Skill definitions
   hooks/hooks.json               # Hook configurations
   scripts/                       # Hook implementation scripts (Python)
   templates/                     # State file templates for /shaktra:init
+  README.md                      # User-facing documentation (ships with plugin)
 docs/                            # Dev-only — architecture, phase plans, Forge analysis
 Resources/                       # Dev-only — diagrams, reference docs
 CLAUDE.md                        # Dev-only — this file (not installed)
 ```
 
-**All plugin development happens in `shaktra/`.** Dev files (docs, Resources, CLAUDE.md) stay at repo root and are never installed.
+**All plugin development happens in `dist/shaktra/`.** Dev files (docs, Resources, CLAUDE.md) stay at repo root and are never installed.
 
 Skills are namespaced as `/shaktra:skill-name` when installed by users.
 
@@ -52,20 +53,20 @@ Skills are namespaced as `/shaktra:skill-name` when installed by users.
 
 ## Testing the Plugin
 
-**Quick dev iteration:** `claude --plugin-dir shaktra/` — loads the plugin directly, no install step. Fast but skips the real install path.
+**Quick dev iteration:** `claude --plugin-dir dist/shaktra/` — loads the plugin directly, no install step. Fast but skips the real install path.
 
 **Full install testing (preferred before marking a phase complete):**
 
 ```bash
 # Local file path — simulates a real install from a local checkout
-/plugin install /absolute/path/to/claude-plugins/shaktra
+/plugin install /absolute/path/to/shaktra-plugin/dist/shaktra
 
 # Git remote — simulates how end users will install
-/plugin install https://github.com/im-shashanks/claude-plugins.git
+/plugin install https://github.com/im-shashanks/shaktra-plugin.git
 
 # Marketplace — the intended distribution path
 /plugin marketplace add https://github.com/im-shashanks/claude-plugins.git
-/plugin install shaktra@plugins
+/plugin install shaktra@cc-plugins
 ```
 
 Always validate at least the local file path install before finalizing a phase. The `--plugin-dir` flag is convenient for rapid iteration but does not exercise the install/discovery pipeline.
@@ -79,7 +80,7 @@ These were explicitly chosen and must not be overridden:
 - **SW Quality and Code Reviewer are separate** — SW Quality checks story-level during TDD, Code Reviewer checks app-level after completion and reviews PRs
 - **Quality depth must match or exceed Forge** — we reduce bloat, not capability
 - **Plugin distribution** via `/plugin install shaktra` (marketplace.json at `.claude-plugin/marketplace.json`)
-- **shaktra/ is the plugin** — Claude Code has no include/exclude mechanism for plugin installs, so all plugin code lives directly in `shaktra/`. Marketplace.json uses `"source": "./shaktra"` to scope what gets installed. Dev files (docs/, Resources/, CLAUDE.md) stay at repo root and are never shipped.
+- **dist/shaktra/ is the plugin** — Claude Code has no include/exclude mechanism for plugin installs, so all plugin code lives directly in `dist/shaktra/`. Marketplace.json uses `"source": "./dist/shaktra"` to scope what gets installed. Dev files (docs/, Resources/, CLAUDE.md) stay at repo root and are never shipped.
 - **Multi-plugin marketplace** — The repo is structured as a marketplace (`claude-plugins`) where Shaktra is one plugin. Future plugins can be added as sibling directories (e.g., `another-plugin/`).
 
 ## Design Constraints
