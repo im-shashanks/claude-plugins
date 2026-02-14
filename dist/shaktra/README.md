@@ -294,6 +294,55 @@ Shows all commands, workflows, and detailed usage guide.
 
 ---
 
+## Workflow Diagrams
+
+Visual documentation of all Shaktra workflows, agent orchestration, and quality enforcement:
+
+### Core User Workflows
+- [Quick Start Decision Tree](./diagrams/01-quick-start-decision-tree.md) — Choose your path: greenfield, brownfield, hotfix, or bug fix
+- [TDD State Machine](./diagrams/02-tdd-state-machine.md) — PLAN → RED → GREEN → QUALITY → MEMORY state transitions
+- [TPM Workflow Timeline](./diagrams/03-tpm-workflow-timeline.md) — Design → Stories → Sprint allocation
+- [Code Review Parallel Analysis](./diagrams/04-code-review-parallel-analysis.md) — 13 dimensions reviewed in parallel
+- [Bug Fix Diagnosis Flow](./diagrams/05-bugfix-diagnosis-flow.md) — 5-step investigation → TDD remediation
+- [Workflow Router](./diagrams/06-workflow-router-decision-tree.md) — Natural language intent classification
+- [Init Workflow](./diagrams/07-init-workflow.md) — Project initialization steps
+- [Analyze Pipeline](./diagrams/08-analyze-pipeline.md) — 2-stage brownfield analysis
+- [PM Orchestrated Workflow](./diagrams/09-pm-orchestrated-workflow.md) — PRD creation from research or hypothesis
+
+### Agent Orchestration
+- [Agent Hierarchy](./diagrams/10-agent-hierarchy.md) — 12 agents across 10 workflows
+- [TPM Agent Dispatch](./diagrams/11-tpm-agent-dispatch.md) — Architect → Scrummaster → PM sequence
+- [Dev Agent Dispatch](./diagrams/12-dev-agent-dispatch.md) — SW Engineer → Test Agent → Developer → Quality
+- [Review Agent Dispatch](./diagrams/13-review-agent-dispatch.md) — 4 parallel CR Analyzer groups
+- [Analyze Agent Dispatch](./diagrams/14-analyze-agent-dispatch.md) — 9-dimension parallel execution
+- [PM Agent Dispatch](./diagrams/15-pm-agent-dispatch.md) — Research-first vs. Hypothesis-first paths
+- [Bug Fix Agent Dispatch](./diagrams/16-bugfix-agent-dispatch.md) — Diagnostician → TDD pipeline handoff
+
+### Quality & Enforcement
+- [Quality Tier Pyramid](./diagrams/17-quality-tier-pyramid.md) — SW Quality vs. Code Review scopes
+- [Quality Loop State Machine](./diagrams/18-quality-loop-state-machine.md) — 3-attempt fix loop
+- [Severity Taxonomy](./diagrams/19-severity-taxonomy-decision-tree.md) — P0-P3 classification
+- [Merge Gate Logic](./diagrams/20-merge-gate-logic.md) — When changes are blocked
+- [Hook Execution Flow](./diagrams/21-hook-execution-flow.md) — 4 blocking hooks
+- [Coverage Thresholds](./diagrams/22-coverage-threshold-by-tier.md) — XS: 70%, S: 80%, M: 90%, L: 95%
+
+### Utility Workflows
+- [Doctor Health Check](./diagrams/23-doctor-health-check.md) — 10 validation checks
+- [Analyze Incremental Refresh](./diagrams/24-analyze-incremental-refresh.md) — Checksum-based stale detection
+- [Debt Strategy](./diagrams/25-debt-strategy-workflow.md) — Tech debt prioritization
+- [Dependency Audit](./diagrams/26-dependency-audit-workflow.md) — Dependency risk assessment
+- [Status Dashboard](./diagrams/27-status-dashboard-data-flow.md) — Data aggregation from state files
+
+### Advanced Architecture
+- [Plugin Directory Structure](./diagrams/28-plugin-directory-structure.md) — File organization
+- [Skill Layering](./diagrams/29-skill-layering-architecture.md) — User-invocable vs. internal skills
+- [State File Lifecycle](./diagrams/30-state-file-lifecycle.md) — How state evolves through workflows
+- [Handoff Schema Evolution](./diagrams/31-handoff-schema-evolution.md) — TDD handoff updates per phase
+- [Memory Capture](./diagrams/32-memory-capture-decision-tree.md) — Decisions vs. lessons
+- [Guard Token Flow](./diagrams/33-guard-token-flow.md) — 20+ guard tokens across workflows
+
+---
+
 ## Workflows & Use Cases
 
 ### TPM Workflow: Design → Stories → Sprint
