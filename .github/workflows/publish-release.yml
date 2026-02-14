@@ -54,6 +54,9 @@ jobs:
           # Copy user-facing README from plugin directory
           cp dist/shaktra/README.md "$BUILD/README.md"
 
+          # Copy CHANGELOG for user visibility
+          cp CHANGELOG.md "$BUILD/CHANGELOG.md"
+
           # Minimal .gitignore
           cat > "$BUILD/.gitignore" << 'GITIGNORE'
           .DS_Store

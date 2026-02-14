@@ -1,10 +1,219 @@
-# Shaktra Development
+# Shaktra — Maintainer & Contributor Guide
 
-**Plugin repository for the Shaktra software development framework**
+**Shaktra is an opinionated AI development framework distributed as a Claude Code plugin, orchestrating 12 specialized agents through TDD workflows to produce production-ready code.**
 
-This repository contains the source code for Shaktra, a Claude Code plugin that orchestrates 12 specialized AI agents through TDD workflows to produce industry-standard, production-quality code.
+## What Makes Shaktra Unique
 
-## Repository Structure
+- **Enforced quality gates** — P0-P3 severity taxonomy blocks merge on critical findings
+- **Two-tier QA safety net** — SW Quality checks story-level during TDD, Code Reviewer validates app-level after completion
+- **TDD state machine with no shortcuts** — PLAN → RED → GREEN → QUALITY → MEMORY → COMPLETE, each transition guarded
+- **Ceremony scaling** — XS stories → 70% coverage, L stories → 95%, framework adapts to complexity
+- **Token-efficient architecture** — ~10K tokens per workflow step vs Forge's 150K+, on-demand skill loading
+
+**Key Metrics:**
+| Component | Count | Purpose |
+|-----------|-------|---------|
+| Agents | 12 | Domain experts spawned by skills |
+| Skills | 16 | User-invocable orchestrators + internal references |
+| Hooks | 4 | Enforcement layer (block on failure) |
+| State Schemas | 5 | YAML templates for `.shaktra/` state files |
+
+**Why contribute:** Build rigorous, scalable AI development tooling that enforces production standards through automation.
+
+**Visual architecture:** See `Resources/workflow.drawio.png` for agent orchestration and TDD state machine diagram.
+
+---
+
+## For Contributors
+
+Choose your path:
+
+### 🌱 First-Time Contributor
+- Start with [Understanding Shaktra](#understanding-shaktra)
+- Read [How We Work](#how-we-work)
+- Try [Your First Contribution](#your-first-contribution)
+
+### 🔌 Plugin Developer
+- Read [Plugin Architecture](#plugin-architecture)
+- Understand [Discovery Mechanism](#what-is-a-claude-code-plugin)
+- Review [Plugin Constraints](#plugin-constraints)
+
+### 🏗️ Active Maintainer
+- Read [CLAUDE.md](CLAUDE.md) for collaborative process
+- See [Development Workflows](#development-workflows)
+- Follow [Validation Checklist](#design-constraints-checklist)
+
+### 🎯 Quality Focused
+- Review [Design Philosophy](#philosophy--design-principles)
+- Study [Mental Models](#mental-models)
+- Check [Design Constraints](#design-constraints-checklist)
+
+---
+
+## Understanding Shaktra
+
+### Philosophy & Design Principles
+
+**1. Quality is Non-Negotiable**
+- TDD state machine enforced by hooks
+- P0-P3 severity taxonomy with blocking gates
+- Two-tier quality safety net (SW Quality + Code Reviewer)
+- Coverage thresholds (70-95%) by story tier
+
+**2. Domain Expertise Over Generalization**
+- Each workflow pillar is a Subject Matter Expert
+- TPM rivals a Principal Program Manager
+- Code Reviewer rivals a Principal Engineer
+- Agents defer to experts, don't attempt everything
+
+**3. Single Source of Truth**
+- Every concept defined exactly once
+- Severity taxonomy: ONE file only (`dist/shaktra/skills/shaktra-reference/severity-taxonomy.md`)
+- Quality dimensions: ONE file only
+- Everything else references, never redefines
+
+**4. Ceremony Proportional to Complexity**
+- Story tiers (XS/S/M/L) scale process rigor
+- Hotfix: 70% coverage, minimal gates
+- Feature: 95% coverage, full review
+- Framework adapts, not the developer
+
+**5. Reference Don't Duplicate**
+- Skills define, agents reference
+- Link to shaktra-reference, don't copy
+- Violation example: Defining P0-P3 in both agent and skill
+
+**6. Minimal Context, Maximum Depth**
+- No file over 300 lines (complexity control)
+- Skills load on-demand (10K tokens vs Forge's 150K)
+- Depth from focused content, not volume
+
+### Mental Models
+
+**Skills Orchestrate, Agents Execute**
+- Main skills (`/shaktra:tpm`) coordinate workflows
+- Sub-agents (`shaktra-architect`) do the work
+- Sub-agents CANNOT spawn other sub-agents
+- Orchestration happens at skill level only
+
+**Progressive Quality Gates**
+- Layer 1: Hooks (always-on, blocking)
+- Layer 2: SW Quality (story-level, 36 checks during TDD)
+- Layer 3: Code Reviewer (app-level, 13 dimensions after completion)
+- All three feed same P0-P3 taxonomy
+
+**TDD State Machine**
+```
+PLAN → RED → GREEN → QUALITY → MEMORY → COMPLETE
+   ↓     ↓      ↓        ↓         ↓         ↓
+Gates  Gates  Gates   Gates    Lessons   Finalize
+```
+- Each transition has guard conditions
+- No shortcuts, no skipped phases
+- Handoff state machine persists in `.shaktra/.tmp/{story}/handoff.yml`
+
+**Single Source of Truth Pattern**
+- Identify: What concept needs definition?
+- Define ONCE: In shaktra-reference or appropriate skill
+- Reference EVERYWHERE: Link, don't duplicate
+- Validate: Check no other file redefines it
+
+### Component Hierarchy
+
+```
+┌─────────────────────────────────────────┐
+│  Skills (Orchestration Layer)           │
+│  /shaktra:tpm, /shaktra:dev, etc.       │
+│  - User-invocable commands              │
+│  - Spawn sub-agents via Task tool       │
+│  - Load internal skills on-demand       │
+└─────────────┬───────────────────────────┘
+              │
+              ↓
+┌─────────────────────────────────────────┐
+│  Agents (Execution Layer)                │
+│  shaktra-architect, shaktra-sw-quality   │
+│  - Spawned by skills                     │
+│  - Execute specific tasks                │
+│  - Return results to parent skill        │
+└─────────────┬───────────────────────────┘
+              │
+              ↓
+┌─────────────────────────────────────────┐
+│  Hooks (Enforcement Layer)               │
+│  block_main_branch, check_p0_findings    │
+│  - External Python scripts               │
+│  - Block on failure (no warn-only)       │
+│  - Triggered by tool use or events       │
+└─────────────┬───────────────────────────┘
+              │
+              ↓
+┌─────────────────────────────────────────┐
+│  State (Persistence Layer)               │
+│  .shaktra/settings.yml, stories/*.yml    │
+│  - YAML schemas validated by hooks       │
+│  - Single source of truth for config     │
+│  - TDD handoff state machine             │
+└─────────────────────────────────────────┘
+```
+
+**Visual workflow:** See `Resources/workflow.drawio.png`
+
+---
+
+## Plugin Architecture
+
+### What is a Claude Code Plugin?
+
+Shaktra is NOT a regular project — it's a **Claude Code plugin**. This means:
+
+1. **Discovery mechanism**: Claude Code reads `.claude-plugin/plugin.json` to discover the plugin
+2. **Skill namespace**: Skills are invoked as `/shaktra:skill-name` (namespace prefix)
+3. **Agent availability**: Agents defined in `agents/` are available to skills via Task tool
+4. **Hook registration**: Hooks in `hooks/hooks.json` are registered on plugin load
+5. **Caching**: Plugins are cached after install at `~/.claude/plugins/cache/`
+
+### Plugin Constraints
+
+**Critical constraints:**
+- All plugin code lives in `dist/shaktra/` (no include/exclude mechanism)
+- SKILL.md files MUST have YAML frontmatter with `name` and `description`
+- Hook script paths use `${CLAUDE_PLUGIN_ROOT}` for portability
+- Main skills MUST NOT use `context: fork` (they run inline to spawn agents)
+- Sub-agents CANNOT spawn other sub-agents (no nested orchestration)
+
+**Directory structure:**
+```
+dist/shaktra/                    # THE PLUGIN (everything here gets installed)
+├── .claude-plugin/
+│   └── plugin.json             # REQUIRED: Plugin manifest
+├── agents/                     # Sub-agent definitions
+├── skills/                     # Skill definitions (YAML frontmatter required)
+├── hooks/hooks.json            # Hook configurations
+├── scripts/                    # Hook implementation scripts (Python)
+├── templates/                  # State file templates for /shaktra:init
+└── README.md                   # User-facing docs (ships with plugin)
+```
+
+**Dev-only files (NOT installed):**
+```
+.claude-plugin/marketplace.json  # Marketplace catalog (source: "./dist/shaktra")
+docs/                           # Architecture, phase plans
+Resources/                      # Diagrams, reference docs
+CLAUDE.md                       # Development instructions
+README.md (root)                # This file (maintainer guide)
+```
+
+**Testing implication:**
+- `--plugin-dir` skips install pipeline (fast iteration)
+- Full install testing exercises discovery mechanism
+- Always test both before finalizing a phase
+
+---
+
+## Repository Guide
+
+### Directory Structure
 
 ```
 shaktra-plugin/
@@ -28,87 +237,65 @@ shaktra-plugin/
 └── README.md                        # This file
 ```
 
-**Plugin distribution:** The plugin is defined in `dist/shaktra/`. The marketplace.json file at `.claude-plugin/marketplace.json` (repo root) registers it with source path `"./dist/shaktra"`.
+### What Goes Where
 
-**User documentation:** Lives in `dist/shaktra/README.md` — this is what users read when they install the plugin.
+**When adding a new component, use this decision tree:**
 
-**Dev documentation:** Lives in `/docs` and `CLAUDE.md` — not shipped with plugin installs.
+**User-invocable orchestrator?**
+→ Create skill: `dist/shaktra/skills/shaktra-{name}/SKILL.md`
+→ Update component count in CLAUDE.md and publish-release.sh
 
----
+**Execution logic for specific task?**
+→ Create agent: `dist/shaktra/agents/shaktra-{name}.md`
+→ Update agent count in CLAUDE.md and publish-release.sh
 
-## Architecture Overview
+**Shared knowledge/constants?**
+→ Add to existing internal skill: `dist/shaktra/skills/shaktra-reference/`
+→ Never create new internal skill without discussion
 
-### Core Concepts
+**Constraint enforcement?**
+→ Add hook entry: `dist/shaktra/hooks/hooks.json`
+→ Create Python script: `dist/shaktra/scripts/{name}.py`
+→ Update hook count in publish-release.sh
 
-- **Multi-agent orchestration** — 12 specialized agents with deep domain expertise
-- **TDD state machine** — PLAN → RED → GREEN → QUALITY → MEMORY → COMPLETE
-- **Quality tiers** — SW Quality (story-level), Code Reviewer (app-level)
-- **Sprint-based planning** — Velocity tracking, capacity allocation
-- **Ceremony scaling** — Story tiers (XS/S/M/L) adjust process rigor
+**State file template?**
+→ Add to: `dist/shaktra/templates/{name}.yml`
+→ Reference from shaktra-init skill
 
-### Component Layers
+**Architecture/dev documentation?**
+→ Add to: `docs/` (not shipped with plugin)
 
-**1. Skills** (skills/) — Orchestration layer, user-facing commands
-- **Main agents:** tpm, dev, review, analyze, general, bugfix
-- **Utilities:** init, doctor, workflow, help
-- **Internal:** quality, tdd, reference, stories
+**Diagram or reference?**
+→ Add to: `Resources/` (not shipped with plugin)
 
-**2. Sub-agents** (agents/) — Execution layer, spawned by skills
-- **TPM workflow:** architect, tpm-quality, scrummaster, product-manager
-- **Dev workflow:** sw-engineer, test-agent, developer, sw-quality
-- **Other:** cba-analyzer, cr-analyzer, memory-curator, bug-diagnostician
+### Component Counts
 
-**3. Enforcement** (hooks/ + scripts/) — Constraint validation
-- **Python scripts** (cross-platform, no shell-isms)
-- **Block on failure** — no warn-only mode
-- **Triggered by:** tool use (Bash, Write/Edit), task completion
+These must match validation expectations (checked in publish-release.sh):
 
-**4. State Management** (templates/) — YAML schemas
-- `.shaktra/settings.yml` — Project configuration
-- `.shaktra/stories/` — User story files
-- `.shaktra/sprints.yml` — Sprint tracking
-- `.shaktra/memory/` — Decision and lesson logs
-- Other artifacts (designs, personas, analysis, etc.)
-
-### Design Constraints
-
-Every component must adhere to these constraints:
-
-- **No file over 300 lines** — Complexity stays manageable
-- **No content duplication** — Skill defines, agent references — never both
-- **No dead code** — All code active, no disabled stubs
-- **Single source of truth** — Severity taxonomy, quality dimensions, schemas defined once
-- **All thresholds in settings.yml** — Never hardcoded
-- **Hook scripts in Python** — Cross-platform, no platform-specific shell commands
-- **Hooks block or don't exist** — No warn-only mode
-- **No always-on rules** — Rules must be triggered, not always-running
-- **No ASCII art** — In agent/skill prompts
-- **No naming ambiguity** — Components have distinct, unambiguous names
+- **Agents:** 12
+- **Skills:** 16 (10 user-invocable, 6 internal)
+- **Hook scripts:** 5
+- **State schemas:** 5
 
 ---
 
-## Development Setup
+## Development Workflows
 
-### Prerequisites
+### Setup
 
+**Prerequisites:**
 - Claude Code CLI installed
 - Python 3.8+ (for hook scripts)
 - Git (for version control)
 - Bash (for release script)
 
-### Quick Iteration
-
-For fast development cycle without full plugin install:
-
+**Quick iteration:**
 ```bash
 # Load plugin directly from disk (skips install pipeline)
 claude --plugin-dir dist/shaktra/
 ```
 
-### Full Install Testing
-
-For validating the install/discovery pipeline before release:
-
+**Full install testing:**
 ```bash
 # Local file path install (simulates user installing from GitHub clone)
 /plugin install /absolute/path/to/shaktra-plugin/dist/shaktra
@@ -121,22 +308,519 @@ For validating the install/discovery pipeline before release:
 /plugin install shaktra@cc-plugins
 ```
 
+### Your First Contribution
+
+**Good first issues:**
+1. Add example to existing skill documentation
+2. Improve error messages in hook scripts
+3. Add test case to hook script tests
+4. Fix typos or improve clarity in agent personas
+5. Add validation to existing schemas
+
+**End-to-end workflow:**
+
+1. **Fork and clone**
+   ```bash
+   git clone https://github.com/{your-username}/shaktra-plugin.git
+   cd shaktra-plugin
+   ```
+
+2. **Create feature branch FROM main**
+   ```bash
+   # Always branch from main, never from release
+   git checkout main
+   git pull origin main
+   git checkout -b docs/improve-severity-examples
+   ```
+
+3. **Make your change**
+   - Edit the relevant file (respect 300-line limit)
+   - Check design constraints (see checklist below)
+
+4. **Test locally**
+   ```bash
+   # Quick test
+   claude --plugin-dir dist/shaktra/
+   /shaktra:doctor
+
+   # Full install test
+   /plugin install /absolute/path/to/shaktra-plugin/dist/shaktra
+   ```
+
+5. **Commit and push**
+   ```bash
+   git add .
+   git commit -m "docs: improve severity taxonomy examples"
+   git push origin docs/improve-severity-examples
+   ```
+
+6. **Create PR to main**
+   - Base branch: `main` (NOT release)
+   - Title: Clear, descriptive, under 70 chars
+   - Description: Explain WHY (not what)
+   - Reference any related issues
+
+### Working on a Feature (End-to-End Example)
+
+**Scenario:** Adding a new quality check to SW Quality agent
+
+**Day 1: Planning**
+```bash
+# Read relevant architecture docs
+cat README.md  # This file
+cat CLAUDE.md  # Collaborative process
+
+# Understand the component
+cat dist/shaktra/agents/shaktra-sw-quality.md
+cat dist/shaktra/skills/shaktra-quality/quick-check.md
+```
+
+**Day 1: Design Proposal**
+- What quality check is needed? (e.g., detect hardcoded credentials)
+- Where does it fit? (P0 severity, quick-check mode)
+- What's the detection logic?
+- Proposed approach: Document and discuss
+
+**Day 2: Wait for Approval**
+- User reviews proposal
+- Discuss tradeoffs, adjust approach if needed
+- Get explicit "proceed with implementation" approval
+
+**Day 3-4: Implementation**
+```bash
+# Create feature branch FROM main
+git checkout main
+git pull origin main
+git checkout -b feat/detect-hardcoded-credentials
+
+# Add the quality check
+# Edit dist/shaktra/skills/shaktra-quality/quick-check.md
+# Add detection pattern under P0 Critical Checks section
+
+# Update agent to reference the new check
+# Edit dist/shaktra/agents/shaktra-sw-quality.md if needed
+
+# Add test case
+# Edit dist/shaktra/scripts/test_quality_checks.py (if exists)
+```
+
+**Day 5: Validation**
+```bash
+# Check design constraints
+find dist/shaktra -name "*.md" | while read f; do
+  lines=$(wc -l < "$f")
+  [ "$lines" -gt 300 ] && echo "$f: $lines lines"
+done
+
+# Test quick iteration
+claude --plugin-dir dist/shaktra/
+/shaktra:dev ST-001
+
+# Test full install
+/plugin install /path/to/shaktra-plugin/dist/shaktra
+/shaktra:doctor
+
+# Verify no duplication (e.g., severity defined in multiple places)
+grep -r "hardcoded credentials" dist/shaktra/skills/
+grep -r "hardcoded credentials" dist/shaktra/agents/
+# Should be defined once, referenced elsewhere
+```
+
+**Day 6: Create PR**
+```bash
+# Commit and push
+git add dist/shaktra/skills/shaktra-quality/quick-check.md
+git commit -m "feat: add hardcoded credentials detection to P0 checks"
+git push origin feat/detect-hardcoded-credentials
+
+# Create PR: feat/detect-hardcoded-credentials → main
+# Base: main (NOT release)
+# Title: "feat: Add hardcoded credentials detection to P0 checks"
+# Description: Explain why this check is needed and how it works
+```
+
+**Feature validation checklist:**
+- [ ] Design constraints met (300-line limit, no duplication, etc.)
+- [ ] Component counts still match (if changed)
+- [ ] Tested with `--plugin-dir` and full install
+- [ ] Quality check triggers correctly
+- [ ] Documentation updated
+
+### Testing Philosophy
+
+**What to test:**
+
+1. **Hook scripts** (unit tests)
+   - All Python scripts in `dist/shaktra/scripts/`
+   - Test valid/invalid inputs
+   - Test error messages
+   - Run: `python3 -m pytest dist/shaktra/scripts/`
+
+2. **Workflows** (integration tests)
+   - End-to-end user scenarios
+   - Initialize → TPM → Dev → Review
+   - Test in real Claude Code environment
+
+3. **Plugin discovery** (release tests)
+   - Install from local path
+   - Install from GitHub remote
+   - Verify marketplace discovery
+   - Check README is user-facing
+
+**Why we test:**
+- Hooks are enforcement layer — they MUST be reliable
+- Workflows are user experience — they MUST work end-to-end
+- Plugin discovery is distribution — it MUST install correctly
+
+**How we test:**
+
+```bash
+# Unit tests (fast, during development)
+python3 -m pytest dist/shaktra/scripts/
+
+# Integration tests (moderate, before PR)
+mkdir test-project && cd test-project
+claude --plugin-dir /path/to/shaktra-plugin/dist/shaktra/
+/shaktra:init
+/shaktra:tpm "add user auth"
+/shaktra:dev ST-001
+
+# Release tests (slow, before publish)
+./scripts/publish-release.sh
+git checkout release
+cat README.md  # Should be user-facing, not this maintainer README
+ls -la | grep CLAUDE  # Should NOT exist
+cat .claude-plugin/plugin.json  # Should exist
+```
+
+---
+
+## Contributing
+
+### How We Work
+
+Shaktra follows a **collaborative build** process — every significant component or change is discussed before implementation.
+
+**The Process:**
+
+1. **Understand Current State**
+   - Review existing components and architecture
+   - Read CLAUDE.md for project context
+   - Study relevant skills, agents, or hooks
+   - Document what exists and how it works
+
+2. **Discuss Before Implementing**
+   - Present your understanding of the problem/opportunity
+   - Propose your approach
+   - Discuss tradeoffs (e.g., simplicity vs capability)
+   - Get explicit approval to proceed
+
+3. **Implement After Agreement**
+   - Only after approval, build the component
+   - Follow the agreed design
+   - Respect design constraints (300-line limit, no duplication, etc.)
+
+4. **Validate Against Constraints**
+   - Check every deliverable against design constraints
+   - Run `/shaktra:doctor` to validate
+   - Test with both `--plugin-dir` and full install
+   - Verify quality standards met
+
+**Why this process?**
+- Prevents wasted effort on rejected approaches
+- Ensures alignment on tradeoffs before committing code
+- Builds shared understanding of design decisions
+- Documents rationale for future contributors
+
+### Git Workflow
+
+**Branch Structure:**
+
+Shaktra uses a two-branch system:
+
+- **`main`** — Active development branch
+  - All development happens here
+  - Create feature branches FROM main
+  - Merge PRs back TO main
+  - This is where contributors work
+
+- **`release`** — Distribution branch (NEVER touch manually)
+  - Auto-generated by `scripts/publish-release.sh`
+  - Orphan branch with clean history
+  - Contains only plugin files (dist/shaktra/ contents promoted to root)
+  - Users install from this branch
+  - **DO NOT create branches from release**
+  - **DO NOT merge to release manually**
+
+**Development Workflow:**
+
+```bash
+# 1. Start from main
+git checkout main
+git pull origin main
+
+# 2. Create feature branch FROM main
+git checkout -b feat/add-quality-check
+
+# 3. Make your changes
+# Edit files in dist/shaktra/
+
+# 4. Test locally
+claude --plugin-dir dist/shaktra/
+
+# 5. Commit to your feature branch
+git add .
+git commit -m "feat: add hardcoded credentials check"
+
+# 6. Push feature branch
+git push origin feat/add-quality-check
+
+# 7. Create PR to merge back to main
+# PR: feat/add-quality-check → main
+```
+
+**Release Process:**
+
+When ready to publish a new version:
+
+```bash
+# 1. Ensure you're on main with clean state
+git checkout main
+git status  # Should be clean
+
+# 2. Run release script
+./scripts/publish-release.sh
+
+# This script:
+# - Creates orphan `release` branch
+# - Copies dist/shaktra/ contents to root
+# - Transforms marketplace.json source path
+# - Creates clean commit: "Release from main@{sha}"
+
+# 3. Push release branch
+./scripts/publish-release.sh --push
+# or manually:
+git push origin release --force
+```
+
+**How Release Branch Works:**
+
+The release branch is a **build artifact**, not a development branch. Here's what happens:
+
+1. `publish-release.sh` creates an orphan branch (no history)
+2. Copies plugin files from `dist/shaktra/` to root level
+3. Excludes dev-only files (docs/, Resources/, CLAUDE.md, root README.md)
+4. Transforms `.claude-plugin/marketplace.json` source path from "./dist/shaktra" to "."
+5. Creates single commit with reference to main branch SHA
+
+**Result:**
+- `main` branch: Full repo with dev docs, scripts, Resources
+- `release` branch: Clean plugin-only structure for distribution
+- Users install from `release` via `/plugin install`
+
+**Important:**
+- ⚠️ NEVER branch from `release`
+- ⚠️ NEVER commit directly to `release`
+- ⚠️ NEVER merge PRs to `release`
+- ✅ Always branch from `main`
+- ✅ Always merge PRs to `main`
+- ✅ Use `publish-release.sh` to update `release`
+
+### Design Constraints Checklist
+
+Before any PR, verify:
+
+- [ ] **No file over 300 lines**
+  - Why: Complexity control, single clear purpose per file
+  - How to check: `find dist/shaktra -name "*.md" -o -name "*.py" | while read f; do lines=$(wc -l < "$f"); [ "$lines" -gt 300 ] && echo "$f: $lines"; done`
+
+- [ ] **No content duplication**
+  - Why: Single source of truth, avoid divergence
+  - Example violation: Defining P0-P3 in both shaktra-quality and sw-quality agent
+  - How to check: Search for key definitions across skills/ and agents/
+
+- [ ] **No dead code or disabled stubs**
+  - Why: Forge had 40% dead code, reduced maintainability
+  - How to check: Every function/section must be called, no commented-out blocks
+
+- [ ] **Severity taxonomy in ONE file only**
+  - Why: Core enforcement mechanism, must be consistent
+  - File: `dist/shaktra/skills/shaktra-reference/severity-taxonomy.md`
+  - How to check: `grep -r "P0.*Critical" dist/shaktra/` should find only one definition
+
+- [ ] **All thresholds read from settings.yml**
+  - Why: Configuration flexibility, no hardcoded values
+  - Example: Coverage threshold read from `.shaktra/settings.yml`, not hardcoded as 90
+  - How to check: Search for numeric thresholds (70, 80, 90, 95) in skills/agents — should find references to settings.yml
+
+- [ ] **All hook scripts in Python**
+  - Why: Cross-platform (Forge used bash with `grep -oP`, failed on macOS)
+  - How to check: All files in `dist/shaktra/scripts/` must be `.py`
+
+- [ ] **Hooks block or don't exist**
+  - Why: Enforcement layer must enforce, warn-only is ineffective
+  - How to check: Hook scripts return exit code 1 on failure, 0 on pass
+
+- [ ] **No always-on rules consuming context**
+  - Why: Token efficiency, context pollution
+  - How to check: Forge had always-on auto-router, Shaktra uses `/shaktra:workflow` on-demand
+
+- [ ] **No ASCII art in prompts**
+  - Why: Token waste, readability issues
+  - How to check: Visual grep for box-drawing characters in skills/ and agents/
+
+- [ ] **No naming ambiguity**
+  - Why: Clear component identity, avoid confusion
+  - Example: sw-quality (agent) vs shaktra-quality (skill) — distinct purposes
+
+- [ ] **Component counts match validation**
+  - Why: Release validation depends on these counts
+  - How to check: Count agents/, skills/, scripts/ — must match publish-release.sh expectations
+
+### Common Mistakes
+
+**1. Defining content in both skill and agent (duplication)**
+
+❌ **Wrong:**
+```markdown
+# dist/shaktra/skills/shaktra-quality/SKILL.md
+P0: Critical issues like timeouts, credentials in logs
+
+# dist/shaktra/agents/sw-quality.md
+P0 findings include: timeouts, credentials in logs, injection risks
+```
+
+✅ **Right:**
+```markdown
+# dist/shaktra/skills/shaktra-reference/severity-taxonomy.md
+P0: Critical issues like timeouts, credentials in logs, injection
+
+# dist/shaktra/agents/sw-quality.md
+Use P0-P3 severity from shaktra-reference/severity-taxonomy.md
+```
+
+**2. Hardcoding thresholds instead of reading from settings.yml**
+
+❌ **Wrong:**
+```markdown
+if coverage < 90:
+    return BLOCKED
+```
+
+✅ **Right:**
+```markdown
+Read `.shaktra/settings.yml` for coverage threshold
+if coverage < tier_threshold:
+    return BLOCKED
+```
+
+**3. Creating warn-only hooks**
+
+❌ **Wrong:**
+```python
+# Just print warning, always exit 0
+print("Warning: P0 findings exist")
+sys.exit(0)
+```
+
+✅ **Right:**
+```python
+# Block on P0 findings
+if p0_count > 0:
+    print("Error: P0 findings prevent completion")
+    sys.exit(1)
+sys.exit(0)
+```
+
+**4. Files over 300 lines**
+
+❌ **Wrong:**
+- Single 800-line skill file with multiple concerns
+
+✅ **Right:**
+- Split into sub-files (shaktra-reference uses this pattern)
+- Main SKILL.md orchestrates, references sub-files
+
+**5. Using bash shell-isms in hook scripts**
+
+❌ **Wrong:**
+```bash
+grep -oP 'pattern' file  # -P flag doesn't exist on macOS
+```
+
+✅ **Right:**
+```python
+import re
+pattern = re.compile(r'pattern')
+```
+
+**6. Main skills using `context: fork`**
+
+❌ **Wrong:**
+```yaml
+---
+name: shaktra-dev
+context: fork  # Breaks ability to spawn sub-agents
+---
+```
+
+✅ **Right:**
+```yaml
+---
+name: shaktra-dev
+# No context field = runs inline, can spawn agents
+---
+```
+
+**7. Sub-agents spawning other sub-agents**
+
+❌ **Wrong:**
+```markdown
+# shaktra-architect.md
+Use the Task tool to spawn shaktra-researcher agent
+```
+
+✅ **Right:**
+```markdown
+# shaktra-tpm/SKILL.md (orchestrator)
+Spawn shaktra-architect, then spawn shaktra-researcher
+```
+
+---
+
+## Reference
+
+### Documentation Index
+
+**For Users (shipped with plugin):**
+- `dist/shaktra/README.md` — Installation, quick start, workflows
+
+**For Contributors (dev-only):**
+- `README.md` (this file) — Development guide, architecture, contributing
+- `CLAUDE.md` — Collaborative build process, design decisions
+- `docs/shaktra-plan/architecture-overview.md` — Detailed architecture
+- `docs/shaktra-plan/phases/` — Implementation phase plans
+- `docs/Forge-analysis/analysis-report.md` — How Shaktra differs from Forge
+
+**Visual:**
+- `Resources/workflow.drawio.png` — Agent orchestration and TDD state machine
+
 ### Validation Checklist
 
-Before declaring a phase complete:
+Before declaring any phase complete:
 
 ```bash
 # Quick validation
 /shaktra:doctor
 
-# Verify all agents load
+# Verify all skills load
 /shaktra:help
 
 # Full end-to-end
 /shaktra:init
-/shaktra:tpm
-/shaktra:dev
-/shaktra:review
+/shaktra:tpm "add feature"
+/shaktra:dev ST-001
+/shaktra:review ST-001
 /shaktra:analyze
 /shaktra:bugfix
 /shaktra:workflow
@@ -144,319 +828,65 @@ Before declaring a phase complete:
 
 ---
 
-## Contributing
+## FAQ
 
-### Before You Start
+**Q: Why is the plugin in `dist/shaktra/` instead of at the repo root?**
 
-**Read CLAUDE.md** for:
-- Collaborative build process (Reference Forge → Discuss → Implement)
-- Design decisions (not to be overridden)
-- Starting a phase workflow
-- Component overview
+A: Claude Code's plugin system has no include/exclude mechanism. The marketplace.json uses `"source": "./dist/shaktra"` to scope what gets installed. This keeps dev-only files (docs/, Resources/, CLAUDE.md) at the repo root and out of user installations.
 
-**Read docs/architecture-overview.md** for:
-- Detailed component layer explanations
-- Constraint validation guidelines
-- Phase dependencies
+**Q: Why can't I use `context: fork` in main skills?**
 
-### Adding Components
+A: Main skills (like shaktra-tpm) need to run inline in the main conversation so they can use the Task tool to spawn sub-agents. Forked context can't spawn agents. Only use `context: fork` for skills that don't orchestrate.
 
-#### New Skill
+**Q: Why is severity taxonomy defined in only ONE file?**
 
-1. Create `dist/shaktra/skills/shaktra-{name}/SKILL.md` with YAML frontmatter
-   ```markdown
-   ---
-   name: skill-display-name
-   description: One-line description of what this skill does
-   ---
-   # Skill content (max 300 lines)
-   ```
+A: Single source of truth. P0-P3 definitions are the enforcement mechanism — if they diverge across files, merge gate logic becomes inconsistent. One definition, many references.
 
-2. Skills are namespace-scoped: users invoke as `/shaktra:name`
+**Q: Why Python for hooks instead of bash?**
 
-3. Follow design constraints:
-   - No file over 300 lines
-   - Reference don't duplicate (link to shaktra-reference)
-   - Single clear purpose
+A: Cross-platform. Forge used `grep -oP` which doesn't exist on macOS. Python runs everywhere and has better error handling.
 
-4. Register in component overview in CLAUDE.md
+**Q: Why are there two quality agents (sw-quality and cr-analyzer)?**
 
-#### New Agent
+A: Different scopes. SW Quality checks story-level during TDD (does this story meet its acceptance criteria?). Code Reviewer checks app-level after completion (does this integrate well? Any broader issues?). Non-redundant, complementary.
 
-1. Create `dist/shaktra/agents/shaktra-{name}.md` with persona
-   - Full experience-based identity (not just role)
-   - Expertise areas, communication style
-   - Constraints and scope
+**Q: How do I avoid duplicating content?**
 
-2. Update agent count in:
-   - CLAUDE.md (Component Overview section)
-   - scripts/publish-release.sh (validation)
+A: Follow "reference don't duplicate" principle:
+1. Identify the canonical location (usually shaktra-reference)
+2. Define the concept ONCE in that location
+3. All other files link to it (e.g., "See severity-taxonomy.md for P0-P3 definitions")
+4. Validate: `grep -r "P0:" dist/shaktra/` should find only one full definition
 
-#### New Hook
+**Q: Why is the 300-line limit so strict?**
 
-1. Add entry to `dist/shaktra/hooks/hooks.json`
-   - Matcher (tool name or regex)
-   - Hook type and command
-   - Python script path
+A: Complexity control. Forge had 1,481-line skill files that were impossible to maintain. 300 lines forces single clear purpose per file. If you hit the limit, split into sub-files (like shaktra-reference does).
 
-2. Create Python script in `dist/shaktra/scripts/{name}.py`
-   - Read `.shaktra/settings.yml` if needed
-   - Print error message to stdout
-   - Exit code: 0 = pass, 1 = fail (blocks operation)
+**Q: What's the difference between this README and CLAUDE.md?**
 
-3. Update hook count in scripts/publish-release.sh
+A: This README is comprehensive architecture and contributor guide (you are here). CLAUDE.md is process guide (how we work on this project). Read both when starting development.
 
-### Design Constraints Checklist
+**Q: Can I add a new internal skill?**
 
-Before any PR, verify:
+A: Rarely. Internal skills (shaktra-reference, shaktra-quality, shaktra-tdd, shaktra-stories) are shared knowledge. Before creating a new one, ask: Does this belong in an existing internal skill? Only create new internal skills after discussion.
 
-- [ ] No file over 300 lines
-- [ ] No content duplication (check skill references vs agent definitions)
-- [ ] No dead code or disabled stubs
-- [ ] Severity taxonomy in ONE file only: `dist/shaktra/skills/shaktra-reference/severity-taxonomy.md`
-- [ ] All thresholds read from `settings.yml` (never hardcoded)
-- [ ] All hook scripts in Python (cross-platform)
-- [ ] Hooks block or don't exist (no warn-only)
-- [ ] No always-on rules consuming context
-- [ ] No ASCII art in prompts
-- [ ] No naming ambiguity between components
-- [ ] Component counts match validation expectations
+**Q: Why does `/shaktra:workflow` exist if we have main skills?**
 
-### Git Workflow
+A: Natural language entry point. Users can describe intent in plain English, and shaktra-workflow routes to the appropriate main skill. It's an on-demand intent classifier for better UX.
 
-- Feature branches for all work (never commit to main)
-- No "Co-Authored-By" lines in commit messages
-- Hooks enforce branch protection automatically
-- PR title: clear, descriptive, under 70 chars
-- PR description: explains why (not what)
+**Q: How do I test hook scripts?**
 
-### Release Process
-
-Handled by `scripts/publish-release.sh`:
-
-1. **Validates state:**
-   - On main branch
-   - Working tree clean
-   - All files present
-   - Component counts correct
-
-2. **Builds release:**
-   - Copies `dist/shaktra/` contents to root level
-   - Promotes `.claude-plugin/plugin.json`
-   - Transforms `marketplace.json` source path
-   - **Copies `dist/shaktra/README.md`** as-is (no transformation)
-
-3. **Validates release:**
-   - 12 agents present
-   - 16 skills present
-   - 5 hook scripts present
-   - No dev-only files leaked
-
-4. **Creates release branch:**
-   - Orphan branch (clean history)
-   - Commit message: "Release from main@{sha}"
-   - Can push with `--push` flag
-
-**Usage:**
-
+A: Unit tests with pytest:
 ```bash
-# Build release locally
-./scripts/publish-release.sh
-
-# Build and push to origin
-./scripts/publish-release.sh --push
+python3 -m pytest dist/shaktra/scripts/test_validate_schema.py
 ```
 
-**Result:**
-- `release` branch — clean, ready for distribution
-- Contains only plugin files, user README, resources
-- No dev docs, CLAUDE.md, or phase plans
+**Q: What if my skill needs to be longer than 300 lines?**
 
----
-
-## File Limits & Constraints
-
-### No file over 300 lines
-
-**Why:** Complexity stays manageable, every file has single clear purpose.
-
-**Checking:**
-```bash
-find dist/shaktra -name "*.md" -o -name "*.py" | while read f; do
-  lines=$(wc -l < "$f")
-  if [ "$lines" -gt 300 ]; then
-    echo "$f: $lines lines"
-  fi
-done
-```
-
-### No content duplication
-
-**Pattern to avoid:** Defining something in both places
-```
-❌ Don't do this:
-   dist/shaktra/skills/shaktra-quality/SKILL.md defines severity taxonomy
-   dist/shaktra/agents/sw-quality.md redefines severity taxonomy
-
-✅ Do this:
-   dist/shaktra/skills/shaktra-reference/severity-taxonomy.md defines it (once)
-   All other files reference it (link or cite)
-```
-
-### Severity taxonomy: single source of truth
-
-**File:** `dist/shaktra/skills/shaktra-reference/severity-taxonomy.md`
-
-**Rule:** P0-P3 definitions, merge gate logic, examples — all in ONE file. No other file may redefine or reexplain severity levels.
-
-**Other files do:** Reference it — "See severity-taxonomy.md for P0-P3 definitions"
-
----
-
-## Component Counts
-
-These must match validation expectations (checked in publish-release.sh):
-
-- **Agents:** 12
-- **Skills:** 16 (10 user-invocable: tpm, dev, review, analyze, general, bugfix, init, doctor, workflow, help; 6 internal: quality, tdd, reference, stories, pm, status-dash)
-- **Hook scripts:** 5 (block_main_branch.py, validate_story_scope.py, validate_schema.py, check_p0_findings.py, and one more)
-- **Hooks.json entries:** Corresponding to scripts
-
----
-
-## Development Workflow
-
-### Phase-Based Development
-
-Phases are defined in `docs/shaktra-plan/phases/`. Each phase:
-
-1. **Exploration** — Understand Forge implementation, current state
-2. **Design** — Propose Shaktra approach, align on tradeoffs
-3. **Implementation** — Build following agreed design
-4. **Validation** — Check constraints, run tests
-
-**Starting a phase:**
-
-```bash
-# Read the phase plan
-cat docs/shaktra-plan/phases/phase-XX-{name}.md
-
-# Read architecture docs
-cat docs/shaktra-plan/architecture-overview.md
-
-# Check Forge reference
-ls ~/workspace/applications/forge-claudify/...
-```
-
-Then discuss findings and approach before implementing.
-
-### Phase Dependency Graph
-
-See `docs/shaktra-plan/execution-plan.md` for:
-- All phases and their status
-- Dependencies between phases
-- Critical path to completion
-
-### Validating Against Constraints
-
-After implementation:
-
-1. Check design constraints (see checklist above)
-2. Verify component counts
-3. Run `/shaktra:doctor` in a test project
-4. Check `docs/shaktra-plan/appendices.md` (Appendix A) for anti-patterns
-
----
-
-## Architecture Diagrams
-
-Visual diagrams are in `Resources/`:
-- `workflow.drawio.png` — Agent orchestration and TDD state machine
-- Other architecture diagrams (as developed)
-
----
-
-## Testing the Plugin
-
-### Unit Testing
-
-Hook scripts have unit tests. Run:
-
-```bash
-# Test hook scripts
-python3 -m pytest dist/shaktra/scripts/
-
-# Test with coverage
-python3 -m pytest --cov=dist/shaktra/scripts dist/shaktra/scripts/
-```
-
-### Integration Testing
-
-Test in real Claude Code environment:
-
-```bash
-# Initialize test project
-mkdir test-project && cd test-project
-claude --plugin-dir /path/to/shaktra-plugin/dist/shaktra/
-/shaktra:init
-
-# Run through workflows
-/shaktra:tpm
-/shaktra:dev ST-001
-/shaktra:review ST-001
-/shaktra:doctor
-```
-
-### Release Testing
-
-Before publishing:
-
-```bash
-./scripts/publish-release.sh
-git checkout release
-# Verify README is user-facing (not dev-focused)
-cat README.md
-# Verify no CLAUDE.md
-ls -la | grep CLAUDE
-# Verify plugin.json present
-cat .claude-plugin/plugin.json
-```
-
----
-
-## Troubleshooting Development
-
-### Plugin not loading with `--plugin-dir`
-
-```bash
-# Check plugin structure
-ls -la dist/shaktra/.claude-plugin/
-# Should have plugin.json
-
-# Check for syntax errors in SKILL.md files
-claude --plugin-dir dist/shaktra/
-/shaktra:help
-```
-
-### Hook script failing
-
-```bash
-# Run script directly to see error
-python3 dist/shaktra/scripts/validate_schema.py
-
-# Check Python syntax
-python3 -m py_compile dist/shaktra/scripts/validate_schema.py
-```
-
-### Schema validation errors during development
-
-```bash
-# Run validator on test file
-python3 dist/shaktra/scripts/validate_schema.py /path/to/.shaktra/settings.yml
-
-# Check schema definition
-cat dist/shaktra/skills/shaktra-reference/schemas/settings-schema.md
-```
+A: Split it:
+- Main SKILL.md orchestrates (< 300 lines)
+- Sub-files contain deep knowledge (each < 300 lines)
+- See shaktra-reference for example pattern
 
 ---
 
@@ -471,14 +901,3 @@ Current version: **0.1.2**
 ## License
 
 MIT License. See [LICENSE](dist/shaktra/LICENSE).
-
----
-
-## Documentation Index
-
-- **User Guide:** `dist/shaktra/README.md` — How to use the plugin
-- **Development:** `CLAUDE.md` — How to contribute
-- **Architecture:** `docs/shaktra-plan/architecture-overview.md`
-- **Phase Plans:** `docs/shaktra-plan/phases/` — Implementation phases
-- **Forge Analysis:** `docs/Forge-analysis/analysis-report.md` — How Shaktra differs from Forge
-- **Diagrams:** `Resources/` — Architecture and workflow diagrams
