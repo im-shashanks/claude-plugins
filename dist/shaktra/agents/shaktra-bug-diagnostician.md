@@ -3,6 +3,7 @@ name: shaktra-bug-diagnostician
 model: opus
 skills:
   - shaktra-reference
+  - shaktra-stories
   - shaktra-bugfix
 tools:
   - Read
@@ -121,7 +122,7 @@ diagnosis:
 
 ### 5. Draft Story for Remediation
 
-Create a story YAML with `scope: bug_fix` following `schemas/story-schema.md`. The story enters the standard TDD pipeline — PLAN → RED → GREEN → QUALITY — unchanged.
+Create a story YAML with `scope: bug_fix` following `story-schema.md`. The story enters the standard TDD pipeline — PLAN → RED → GREEN → QUALITY — unchanged.
 
 Story tier is determined by triage severity:
 - P0 → Large (full story with failure modes, edge cases, feature flags)

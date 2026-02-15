@@ -10,7 +10,7 @@ Create stories from an approved design document. Follow steps 1-7 in order.
 
 Read the following before creating any story:
 - The approved design document
-- `schemas/story-schema.md` — field definitions per tier
+- `story-schema.md` — field definitions per tier
 - `story-tiers.md` — tier detection logic
 - `.shaktra/memory/decisions.yml` — prior decisions that constrain design choices
 - `.shaktra/settings.yml` — project type, language, thresholds
@@ -58,7 +58,7 @@ Before moving to the next story, verify this 6-point checklist:
 2. **Error case present:** `io_examples` includes at least one error-case example (Medium+)
 3. **Test reference integrity:** Every `test` field value matches an ID in `test_specs`
 4. **No orphan tests:** Every `test_specs` entry is referenced by at least one other field
-5. **Size limits:** `metadata.story_points` <= 10, files touched <= 3. If exceeded, split the story.
+5. **Size limits:** `metadata.story_points` <= 10, `files` list <= 3 source files (test files are NOT listed in `files` — they're defined in `test_specs`). If exceeded, split the story.
 6. **Feature flags:** Large tier stories have `feature_flags` with `default: false`
 
 Fix any failures before proceeding.
@@ -74,6 +74,7 @@ FOR EACH story in the batch:
   3. Forward check: every test reference → must exist in test_specs
   4. Reverse check: every test_specs entry → must be referenced by at least one field
   5. Cross-story check: no duplicate story IDs, no overlapping scope boundaries
+  6. Size check: files list <= 3 source files, story_points <= 10. If exceeded, split the story.
 
 IF any check fails:
   Fix the specific story
@@ -132,7 +133,8 @@ If enriching a batch of stories, run the Final Verification Loop from CREATE Ste
 | Error case in io_examples | Medium+ | P0 (missing error path) |
 | Forward test ref integrity | Medium+ | P0 (orphan reference) |
 | Reverse test ref coverage | Medium+ | P0 (dead test) |
-| Size limits (points, files) | All tiers | P1 (split needed) |
+| File count > 3 source files | All tiers | P0 (split needed) |
+| Story points > 10 | All tiers | P1 (split needed) |
 | Feature flags for Large | Large only | P1 (missing safety mechanism) |
 | Edge case coverage (5/10) | Large only | P1 (insufficient coverage) |
 | Field completeness per tier | All tiers | P1 (missing required field) |

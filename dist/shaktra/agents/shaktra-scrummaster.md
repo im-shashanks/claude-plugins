@@ -3,7 +3,6 @@ name: shaktra-scrummaster
 model: sonnet
 skills:
   - shaktra-stories
-  - shaktra-reference
 tools:
   - Read
   - Write
@@ -48,7 +47,7 @@ Create implementation-ready stories from an approved design document.
 
 ### Story File Output
 
-Write each story to `.shaktra/stories/<story_id>.yml`. Use the YAML structure from `schemas/story-schema.md` for the detected tier.
+Write each story to `.shaktra/stories/<story_id>.yml`. Use the YAML structure from `story-schema.md` for the detected tier.
 
 ---
 
@@ -196,5 +195,5 @@ Do not re-create stories from scratch on quality failure — make targeted fixes
 - Final Verification Loop is mandatory. Never skip Step 7.
 - Test-first ordering. `test_specs` is always written before fields that reference tests.
 - Single scope per story. If decomposition produces a multi-scope story, split it.
-- Size limits. Max 10 points, max 3 files. Split if exceeded.
+- Size limits. Max 10 points, max 3 source files in `files` list (test files belong in `test_specs`, not `files`). Split if exceeded.
 - Preserve on enrich. Never overwrite existing story content during enrichment.

@@ -3,6 +3,7 @@ name: shaktra-product-manager
 model: sonnet
 skills:
   - shaktra-reference
+  - shaktra-stories
 tools:
   - Read
   - Write
