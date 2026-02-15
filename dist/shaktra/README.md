@@ -122,24 +122,7 @@ Strict state machine: **PLAN → RED → GREEN → QUALITY → MEMORY → COMPLE
 
 **Hotfix (XS):** 70% coverage, minimal gates, ships in minutes. **Small (S):** 80% coverage, skip comprehensive review. **Medium (M):** 90% coverage, full TDD state machine. **Large (L):** 95% coverage, full architecture review, expanded quality gates.
 
-You choose the tier, framework enforces the rigor. No one forgets to run tests or skips coverage checks — it's physically impossible.
-
-**Quality tier pyramid:**
-
-```
-┌─────────────────────────────────────────┐
-│   Code Review (App-Level)               │
-│   13 dimensions, after story completion │
-├─────────────────────────────────────────┤
-│   SW Quality (Story-Level)              │
-│   36 checks per gate, during TDD        │
-├─────────────────────────────────────────┤
-│   Hooks (Always-On)                     │
-│   4 blocking constraints                │
-└─────────────────────────────────────────┘
-```
-
-All three tiers feed the same P0-P3 severity taxonomy and merge gate.
+You choose the tier, framework enforces the rigor. No one forgets to run tests or skips coverage checks — it's physically impossible. Three quality tiers (Hooks → SW Quality → Code Review) all feed the same P0-P3 severity taxonomy and merge gate.
 
 [See full quality philosophy](./docs/QUALITY.md) →
 

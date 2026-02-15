@@ -59,7 +59,7 @@ After the pipeline completes, present a structured summary (see below).
 | shaktra-test-agent | opus | shaktra-reference, shaktra-tdd | RED phase |
 | shaktra-developer | opus | shaktra-reference, shaktra-tdd | BRANCH + GREEN phase |
 | shaktra-sw-quality | sonnet | shaktra-reference, shaktra-quality | All quality gates |
-| shaktra-memory-curator | haiku | shaktra-reference | Memory capture |
+| shaktra-memory-curator | sonnet | shaktra-reference | Memory capture |
 
 ---
 
@@ -214,6 +214,12 @@ Workflow type: tdd
 Artifacts path: {story_dir}
 
 Extract lessons that meet the capture bar. Append to .shaktra/memory/lessons.yml.
+Each lesson entry MUST have exactly these 5 fields:
+  id: "LS-NNN" (sequential, check existing entries for next number)
+  date: "YYYY-MM-DD"
+  source: story ID or workflow type (e.g., "tdd", "ST-001")
+  insight: what was learned (1-3 sentences)
+  action: concrete change to future behavior (1-2 sentences)
 Set memory_captured: true in handoff.
 ```
 

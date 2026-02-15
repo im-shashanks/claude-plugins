@@ -1,6 +1,6 @@
 ---
 name: shaktra-memory-curator
-model: haiku
+model: sonnet
 skills:
   - shaktra-reference
 tools:

@@ -80,6 +80,12 @@ Artifacts path: .shaktra/memory/
 
 Review the conversation for insights that meet the capture bar. This was an advisory
 interaction — there is no handoff file. Append lessons to .shaktra/memory/lessons.yml only.
+Each lesson entry MUST have exactly these 5 fields:
+  id: "LS-NNN" (sequential, check existing entries for next number)
+  date: "YYYY-MM-DD"
+  source: workflow type (e.g., "general-architecture")
+  insight: what was learned (1-3 sentences)
+  action: concrete change to future behavior (1-2 sentences)
 Skip memory_captured handoff update.
 ```
 
