@@ -6,6 +6,7 @@ on:
     paths:
       - 'dist/shaktra/**'
       - '.claude-plugin/marketplace.json'
+      - '.github/workflows/**'
       - 'README-marketplace.md'
       - 'CHANGELOG.md'
   workflow_dispatch:
