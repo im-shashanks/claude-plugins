@@ -6,6 +6,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Version numbers 
 
 ---
 
+## [0.1.4] - 2026-02-15
+
+### Added
+- **`/shaktra-update` command** — Automates plugin updates by fetching latest from marketplace, clearing stale cache, and reinstalling. Works around Claude Code's cache invalidation bug. Supports `--force` flag to reinstall even when already up to date.
+- **`update_plugin.py` script** — End-to-end update handler: version check (reuses `check_version.py`), git fetch/reset of marketplace clone, cache cleanup, fresh copy, and `installed_plugins.json` update.
+- **`commands/` directory** — New plugin directory for non-namespaced slash commands (simpler than skills for utility operations).
+
+---
+
 ## [0.1.3] - 2026-02-15
 
 ### Fixed

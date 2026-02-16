@@ -44,6 +44,7 @@ Shaktra orchestrates 12 specialized AI agents through agile-inspired workflows. 
 | `/shaktra:workflow` | Natural language router — describe what you need, get dispatched to the right skill. |
 | `/shaktra:help` | This guide. |
 | `/shaktra:status-dash` | Project dashboard — version check, sprint health, quality overview. |
+| `/shaktra-update` | Update Shaktra plugin — fetches latest, clears cache, reinstalls. |
 
 ---
 

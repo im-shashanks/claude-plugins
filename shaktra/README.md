@@ -4,7 +4,7 @@
 
 | | |
 |---|---|
-| **Version** | 0.1.3 |
+| **Version** | 0.1.4 |
 | **License** | MIT |
 | **Claude Code** | February 2025+ |
 | **Platform** | Claude code native (macOS, Linux, Windows) |
