@@ -43,7 +43,7 @@ Three commands take you from idea to production-ready, fully tested code:
 /plugin install https://github.com/im-shashanks/claude-plugins.git
 ```
 
-v0.1.4 | MIT License | [Full documentation](./shaktra/README.md)
+v0.1.5 | MIT License | [Full documentation](./shaktra/README.md)
 
 ---
 
