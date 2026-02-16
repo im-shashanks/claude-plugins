@@ -1,6 +1,6 @@
 # Story Tiers
 
-4-tier classification system for user stories. Tier determines required fields, quality gates, and coverage thresholds. Field definitions and YAML schema live in `schemas/story-schema.md` — this file defines only the tier matrix, detection logic, and gate behavior.
+4-tier classification system for user stories. Tier determines required fields, quality gates, and coverage thresholds. Field definitions and YAML schema live in `story-schema.md` — this file defines only the tier matrix, detection logic, and gate behavior.
 
 ## Tier Summary
 

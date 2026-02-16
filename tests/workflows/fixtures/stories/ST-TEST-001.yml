@@ -1,0 +1,111 @@
+id: ST-TEST-001
+title: Implement user registration endpoint
+description: >
+  Create a POST /users/register endpoint that accepts email and password,
+  validates inputs, hashes the password with bcrypt, and stores the user.
+tier: medium
+scope: feature
+files:
+  - src/api/user_routes.py
+  - src/services/user_service.py
+  - src/repositories/user_repository.py
+  - src/models/user.py
+  - src/utils/password_utils.py
+  - tests/test_user_service.py
+  - tests/test_user_routes.py
+acceptance_criteria:
+  - id: AC-1
+    given: a valid email and password meeting strength requirements
+    when: POST /users/register is called
+    then: user is created and 201 returned with confirmation
+    priority: must
+  - id: AC-2
+    given: an email that already exists
+    when: POST /users/register is called
+    then: 409 Conflict is returned
+    priority: must
+  - id: AC-3
+    given: a password shorter than 8 characters
+    when: POST /users/register is called
+    then: 422 is returned with validation error
+    priority: must
+interfaces:
+  implements:
+    - name: register_user
+      signature: "register_user(email: str, password: str) -> User"
+      returns: User object with id and email
+      raises:
+        - DuplicateEmailError
+        - WeakPasswordError
+  uses:
+    - user_repository.create
+    - password_utils.hash_password
+io_examples:
+  - name: successful registration
+    input: '{"email": "alice@example.com", "password": "SecurePass1"}'
+    output: '{"id": 1, "email": "alice@example.com", "message": "registered"}'
+    notes: password not returned
+  - name: duplicate email
+    input: '{"email": "existing@example.com", "password": "SecurePass1"}'
+    output: '{"error": "email already registered"}'
+    notes: 409 status code
+error_handling:
+  - code: DuplicateEmailError
+    condition: email already exists in database
+    recoverable: true
+    fallback: return 409 with message
+  - code: WeakPasswordError
+    condition: password does not meet strength requirements
+    recoverable: true
+    fallback: return 422 with validation details
+test_specs:
+  unit:
+    - id: T-01
+      description: Register user with valid credentials
+      covers: AC-1
+      arrange: empty user repository
+      act: call register_user("alice@example.com", "SecurePass1")
+      assert:
+        - user object returned with id and email
+        - password is hashed (not plaintext)
+    - id: T-02
+      description: Reject duplicate email
+      covers: AC-2
+      arrange: user with alice@example.com already exists
+      act: call register_user("alice@example.com", "NewPass123")
+      assert:
+        - DuplicateEmailError raised
+    - id: T-03
+      description: Reject weak password
+      covers: AC-3
+      arrange: empty repository
+      act: call register_user("bob@example.com", "short")
+      assert:
+        - WeakPasswordError raised
+    - id: T-04
+      description: Password is bcrypt hashed
+      covers: AC-1
+      arrange: empty repository
+      act: call register_user then check stored password
+      assert:
+        - stored password starts with $2b$
+        - stored password != plaintext input
+invariants:
+  - rule: plaintext passwords are never stored or logged
+    test: grep codebase for password storage, verify bcrypt
+  - rule: email uniqueness enforced at repository level
+    test: attempt duplicate insert, verify error
+logging_rules:
+  - event: user_registered
+    level: info
+    fields: [user_id, email]
+    condition: successful registration
+  - event: registration_failed
+    level: warn
+    fields: [email, reason]
+    condition: registration rejected
+metadata:
+  story_points: 5
+  priority: high
+  blocked_by: []
+  status: planned

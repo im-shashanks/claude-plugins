@@ -20,7 +20,7 @@ metadata:
 ## Small — adds 2 fields (total 5 + metadata)
 
 ```yaml
-files: [string]             # paths of files to create or modify
+files: [string]             # source files to create or modify (max 3). Excludes test files — tests are defined in test_specs.
 acceptance_criteria:        # Gherkin-style
   - id: string              # "AC-1"
     given: string

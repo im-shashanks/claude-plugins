@@ -46,7 +46,11 @@ cp -r dist/shaktra/scripts "$BUILD/"
 cp -r dist/shaktra/templates "$BUILD/"
 cp dist/shaktra/LICENSE "$BUILD/"
 
-# Copy workflow diagram for README
+# Copy documentation referenced by README
+cp -r dist/shaktra/docs "$BUILD/"
+cp -r dist/shaktra/diagrams "$BUILD/"
+
+# Copy workflow diagram for README (legacy path)
 mkdir -p "$BUILD/Resources"
 cp Resources/workflow.drawio.png "$BUILD/Resources/"
 
@@ -125,7 +129,17 @@ if [ ! -f "$BUILD/hooks/hooks.json" ]; then
   errors=$((errors + 1))
 fi
 
-for devfile in CLAUDE.md docs .claude .local .venv; do
+if [ ! -d "$BUILD/docs" ]; then
+  echo "  FAIL: docs/ missing (README links depend on it)"
+  errors=$((errors + 1))
+fi
+
+if [ ! -d "$BUILD/diagrams" ]; then
+  echo "  FAIL: diagrams/ missing (README links depend on it)"
+  errors=$((errors + 1))
+fi
+
+for devfile in CLAUDE.md .claude .local .venv; do
   if [ -e "$BUILD/$devfile" ]; then
     echo "  FAIL: dev-only '$devfile' found in release build"
     errors=$((errors + 1))

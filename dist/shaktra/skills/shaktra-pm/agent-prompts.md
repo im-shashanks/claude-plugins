@@ -109,4 +109,10 @@ Workflow type: {workflow_type}
 Artifacts path: {artifacts_path}
 
 Extract lessons that meet the capture bar. Append to .shaktra/memory/lessons.yml.
+Each lesson entry MUST have exactly these 5 fields:
+  id: "LS-NNN" (sequential, check existing entries for next number)
+  date: "YYYY-MM-DD"
+  source: story ID or workflow type (e.g., "pm-prd", "pm-research")
+  insight: what was learned (1-3 sentences)
+  action: concrete change to future behavior (1-2 sentences)
 ```

@@ -4,31 +4,81 @@ Step-by-step orchestration for each TPM sub-intent. The TPM SKILL.md classifies 
 
 ---
 
-## Quality Loop Pattern
+## Quality Loop Patterns
 
-Reusable pattern used by multiple workflows. Referenced as "run quality loop" below.
+### Single Artifact Quality Loop
+
+Used for design docs (typically 1 artifact). File-based findings handoff keeps TPM context lean.
 
 ```
 quality_loop(artifact_path, artifact_type, creator_agent, max_attempts=3):
   attempt = 0
   WHILE attempt < max_attempts:
     attempt += 1
-    result = spawn tpm-quality(artifact_path, artifact_type)
+    result = spawn tpm-quality(artifact_path, artifact_type, round=attempt)
+    → agent writes findings to .quality.yml if BLOCKED
+    → returns ONE LINE: "QUALITY_PASS: <id>" or "QUALITY_BLOCKED: <id>"
 
-    IF result == QUALITY_PASS:
+    IF result starts with "QUALITY_PASS":
       RETURN QUALITY_PASS
 
-    IF result == QUALITY_BLOCKED:
-      spawn creator_agent.fix(findings=result.findings)
+    IF result starts with "QUALITY_BLOCKED":
+      spawn creator_agent.fix(artifact_path)
+      → agent reads findings from .quality.yml, fixes, deletes file
       CONTINUE
 
   # Loop exhausted
   EMIT MAX_LOOPS_REACHED
-  Present findings to user with:
-    - all unresolved findings
-    - number of fix attempts made
-    - recommendation: manual review needed
+  Present to user: findings are in the .quality.yml file for reference
   RETURN QUALITY_BLOCKED
+
+  # CLEANUP — delete any remaining .quality.yml for this artifact
+```
+
+### Parallel Batch Quality Review
+
+Used for stories (multiple artifacts). Spawns all reviews/fixes in parallel per round. File-based findings handoff keeps TPM context to one-line verdicts only.
+
+**Findings files** (ephemeral — TPM cleans up after loop): `.shaktra/stories/ST-NNN.quality.yml` or `.shaktra/designs/{name}-design.quality.yml`
+
+```
+parallel_quality_review(story_paths, max_rounds=3):
+  pending = all story_paths
+  passed = []
+
+  FOR round IN 1..max_rounds:
+    IF pending is empty: BREAK
+
+    # REVIEW BATCH — spawn ALL in parallel (one Task per story)
+    FOR EACH path IN pending — PARALLEL Task() calls in single response:
+      spawn tpm-quality(path, "story", round)
+      → agent reviews story, writes findings to .quality.yml if BLOCKED
+      → returns ONE LINE: "QUALITY_PASS: ST-NNN" or "QUALITY_BLOCKED: ST-NNN"
+
+    # COLLECT — TPM reads one-line verdicts (minimal context)
+    newly_passed = stories with QUALITY_PASS
+    blocked = stories with QUALITY_BLOCKED
+    passed += newly_passed
+
+    IF blocked is empty: BREAK
+    IF round == max_rounds:
+      EMIT MAX_LOOPS_REACHED
+      Present blocked stories to user (findings are in .quality.yml files for reference)
+      BREAK
+
+    # FIX BATCH — spawn ALL in parallel (one Task per blocked story)
+    FOR EACH story IN blocked — PARALLEL Task() calls in single response:
+      spawn scrummaster.fix(story_path)
+      → agent reads findings from .quality.yml
+      → fixes story
+      → deletes .quality.yml after fixing
+
+    pending = [paths of previously blocked stories]
+
+  # CLEANUP — delete any remaining *.quality.yml files
+  Delete all .shaktra/stories/*.quality.yml and .shaktra/designs/*.quality.yml
+
+  RETURN passed, blocked
 ```
 
 ---
@@ -54,8 +104,11 @@ Complete TPM workflow — design through sprint planning. This is the default fo
 ### Phase 2 — Stories
 
 1. Spawn **scrummaster** (mode: create) with the approved design doc
-2. For each story produced: run quality loop `quality_loop(story_path, "story", scrummaster)`
-3. If any story blocked after max loops: present blocked stories to user
+   - Scrummaster MUST create stories as YAML files at `.shaktra/stories/ST-<NNN>.yml`
+   - Stories use the YAML structure from `story-schema.md` with tier-appropriate fields
+   - Do NOT write Markdown (.md) — stories are always YAML (.yml)
+2. Run parallel batch quality review: `parallel_quality_review(all_story_paths)`
+3. If any story blocked after max rounds: present blocked stories to user (findings in `.quality.yml` files)
 4. Collect all passing stories for Phase 3
 
 ### Phase 3 — PM Analysis
@@ -122,7 +175,7 @@ Enrich existing sparse stories with tier-appropriate detail.
 3. Spawn **scrummaster** (mode: enrich) with story paths
    - Single story: one spawn
    - Batch (multiple stories): scrummaster processes sequentially with batch Final Verification
-4. Run quality loop for each enriched story: `quality_loop(story_path, "story", scrummaster)`
+4. Run parallel batch quality review: `parallel_quality_review(enriched_story_paths)`
 5. Present enriched stories to user for approval before writing
 6. On user approval: write final versions to `.shaktra/stories/`
 7. Spawn **memory-curator** with workflow_type: "story-enrichment"
@@ -131,15 +184,17 @@ Enrich existing sparse stories with tier-appropriate detail.
 
 ## Workflow: Hotfix
 
-Fast path for trivial fixes. Produces a Trivial-tier story with minimal overhead.
+Fast path for trivial fixes. Produces a single Trivial-tier story YAML file with minimal overhead.
 
 1. Read `.shaktra/settings.yml` for project context
 2. Spawn **scrummaster** (mode: create) with user's hotfix description
-   - Scrummaster creates a single Trivial-tier story (3 fields: id, title, description)
+   - Scrummaster MUST create a single Trivial-tier story as a YAML file at `.shaktra/stories/ST-<NNN>.yml`
+   - The file MUST use the YAML structure from `story-schema.md` (Trivial tier: id, title, description, tier, metadata)
+   - Do NOT write Markdown (.md) — stories are always YAML (.yml)
 3. Single quality pass — spawn **tpm-quality** once (no loop, no retry)
    - If `QUALITY_PASS`: present to user for confirmation
    - If `QUALITY_BLOCKED`: present findings to user (hotfixes shouldn't fail quality, but if they do, user decides)
-4. On user confirmation: write story to `.shaktra/stories/`
+4. On user confirmation: verify `.shaktra/stories/ST-<NNN>.yml` exists and is valid YAML
 5. Spawn **memory-curator** with workflow_type: "tpm-hotfix", artifacts_path: story directory
 6. Recommend next step: `/shaktra:dev` to implement the hotfix
 
@@ -241,6 +296,4 @@ If the user cancels mid-workflow:
 
 ### Missing Settings
 
-If `.shaktra/settings.yml` doesn't exist:
-1. Inform user to run `/shaktra:init` first
-2. Do not proceed — settings are required for tier detection and threshold evaluation
+If `.shaktra/settings.yml` doesn't exist: inform user to run `/shaktra:init` first. Do not proceed — settings are required for tier detection and threshold evaluation.

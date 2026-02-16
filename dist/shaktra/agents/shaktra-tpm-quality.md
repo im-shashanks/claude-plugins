@@ -3,9 +3,11 @@ name: shaktra-tpm-quality
 model: sonnet
 skills:
   - shaktra-reference
+  - shaktra-stories
   - shaktra-tdd
 tools:
   - Read
+  - Write
   - Glob
   - Grep
 ---
@@ -70,14 +72,15 @@ Apply when `artifact_type == "story"`.
 
 | # | Check | Source | Severity if Failed |
 |---|---|---|---|
-| S1 | Schema compliance — fields match `schemas/story-schema.md` for the story's tier | story-schema | P1 |
+| S1 | Schema compliance — fields match `story-schema.md` for the story's tier | story-schema | P1 |
 | S2 | Single-scope rule — exactly one `scope` value (Medium+) | story-schema rule 1 | P0 |
 | S3 | Test reference integrity — every `test` field value exists in `test_specs` | story-schema rule 2 | P0 |
 | S4 | No orphan tests — every `test_specs` entry is referenced by at least one field | story-creation.md | P0 |
 | S5 | Error case in io_examples — at least one error-case example (Medium+) | story-schema rule 3 | P0 |
 | S6 | Edge case coverage — Large tier covers at least 5 of 10 categories | story-schema rule 4 | P1 |
 | S7 | Field inheritance — higher tiers include all lower-tier fields | story-schema rule 5 | P1 |
-| S8 | Size limits — story points <= 10, files <= 3 | story-creation.md | P1 |
+| S8a | File count — files list <= 3 source files (test files belong in test_specs, not files) | story-creation.md | P0 |
+| S8b | Story points — story_points <= 10 | story-creation.md | P1 |
 | S9 | Feature flags — Large tier has feature_flags with default: false | story-schema | P1 |
 | S10 | Test-first evidence — test_specs written before dependent fields (check IDs are referenced) | story-creation.md | P2 |
 
@@ -89,39 +92,53 @@ Apply when `artifact_type == "story"`.
 - Missing tier-required field → P1 (incomplete story)
 - Edge case coverage below 5/10 for Large → P1 (insufficient coverage)
 - Missing feature flags for Large → P1 (missing safety mechanism)
-- Size limits exceeded → P1 (story too large to implement cleanly)
+- File count > 3 source files → P0 (story scope too wide, must split)
+- Story points > 10 → P1 (story too large to implement cleanly)
 
 ---
 
 ## Output Format
 
-### QUALITY_PASS
+### File-Based Findings Handoff
 
-```
-QUALITY_PASS
-Reviewed: <artifact_path>
-Type: <design|story>
-Checks passed: <N>/<total>
-Notes: <any observations that don't block, or "None">
+When the verdict is `QUALITY_BLOCKED`, write findings to a YAML file — do NOT include findings in your returned response. The TPM orchestrator only receives a one-line verdict to keep its context lean. The fix agent reads findings from the file.
+
+**File location:**
+- Stories: same directory as the story, replacing `.yml` with `.quality.yml` (e.g., `.shaktra/stories/ST-002.quality.yml`)
+- Designs: same directory as the design doc, replacing `-design.md` with `-design.quality.yml` (e.g., `.shaktra/designs/auth-design.quality.yml`)
+
+**File format:**
+```yaml
+story_id: ST-002  # or design_name for designs
+verdict: BLOCKED
+round: 1
+findings:
+  - severity: P0
+    check: S3
+    dimension: ""  # quality dimension A-M, if applicable
+    issue: "test field references 'test_user_auth' but test_specs has no such entry"
+    guidance: "Add test_user_auth to test_specs or remove from field reference"
 ```
 
-### QUALITY_BLOCKED
+### Returned Response
 
+Your response to the TPM must be exactly ONE line:
+
+**QUALITY_PASS:**
 ```
-QUALITY_BLOCKED
-Reviewed: <artifact_path>
-Type: <design|story>
-Findings:
-  - severity: P0|P1|P2
-    check: <check ID — D1, S3, etc.>
-    dimension: <quality dimension A-M, if applicable>
-    issue: <what is wrong — specific, not vague>
-    guidance: <how to fix it — actionable>
+QUALITY_PASS: <artifact_id>
 ```
+
+**QUALITY_BLOCKED:**
+```
+QUALITY_BLOCKED: <artifact_id>
+```
+
+Where `<artifact_id>` is the story ID (e.g., `ST-002`) or design name. Do NOT include findings, check counts, or notes in your response — all detail goes in the `.quality.yml` file.
 
 ## Gate Logic
 
 Apply merge gate logic from `severity-taxonomy.md`:
-- Any P0 finding → `QUALITY_BLOCKED`
-- P1 count > `settings.quality.p1_threshold` → `QUALITY_BLOCKED`
-- Otherwise → `QUALITY_PASS`
+- Any P0 finding → `QUALITY_BLOCKED` (write findings to `.quality.yml`, return one-line verdict)
+- P1 count > `settings.quality.p1_threshold` → `QUALITY_BLOCKED` (write findings to `.quality.yml`, return one-line verdict)
+- Otherwise → `QUALITY_PASS` (no file written, return one-line verdict)

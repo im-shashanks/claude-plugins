@@ -448,29 +448,26 @@ git push origin feat/detect-hardcoded-credentials
 
 ### Testing Philosophy
 
-**What to test:**
+Shaktra has three testing layers:
 
-1. **Hook scripts** (unit tests)
-   - All Python scripts in `dist/shaktra/scripts/`
-   - Test valid/invalid inputs
-   - Test error messages
-   - Run: `python3 -m pytest dist/shaktra/scripts/`
+| Layer | What | Speed | Cost |
+|-------|------|-------|------|
+| **Hook unit tests** | Python scripts in `dist/shaktra/scripts/` | Fast (seconds) | Free |
+| **L1-L4 Audit** | Static checks — file structure, references, schemas | Fast (seconds) | Free |
+| **L5 Workflow tests** | Live end-to-end skill execution with real sub-agents | Slow (minutes) | API costs |
 
-2. **Workflows** (integration tests)
-   - End-to-end user scenarios
-   - Initialize → TPM → Dev → Review
-   - Test in real Claude Code environment
+**19 automated tests** (14 positive + 5 negative) covering every workflow:
 
-3. **Plugin discovery** (release tests)
-   - Install from local path
-   - Install from GitHub remote
-   - Verify marketplace discovery
-   - Check README is user-facing
+| Category | Tests | What They Prove |
+|----------|-------|-----------------|
+| Smoke (5) | help, doctor, status-dash, general, workflow | Skills load and execute without error |
+| Greenfield (5) | init, pm, tpm, dev, review | Full lifecycle from project setup through code review |
+| Brownfield (2) | init-brownfield, analyze | Existing codebase onboarding and assessment |
+| Hotfix (1) | tpm-hotfix | Trivial-tier fast path |
+| Bugfix (1) | bugfix | Diagnosis → TDD fix pipeline |
+| Negative (5) | dev-no-settings, dev-blocked-story, dev-sparse-story, review-incomplete-dev, init-already-exists | Pre-flight checks catch invalid state |
 
-**Why we test:**
-- Hooks are enforcement layer — they MUST be reliable
-- Workflows are user experience — they MUST work end-to-end
-- Plugin discovery is distribution — it MUST install correctly
+Every test is standalone — own temp directory, own fixtures, no shared state. Tests can run in any order.
 
 **How we test:**
 
@@ -478,20 +475,70 @@ git push origin feat/detect-hardcoded-credentials
 # Unit tests (fast, during development)
 python3 -m pytest dist/shaktra/scripts/
 
-# Integration tests (moderate, before PR)
-mkdir test-project && cd test-project
-claude --plugin-dir /path/to/shaktra-plugin/dist/shaktra/
+# Automated workflow tests (moderate, before PR)
+python3 tests/workflows/run_workflow_tests.py --smoke        # Smoke tests (~2 min)
+python3 tests/workflows/run_workflow_tests.py --negative     # Error paths (~5 min)
+python3 tests/workflows/run_workflow_tests.py --test tpm     # Single workflow (~20 min)
+python3 tests/workflows/run_workflow_tests.py                # Full suite (~60-90 min)
+
+# Manual integration (ad-hoc)
+claude --plugin-dir dist/shaktra/
 /shaktra:init
 /shaktra:tpm "add user auth"
-/shaktra:dev ST-001
 
 # Release tests (slow, before publish)
 ./scripts/publish-release.sh
-git checkout release
-cat README.md  # Should be user-facing, not this maintainer README
-ls -la | grep CLAUDE  # Should NOT exist
-cat .claude-plugin/plugin.json  # Should exist
 ```
+
+### Tested in Action
+
+Real logs from automated test runs — this is what the framework produces unattended:
+
+<details>
+<summary><b>Bugfix workflow</b> — diagnosis to TDD fix in ~13 minutes</summary>
+
+```
+[14:23:52] [bugfix-orchestrator] started — investigating divide function ZeroDivisionError bug
+[14:24:51] PHASE: reproduce started
+[14:25:02] PHASE: reproduce complete — bug confirmed
+[14:25:29] PHASE: gather-evidence complete — RC-LOGIC-1 confirmed, RC-DATA-1 eliminated
+[14:26:14] WRITE: .shaktra/diagnosis/BUG-001-diagnosis.yml
+[14:26:37] DIAGNOSIS_COMPLETE — root cause: RC-LOGIC, location: src/calculator.py:2
+[14:26:45] PHASE: REMEDIATION started — routing to TDD pipeline for BUG-001
+[14:28:55] PHASE: PLAN complete
+[14:31:12] PHASE: RED complete — 2 failing tests (valid RED), 7 passing
+[14:32:29] QUALITY: verdict=BLOCKED findings=2 (1 P0: missing float zero test)
+[14:32:56] QUALITY-FIX: fixing 1 finding in tests/test_calculator.py
+[14:35:33] PHASE: GREEN complete — all 10 tests pass, 100% coverage
+[14:36:39] QUALITY: verdict=PASS findings=0
+```
+
+Validator: 9/10 checks passed. Diagnosis artifact, bug story, root cause, TDD fix all verified.
+</details>
+
+<details>
+<summary><b>Dev workflow</b> — full TDD pipeline in ~19 minutes (29 tests, 98% coverage)</summary>
+
+```
+[14:45:23] [SDM] started — develop story ST-TEST-001
+[14:45:55] PHASE: pre-flight complete — all 3 checks passed
+[14:48:20] PHASE: plan complete
+[14:49:18] QUALITY: verdict=BLOCKED findings=5
+[14:50:21] QUALITY-FIX: fixing 5 findings in implementation_plan.md
+[14:52:59] branch feat/ST-TEST-001-user-registration created
+[14:53:14] PHASE: red started — test-agent writing failing tests
+[14:56:13] WRITE: tests/test_email_validator.py, test_password_utils.py, test_user_repository.py, test_user_service.py, test_user_routes.py
+[14:58:01] PHASE: red complete
+[14:59:37] QUALITY: verdict=CHECK_PASSED
+[15:00:18] PHASE: green started — developer implementing code
+[15:03:10] WRITE: src/models/user.py, src/exceptions.py, src/utils/password_utils.py, src/utils/email_validator.py, src/repositories/user_repository.py, src/services/user_service.py, src/api/user_routes.py
+[15:03:39] [developer] complete — 29 tests, 98% coverage
+```
+
+Validator: 18/19 checks passed. Full layered architecture (7 components), quality gates at every phase.
+</details>
+
+See `tests/workflows/README.md` for full documentation on the automated test framework, available tests, debugging, and cost expectations.
 
 ---
 
@@ -894,7 +941,7 @@ A: Split it:
 
 See GitHub releases for changelog and version history.
 
-Current version: **0.1.2**
+Current version: **0.1.3**
 
 ---
 

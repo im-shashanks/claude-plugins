@@ -80,4 +80,4 @@ Max fix loops: 3 per gate. After 3 failed attempts, emit `MAX_LOOPS_REACHED` and
 - `shaktra-reference/quality-dimensions.md` — 13 dimensions (A-M) framework
 - `shaktra-reference/quality-principles.md` — 10 core principles
 - `shaktra-reference/guard-tokens.md` — tokens emitted during reviews
-- `shaktra-reference/story-tiers.md` — tier-based check depth behavior
+- `shaktra-stories/story-tiers.md` — tier-based check depth behavior

@@ -1,0 +1,10 @@
+story_id: ST-TEST-001
+current_phase: plan
+completed_phases:
+  - plan
+plan_summary:
+  components:
+    - UserService
+    - UserRepository
+  test_plan: "Unit tests for service layer"
+memory_captured: false

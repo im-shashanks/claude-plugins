@@ -50,6 +50,7 @@ pip-log.txt
 pip-delete-this-directory.txt
 
 # Unit test / coverage reports
+tests/workflows/reports/
 htmlcov/
 .tox/
 .nox/
@@ -218,3 +219,7 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Test workflow caches
+tests/workflows/__pycache__/
+tests/workflows/validators/__pycache__/

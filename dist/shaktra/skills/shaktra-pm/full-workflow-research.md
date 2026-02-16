@@ -76,13 +76,11 @@ Research → Personas → Journeys → PRD → [USER APPROVAL]
 
 ### Steps
 
-1. For each persona:
-   - Spawn **product-manager** (mode: journey-create)
-   - Map through: Awareness → Consideration → Acquisition → Service → Loyalty
-   - Capture per stage: touchpoints, actions, emotions, pain points, opportunities
-   - Identify moments of truth
-
-2. Write to `.shaktra/journeys/{persona_id}-journey.yml`
+1. Spawn **product-manager** (mode: journey-create) for ALL personas in parallel — one Task() call per persona, all in a single response:
+   - Each agent maps its persona through: Awareness → Consideration → Acquisition → Service → Loyalty
+   - Captures per stage: touchpoints, actions, emotions, pain points, opportunities
+   - Identifies moments of truth
+   - Writes to `.shaktra/journeys/{persona_id}-journey.yml`
 
 3. **Aggregate for PRD input:**
    - Collect all pain points across journeys

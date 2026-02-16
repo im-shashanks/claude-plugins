@@ -6,6 +6,32 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Version numbers 
 
 ---
 
+## [0.1.3] - 2026-02-15
+
+### Added
+- **File-read tracking in test framework** — captures every Read tool invocation (including sub-agent reads) via stream-json parsing, reports which plugin reference files each workflow actually consulted
+- **Expected reads validation** — test definitions can declare `expected_reads` patterns (substring matches against file paths); dev test validates 8 patterns covering practices, quality checks, severity taxonomy, story, settings, and handoff files
+- **Read manifest in test logs** — `.shaktra-test.log` gets a `[READ-MANIFEST]` section listing all unique files read during the test, with `[plugin]` and `[project]` path prefixes for readability
+- **Reads in markdown reports** — per-test "Reference Files Read" section showing unique files read, plus "Expected Reads: N/N matched" with missing pattern details
+- **Comprehensive automated test framework** — 19 end-to-end tests (14 positive + 5 negative) covering every `/shaktra:*` workflow
+- **Standalone test architecture** — every test gets its own temp directory with isolated fixtures, no shared state
+- **Negative test suite** — validates pre-flight checks catch invalid state (missing settings, blocked stories, sparse stories, incomplete dev, already-initialized projects)
+- **Test fixtures for dev/review** — pre-built code files (Flask user registration app), handoff artifacts, design docs, and story YAML so dev and review tests run independently
+- **Enhanced validators** — PM validator checks PRD content, personas, journeys, brainstorm notes; review validator checks findings and memory; bugfix validator checks diagnosis artifacts, root cause, bug stories
+- **Negative test validator** — `validate_negative.py` for error detection, no-handoff, and no-progression checks
+- **AskUserQuestion auto-answer override** — test agents auto-select first option instead of blocking on user input
+- **Real test run documentation** — README includes actual bugfix (13min, 100% coverage) and dev (19min, 98% coverage, 29 tests) workflow logs
+
+### Changed
+- **Test runner uses stream-json** — switched from plain text capture to `--output-format stream-json --verbose`, enabling structured parsing of tool calls while preserving text output and verdict parsing
+- **Test isolation** — removed shared directory chaining (`SHARED_DIR_GROUPS`); every test creates its own fresh temp dir
+- **Dev test** uses explicit story ID (`ST-TEST-001`) with pre-built fixtures instead of depending on prior TPM run
+- **Review test** includes completed handoff + actual Python code files instead of depending on prior dev run
+- **Bugfix max_turns** increased (40→55) to allow memory capture and validator execution
+- **Dev max_turns** increased (50→65) to allow quality phase, memory capture, and validator execution
+
+---
+
 ## [0.1.2] - 2026-02-12
 
 ### Changed

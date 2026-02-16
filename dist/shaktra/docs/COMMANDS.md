@@ -41,7 +41,7 @@ Complete reference for all Shaktra commands. Commands are organized into **main 
 - Fixing a bug after diagnosis
 
 **Typical workflow:**
-1. Dev Manager reads the story from `.shaktra/stories/<story-id>.md`
+1. Dev Manager reads the story from `.shaktra/stories/<story-id>.yml`
 2. PLAN phase: Develop a test plan and skeleton code structure
 3. RED phase: Write failing tests
 4. GREEN phase: Write minimal code to pass tests

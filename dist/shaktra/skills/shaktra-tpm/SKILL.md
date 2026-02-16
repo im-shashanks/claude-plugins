@@ -55,9 +55,9 @@ After any workflow completes, present a structured summary (see Completion Repor
 |---|---|---|---|
 | shaktra-architect | opus | shaktra-reference, shaktra-tdd | Design workflows |
 | shaktra-product-manager | sonnet | shaktra-reference | Gap answering, RICE, coverage |
-| shaktra-scrummaster | sonnet | shaktra-stories, shaktra-reference | Story creation/enrichment |
+| shaktra-scrummaster | sonnet | shaktra-stories | Story creation/enrichment |
 | shaktra-tpm-quality | sonnet | shaktra-reference, shaktra-tdd | Quality review loops |
-| shaktra-memory-curator | haiku | shaktra-reference | End of every workflow |
+| shaktra-memory-curator | sonnet | shaktra-reference | End of every workflow |
 
 ---
 
@@ -87,10 +87,11 @@ Write the design doc to .shaktra/designs/{project_name}-design.md.
 You are the shaktra-architect agent. Fix quality findings in the design document.
 
 Design doc: {design_doc_path}
-Findings:
-{quality_findings — severity, check, issue, guidance for each}
+Findings file: {design_doc_path with extension replaced by .quality.yml}
 
-Fix each finding. Do not rewrite sections without findings. Preserve the overall structure.
+Read the findings from the .quality.yml file. Fix each finding in the design doc.
+Do not rewrite sections without findings. Preserve the overall structure.
+After fixing, delete the .quality.yml file.
 ```
 
 ### Product Manager — Gap Answering
@@ -140,7 +141,8 @@ You are the shaktra-scrummaster agent operating in create mode.
 Design doc: {design_doc_path}
 Project settings: {settings summary}
 
-Follow story-creation.md Steps 1-7. Write stories to .shaktra/stories/.
+Follow story-creation.md Steps 1-7. Write stories as YAML files to .shaktra/stories/ST-<NNN>.yml.
+Stories MUST be .yml files (not .md). Use the YAML structure from story-schema.md.
 The Final Verification Loop (Step 7) is mandatory — do not skip it.
 ```
 
@@ -162,10 +164,11 @@ Run Final Verification after enrichment.
 You are the shaktra-scrummaster agent. Fix quality findings in stories.
 
 Story: {story_path}
-Findings:
-{quality_findings}
+Findings file: {story_path with extension replaced by .quality.yml}
 
-Fix each finding. Do not rewrite fields without findings. Re-run self-validation after fixes.
+Read the findings from the .quality.yml file. Fix each finding in the story.
+Do not rewrite fields without findings. Re-run self-validation after fixes.
+After fixing, delete the .quality.yml file.
 ```
 
 ### Scrummaster — Sprint Allocation
@@ -202,9 +205,12 @@ You are the shaktra-tpm-quality agent. Review this artifact for quality.
 
 Artifact: {artifact_path}
 Type: {design|story}
+Round: {round_number}
 Review context: {review_context or "First review"}
 
-Apply the {design|story} review checklist. Emit QUALITY_PASS or QUALITY_BLOCKED with findings.
+Apply the {design|story} review checklist.
+If QUALITY_BLOCKED: write findings to the .quality.yml file (see Output Format).
+Return ONLY a one-line verdict — do NOT include findings in your response.
 ```
 
 ### Memory Curator — Capture
@@ -216,6 +222,12 @@ Workflow type: {workflow_type}
 Artifacts path: {artifacts_path}
 
 Extract lessons that meet the capture bar. Append to .shaktra/memory/lessons.yml.
+Each lesson entry MUST have exactly these 5 fields:
+  id: "LS-NNN" (sequential, check existing entries for next number)
+  date: "YYYY-MM-DD"
+  source: story ID or workflow type (e.g., "tpm-planning", "ST-001")
+  insight: what was learned (1-3 sentences)
+  action: concrete change to future behavior (1-2 sentences)
 ```
 
 ---
@@ -232,15 +244,7 @@ Extract lessons that meet the capture bar. Append to .shaktra/memory/lessons.yml
 | Sprint | Stories in `.shaktra/stories/`, `.shaktra/settings.yml` | Run stories workflow first |
 | Close Sprint | `.shaktra/sprints.yml` with active `current_sprint` | Run sprint planning first |
 
-**PRD Guidance:**
-
-If `.shaktra/prd.md` is missing when starting Full or Design workflows:
-
-> "PRD not found at `.shaktra/prd.md`.
->
-> Create one with `/shaktra:pm` — describe your product idea and I'll guide you through.
->
-> Or for just PRD creation: `/shaktra:pm prd`"
+**PRD Guidance:** If `.shaktra/prd.md` is missing when starting Full or Design workflows, tell the user: "PRD not found at `.shaktra/prd.md`. Create one with `/shaktra:pm` or `/shaktra:pm prd`."
 
 ---
 

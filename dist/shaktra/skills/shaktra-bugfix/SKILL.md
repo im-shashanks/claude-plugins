@@ -159,7 +159,7 @@ After the full bugfix lifecycle:
 ## References
 
 - `shaktra-reference/severity-taxonomy.md` — P0-P3 severity definitions
-- `shaktra-reference/schemas/story-schema.md` — story structure (scope: bug_fix)
+- `shaktra-stories/story-schema.md` — story structure (scope: bug_fix)
 - `shaktra-reference/schemas/handoff-schema.md` — TDD state machine (reused for remediation)
 
 ## Guard Tokens

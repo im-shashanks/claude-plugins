@@ -56,8 +56,8 @@ The full workflow is the default path for new features. It proceeds through four
 **Agent:** Scrummaster (Sonnet)
 
 1. Scrummaster receives the approved design doc
-2. Stories are created in `.shaktra/stories/` following the story template
-3. **Quality gate:** Each story is reviewed by TPM Quality (up to 3 iterations per story)
+2. Stories are created as YAML files in `.shaktra/stories/` following the story schema
+3. **Quality gate:** All stories are reviewed by TPM Quality in parallel (up to 3 rounds). Findings are written to `.quality.yml` files — the TPM only receives one-line verdicts to keep context lean. Fix agents read findings from disk.
 
 **Produces:** A set of quality-reviewed user stories with IDs, story points, acceptance criteria, and test specifications.
 
@@ -76,7 +76,7 @@ The full workflow is the default path for new features. It proceeds through four
 
 ### Phase 4 -- Memory
 
-**Agent:** Memory Curator (Haiku)
+**Agent:** Memory Curator (Sonnet)
 
 1. Captures lessons learned from the planning session
 2. Appends to `.shaktra/memory/lessons.yml`
@@ -93,10 +93,13 @@ You ──► /shaktra:tpm
             │       │ (gaps)              │
             │   Product Manager           ▼
             │                      TPM Quality ──► PASS/BLOCKED
+            │                      (findings → .quality.yml)
             │                             │
-            ├─► Scrummaster ─────► Stories (per story)
+            ├─► Scrummaster ─────► Stories (all created)
             │                             │
-            │                      TPM Quality ──► PASS/BLOCKED
+            │                      TPM Quality ──► PARALLEL review
+            │                      (findings → .quality.yml per story)
+            │                      one-line verdicts back to TPM
             │                             │
             ├─► Product Manager ──► Coverage + RICE
             │                             │
@@ -110,8 +113,8 @@ You ──► /shaktra:tpm
 Every artifact passes through TPM Quality review before proceeding:
 
 - **Design docs** are checked for completeness, consistency with the PRD, and technical soundness
-- **Stories** are checked for proper structure, clear acceptance criteria, and appropriate sizing
-- Reviews run up to 3 iterations -- the creating agent fixes findings between each pass
+- **Stories** are reviewed in parallel batches -- all stories in one round, then all fixes in one round
+- Reviews run up to 3 rounds -- findings are written to `.quality.yml` files (not returned to TPM), and fix agents read from those files
 - P0 findings block progress unconditionally
 - If 3 iterations exhaust without passing, findings are escalated to you for manual resolution
 
@@ -139,7 +142,7 @@ Records velocity for the current sprint, moves incomplete stories to the backlog
 
 ### Hotfix
 
-Fast path for trivial fixes. Produces a single Trivial-tier story with only 3 fields (id, title, description) and a single quality pass -- no retry loop, no RICE scoring, no sprint allocation. After confirmation, proceed directly to `/shaktra:dev` to implement.
+Fast path for trivial fixes. Produces a single Trivial-tier story YAML file and a single quality pass -- no retry loop, no RICE scoring, no sprint allocation. After confirmation, proceed directly to `/shaktra:dev` to implement.
 
 ## Example Sessions
 

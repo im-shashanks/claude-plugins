@@ -1,0 +1,20 @@
+id: ST-SPARSE-001
+title: Add user profile endpoint
+description: >
+  Create a GET /users/profile endpoint that returns user details.
+tier: medium
+scope: feature
+files:
+  - src/api/profile_routes.py
+  - src/services/profile_service.py
+acceptance_criteria:
+  - id: AC-1
+    given: authenticated user
+    when: GET /users/profile
+    then: user profile returned
+    priority: must
+metadata:
+  story_points: 3
+  priority: medium
+  blocked_by: []
+  status: planned

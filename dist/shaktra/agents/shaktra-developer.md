@@ -3,6 +3,7 @@ name: shaktra-developer
 model: opus
 skills:
   - shaktra-reference
+  - shaktra-stories
   - shaktra-tdd
 tools:
   - Read

@@ -48,9 +48,9 @@ Shaktra orchestrates 12 specialized sub-agents, each with a defined role, strict
 
 **Invoked by:** `/shaktra:tpm` after architect produces a design or scrum master produces stories.
 
-**Produces:** `QUALITY_PASS` or `QUALITY_BLOCKED` with structured findings (severity, check ID, issue, guidance).
+**Produces:** One-line verdict (`QUALITY_PASS: <id>` or `QUALITY_BLOCKED: <id>`). When blocked, writes structured findings (severity, check ID, issue, guidance) to a `.quality.yml` file alongside the reviewed artifact — findings are never returned to the TPM orchestrator.
 
-**Key behaviors:** Applies different checklists for design review (12 checks) vs story review (10 checks). Gates on severity -- any P0 blocks, P1 count checked against threshold. Never modifies artifacts.
+**Key behaviors:** Applies different checklists for design review (12 checks) vs story review (10 checks). Gates on severity -- any P0 blocks, P1 count checked against threshold. Never modifies reviewed artifacts. Writes findings to `.shaktra/stories/ST-NNN.quality.yml` or `.shaktra/designs/{name}-design.quality.yml` for fix agents to consume.
 
 ## Implementation Agents (TDD Pipeline)
 
@@ -146,8 +146,10 @@ Most workflows follow a produce-review-fix loop:
 
 1. A **producing agent** creates an artifact (design doc, stories, code)
 2. A **reviewing agent** inspects it (tpm-quality, sw-quality)
-3. If blocked: findings go back to the producer for targeted fixes
+3. If blocked: the reviewer writes findings to a `.quality.yml` file; the producer reads and fixes from that file
 4. Loop repeats until the gate passes or max iterations are reached
+
+TPM quality reviews use **parallel batch processing** for stories — all reviews spawn in parallel per round, then all fixes spawn in parallel. File-based findings handoff (`.quality.yml`) keeps the TPM orchestrator's context lean (one-line verdicts only).
 
 ### TDD Pipeline Handoff
 

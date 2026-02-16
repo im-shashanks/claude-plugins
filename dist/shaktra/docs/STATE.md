@@ -7,7 +7,7 @@ The `.shaktra/` directory holds all project-level development state. It is creat
   CLAUDE.md              # State documentation (helps Claude understand the directory)
   settings.yml           # Project configuration and quality thresholds
   sprints.yml            # Sprint tracking and velocity history
-  stories/               # User story files (ST-001.md, ST-002.md, ...)
+  stories/               # User story files (ST-001.yml, ST-002.yml, ...)
   designs/               # Design documents from architecture phase
   memory/
     decisions.yml        # Architectural decisions (append-only)
@@ -60,7 +60,7 @@ Sprint planning state and velocity history.
 
 ## stories/
 
-User story files, one per story. Named by ID: `ST-001.md`, `ST-002.md`, etc.
+User story files, one per story. Named by ID: `ST-001.yml`, `ST-002.yml`, etc.
 
 **Created by:** TPM skill during `/shaktra:tpm` planning
 **Updated by:** Dev Manager (status transitions), SW Quality (findings), Code Reviewer (review results)

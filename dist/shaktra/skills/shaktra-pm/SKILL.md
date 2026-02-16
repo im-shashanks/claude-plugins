@@ -118,7 +118,7 @@ After any workflow completes, present a structured summary (see Completion Repor
 | Agent | Model | Skills Loaded | Spawned For |
 |---|---|---|---|
 | shaktra-product-manager | sonnet | shaktra-reference | All PM workflows |
-| shaktra-memory-curator | haiku | shaktra-reference | End of every workflow |
+| shaktra-memory-curator | sonnet | shaktra-reference | End of every workflow |
 
 ---
 

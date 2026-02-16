@@ -1,0 +1,46 @@
+id: ST-BLOCKED-001
+title: Implement password reset endpoint
+description: >
+  Create a POST /users/password-reset endpoint that sends a reset link.
+tier: medium
+scope: feature
+files:
+  - src/api/password_routes.py
+  - src/services/password_service.py
+acceptance_criteria:
+  - id: AC-1
+    given: a valid registered email
+    when: POST /users/password-reset is called
+    then: reset link is sent and 200 returned
+    priority: must
+interfaces:
+  implements:
+    - name: request_password_reset
+      signature: "request_password_reset(email: str) -> bool"
+      returns: True if email sent
+  uses:
+    - user_repository.find_by_email
+io_examples:
+  - name: successful reset request
+    input: '{"email": "alice@example.com"}'
+    output: '{"message": "reset link sent"}'
+error_handling:
+  - code: UserNotFoundError
+    condition: email not registered
+    recoverable: true
+    fallback: return 200 (no info leak)
+test_specs:
+  unit:
+    - id: T-01
+      description: Request reset for existing user
+      covers: AC-1
+      arrange: user exists
+      act: call request_password_reset
+      assert:
+        - returns True
+metadata:
+  story_points: 5
+  priority: high
+  blocked_by:
+    - ST-PREREQ-001
+  status: planned

@@ -10,7 +10,7 @@ sequenceDiagram
     participant PM as Product Manager<br/>(Sonnet)
     participant TQ as TPM Quality<br/>(Sonnet)
     participant SM as Scrummaster<br/>(Sonnet)
-    participant MC as Memory Curator<br/>(Haiku)
+    participant MC as Memory Curator<br/>(Sonnet)
 
     U->>O: /shaktra:tpm {request}
     O->>O: Read settings, decisions, lessons
@@ -35,11 +35,12 @@ sequenceDiagram
         loop Quality Loop (max 3 attempts)
             O->>TQ: Review design (type: design)
             alt QUALITY_PASS
-                TQ-->>O: QUALITY_PASS
+                TQ-->>O: QUALITY_PASS (one-line)
             else QUALITY_BLOCKED
-                TQ-->>O: Findings
-                O->>ARCH: Fix findings
-                ARCH-->>O: Updated design
+                TQ->>TQ: Write findings to .quality.yml
+                TQ-->>O: QUALITY_BLOCKED (one-line)
+                O->>ARCH: Fix findings (reads .quality.yml)
+                ARCH-->>O: Updated design (deletes .quality.yml)
             end
         end
         Note over O: MAX_LOOPS_REACHED if 3 failures
@@ -48,16 +49,21 @@ sequenceDiagram
     rect rgb(235, 245, 255)
         Note over O,TQ: PHASE 2: STORIES
         O->>SM: mode: create (from design doc)
-        SM-->>O: Stories written
+        SM-->>O: Stories written (.yml files)
 
-        loop Per story - Quality Loop (max 3)
-            O->>TQ: Review story (type: story)
-            alt QUALITY_PASS
-                TQ-->>O: QUALITY_PASS
-            else QUALITY_BLOCKED
-                TQ-->>O: Findings
-                O->>SM: Fix story findings
-                SM-->>O: Updated story
+        loop Parallel Quality Review (max 3 rounds)
+            Note over O,TQ: REVIEW BATCH — all stories in parallel
+            O->>TQ: Review ALL stories (parallel Task calls)
+            TQ->>TQ: Write findings to .quality.yml files
+            TQ-->>O: One-line verdicts only
+
+            alt All QUALITY_PASS
+                Note over O: Proceed to Phase 3
+            else Some QUALITY_BLOCKED
+                Note over O,SM: FIX BATCH — blocked stories in parallel
+                O->>SM: Fix blocked stories (parallel Task calls)
+                SM->>SM: Read .quality.yml, fix, delete file
+                SM-->>O: Fixed
             end
         end
     end
@@ -85,8 +91,8 @@ sequenceDiagram
 
 ### Reading Guide
 
-- **Phase 1 (Design)** has the most complex flow: Architect may discover gaps, routing to PM for answers, which may escalate to the user. After the design is created, a quality loop validates it up to 3 times.
-- **Phase 2 (Stories)** runs a quality loop per story, not once for the batch. Each story is independently validated.
+- **Phase 1 (Design)** has the most complex flow: Architect may discover gaps, routing to PM for answers, which may escalate to the user. After the design is created, a quality loop validates it up to 3 times. Findings are written to `.quality.yml` files — the TPM only sees one-line verdicts.
+- **Phase 2 (Stories)** reviews ALL stories in parallel per round, then fixes ALL blocked stories in parallel. File-based findings handoff (`.quality.yml`) keeps the TPM's context lean.
 - **Phase 3 (PM Analysis)** is linear -- PM scores stories, then Scrummaster allocates to sprints. No quality loops here.
 - **Guard tokens** drive control flow: GAPS_FOUND routes to PM, PM_ESCALATE routes to user, QUALITY_BLOCKED triggers a fix cycle, MAX_LOOPS_REACHED halts and escalates.
 

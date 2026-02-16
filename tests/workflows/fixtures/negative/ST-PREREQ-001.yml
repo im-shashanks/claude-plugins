@@ -1,0 +1,20 @@
+id: ST-PREREQ-001
+title: Implement user registration endpoint
+description: >
+  Create the user registration endpoint (prerequisite for password reset).
+tier: medium
+scope: feature
+files:
+  - src/api/user_routes.py
+  - src/services/user_service.py
+acceptance_criteria:
+  - id: AC-1
+    given: valid email and password
+    when: POST /users/register
+    then: user created and 201 returned
+    priority: must
+metadata:
+  story_points: 5
+  priority: high
+  blocked_by: []
+  status: planned
