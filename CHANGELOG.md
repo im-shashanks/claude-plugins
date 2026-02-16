@@ -6,6 +6,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Version numbers 
 
 ---
 
+## [0.1.5] - 2026-02-16
+
+### Changed
+- **CLAUDE.md template** — Removed all Shaktra-specific references from the project root CLAUDE.md template. Template is now a pure generic project documentation wireframe following CLAUDE.md best practices.
+- **`/shaktra:init` skill** — Updated Step 5 and Step 6 descriptions to reflect cleaned-up template (removed `/init CLAUDE.md` references and Shaktra-specific cross-links).
+
+---
+
 ## [0.1.4] - 2026-02-15
 
 ### Added
