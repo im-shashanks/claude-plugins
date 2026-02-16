@@ -105,10 +105,10 @@ jobs:
             errors=$((errors + 1))
           fi
 
-          # Count scripts in shaktra (5 expected)
+          # Count scripts in shaktra (6 expected)
           script_count=$(ls "$BUILD/shaktra/scripts/"*.py 2>/dev/null | wc -l | tr -d ' ')
-          if [ "$script_count" -ne 5 ]; then
-            echo "FAIL: expected 5 scripts in shaktra, found $script_count"
+          if [ "$script_count" -ne 6 ]; then
+            echo "FAIL: expected 6 scripts in shaktra, found $script_count"
             errors=$((errors + 1))
           fi
 
