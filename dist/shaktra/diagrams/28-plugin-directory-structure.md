@@ -11,8 +11,8 @@ graph TD
     ROOT --> CM["CLAUDE.md<br/>dev-only"]
 
     DIST --> PLUG[".claude-plugin/<br/>plugin.json"]
-    DIST --> AGENTS["agents/<br/>12 sub-agents"]
-    DIST --> SKILLS["skills/<br/>16 skill dirs"]
+    DIST --> AGENTS["agents/<br/>14 sub-agents"]
+    DIST --> SKILLS["skills/<br/>19 skill dirs"]
     DIST --> HOOKS["hooks/<br/>hooks.json"]
     DIST --> SCRIPTS["scripts/<br/>Python hook scripts"]
     DIST --> TEMPLATES["templates/<br/>state file templates"]

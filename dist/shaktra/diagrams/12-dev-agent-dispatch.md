@@ -104,7 +104,7 @@ sequenceDiagram
             end
         end
 
-        O->>O: Write promoted decisions<br/>to decisions.yml
+        O->>O: Record observations<br/>for memory consolidation
     end
 
     rect rgb(245, 235, 255)
@@ -123,6 +123,6 @@ sequenceDiagram
 - **Quality loops** use a reusable pattern: SW Quality reviews, if blocked the creator agent fixes, up to 3 attempts. After 3 failures, MAX_LOOPS_REACHED escalates to the user.
 - **Tier-aware gating:** Trivial stories skip RED and QUALITY. Small stories skip QUALITY. Medium gets standard COMPREHENSIVE. Large gets COMPREHENSIVE + expanded review.
 - **Coverage thresholds** are read from settings per tier: hotfix (Trivial), small, standard (Medium), large.
-- **Decision promotion** happens during QUALITY phase -- SW Quality identifies patterns worth codifying, and the orchestrator writes them to decisions.yml.
+- **Observation capture** happens during QUALITY phase -- SW Quality identifies patterns worth codifying, and the orchestrator records them as observations for consolidation via memory-curator.
 
 **Source:** `dist/shaktra/skills/shaktra-dev/SKILL.md`, `dist/shaktra/skills/shaktra-dev/tdd-pipeline.md`, `dist/shaktra/agents/shaktra-sw-engineer.md`, `dist/shaktra/agents/shaktra-test-agent.md`, `dist/shaktra/agents/shaktra-developer.md`, `dist/shaktra/agents/shaktra-sw-quality.md`

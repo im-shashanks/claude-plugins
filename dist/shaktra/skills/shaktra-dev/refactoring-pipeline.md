@@ -222,7 +222,7 @@ Artifacts path: {refactoring_dir}
 
 Extract lessons: which smells were found and how they were resolved.
 Capture patterns that should be avoided in future code.
-Append to .shaktra/memory/lessons.yml (if actionable).
+Consolidate via consolidation-guide.md into principles.yml, anti-patterns.yml, procedures.yml (if actionable).
 Set memory_captured: true in refactoring-handoff.yml.
 ```
 

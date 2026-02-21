@@ -1,6 +1,6 @@
 # Shaktra — Maintainer & Contributor Guide
 
-**Shaktra is an opinionated AI development framework distributed as a Claude Code plugin, orchestrating 12 specialized agents through TDD workflows to produce production-ready code.**
+**Shaktra is an opinionated AI development framework distributed as a Claude Code plugin, orchestrating 14 specialized agents through TDD workflows to produce production-ready code.**
 
 ## What Makes Shaktra Unique
 
@@ -13,8 +13,8 @@
 **Key Metrics:**
 | Component | Count | Purpose |
 |-----------|-------|---------|
-| Agents | 12 | Domain experts spawned by skills |
-| Skills | 16 | User-invocable orchestrators + internal references |
+| Agents | 14 | Domain experts spawned by skills |
+| Skills | 19 | User-invocable orchestrators + internal references |
 | Hooks | 4 | Enforcement layer (block on failure) |
 | State Schemas | 5 | YAML templates for `.shaktra/` state files |
 
@@ -220,8 +220,8 @@ shaktra-plugin/
 ├── .claude-plugin/marketplace.json  # Marketplace catalog
 ├── dist/shaktra/                    # THE PLUGIN (installed by users)
 │   ├── .claude-plugin/plugin.json   # Plugin manifest
-│   ├── agents/                      # 12 sub-agent definitions
-│   ├── skills/                      # 16 skills (10 user-invocable)
+│   ├── agents/                      # 14 sub-agent definitions
+│   ├── skills/                      # 19 skills (14 user-invocable + 5 internal)
 │   ├── hooks/hooks.json             # Hook configurations
 │   ├── scripts/                     # Hook implementations (Python)
 │   ├── templates/                   # State file templates
@@ -272,8 +272,8 @@ shaktra-plugin/
 
 These must match validation expectations (checked in publish-release.sh):
 
-- **Agents:** 12
-- **Skills:** 16 (10 user-invocable, 6 internal)
+- **Agents:** 14
+- **Skills:** 19 (14 user-invocable, 5 internal)
 - **Hook scripts:** 5
 - **State schemas:** 5
 
@@ -456,16 +456,16 @@ Shaktra has three testing layers:
 | **L1-L4 Audit** | Static checks — file structure, references, schemas | Fast (seconds) | Free |
 | **L5 Workflow tests** | Live end-to-end skill execution with real sub-agents | Slow (minutes) | API costs |
 
-**19 automated tests** (14 positive + 5 negative) covering every workflow:
+**21 automated tests** (15 positive + 6 negative) covering every workflow:
 
 | Category | Tests | What They Prove |
 |----------|-------|-----------------|
 | Smoke (5) | help, doctor, status-dash, general, workflow | Skills load and execute without error |
-| Greenfield (5) | init, pm, tpm, dev, review | Full lifecycle from project setup through code review |
+| Greenfield (6) | init, pm, tpm, dev, review, adversarial-review | Full lifecycle from project setup through adversarial review |
 | Brownfield (2) | init-brownfield, analyze | Existing codebase onboarding and assessment |
 | Hotfix (1) | tpm-hotfix | Trivial-tier fast path |
 | Bugfix (1) | bugfix | Diagnosis → TDD fix pipeline |
-| Negative (5) | dev-no-settings, dev-blocked-story, dev-sparse-story, review-incomplete-dev, init-already-exists | Pre-flight checks catch invalid state |
+| Negative (6) | dev-no-settings, dev-blocked-story, dev-sparse-story, review-incomplete-dev, adversarial-review-incomplete-dev, init-already-exists | Pre-flight checks catch invalid state |
 
 Every test is standalone — own temp directory, own fixtures, no shared state. Tests can run in any order.
 
@@ -941,7 +941,7 @@ A: Split it:
 
 See GitHub releases for changelog and version history.
 
-Current version: **0.1.5**
+Current version: **0.3.0**
 
 ---
 

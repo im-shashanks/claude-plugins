@@ -100,7 +100,7 @@ Implementation follows coding practices: single responsibility, dependency injec
 
 **Agent:** SW Quality (Sonnet) | **Output:** `QUALITY_PASS` or `QUALITY_BLOCKED`
 
-The final quality gate runs a comprehensive review across 14 dimensions (A-M from quality dimensions plus N: Plan Adherence). SW Quality independently executes the test suite (not trusting self-reported results), verifies coverage, checks cross-story consistency against `decisions.yml`, and consolidates important decisions for promotion.
+The final quality gate runs a comprehensive review across 14 dimensions (A-M from quality dimensions plus N: Plan Adherence). SW Quality independently executes the test suite (not trusting self-reported results), verifies coverage, checks cross-story consistency against `principles.yml`, and captures observations for consolidation via memory-curator.
 
 **Tier behavior:**
 - Trivial/Small: QUALITY phase is **skipped entirely**. The Code gate is the final gate.
@@ -119,11 +119,11 @@ The final quality gate runs a comprehensive review across 14 dimensions (A-M fro
 
 ### MEMORY (Capture Lessons)
 
-**Agent:** Memory Curator (Haiku) | **Output:** Lessons appended to `lessons.yml`
+**Agent:** Memory Curator (Haiku) | **Output:** Observations consolidated into memory stores
 
-The Memory Curator reads the entire workflow artifact trail -- handoff decisions, quality findings, patterns discovered, risks encountered -- and evaluates each against the capture bar: "Would this materially change future workflow execution?"
+The Memory Curator reads the entire workflow artifact trail -- handoff observations, quality findings, patterns discovered, risks encountered -- and evaluates each against the capture bar: "Would this materially change future workflow execution?"
 
-Only actionable, generalizable insights are written to `.shaktra/memory/lessons.yml`. Story-specific details are not captured. After capture, `memory_captured: true` is set in the handoff and the phase transitions to COMPLETE.
+The Memory Curator consolidates observations from `.shaktra/memory/observations.yml` into the appropriate memory stores (`principles.yml`, `anti-patterns.yml`, `procedures.yml`). Story-specific details are not captured. After capture, `memory_captured: true` is set in the handoff and the phase transitions to COMPLETE.
 
 Memory capture is **mandatory for every tier** -- it is never skipped, even for Trivial stories.
 

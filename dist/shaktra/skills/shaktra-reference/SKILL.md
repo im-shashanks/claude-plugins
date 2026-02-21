@@ -24,8 +24,11 @@ Agents load this skill via their `skills` frontmatter. Story-related schemas (st
 | `quality-dimensions.md` | 13 review dimensions (A-M) with key checks and P0 triggers |
 | `schemas/handoff-schema.md` | TDD state machine — phases, transitions, validation rules |
 | `schemas/settings-schema.md` | Framework config — types, defaults, consumer reference |
-| `schemas/decisions-schema.md` | Decisions log — entry schema, 14 categories, lifecycle |
-| `schemas/lessons-schema.md` | Lessons learned — 5 fields, capture bar, archival rule |
+| `schemas/principles-schema.md` | Principles store — synthesized from observations, 14 categories, confidence lifecycle |
+| `schemas/observations-schema.md` | Per-story observations — agent-written during workflow execution |
+| `schemas/anti-patterns-schema.md` | Anti-patterns — failure patterns with recommended alternatives |
+| `schemas/procedures-schema.md` | Procedures — workflow-level adaptation learnings |
+| `schemas/briefing-schema.md` | Story briefings — filtered view of long-term knowledge |
 | `schemas/design-doc-schema.md` | Design doc sections — tier-scaled structure |
 | `schemas/refactoring-handoff-schema.md` | Refactoring state machine — phases, transitions, baseline metrics |
 | `schemas/prd-schema.md` | PRD validation — required sections, quality checks |
@@ -40,14 +43,16 @@ Agents load this skill via their `skills` frontmatter. Story-related schemas (st
 
 | Agent Role | From shaktra-reference | From shaktra-stories |
 |---|---|---|
-| SW Quality | severity-taxonomy, quality-principles, quality-dimensions, schemas/handoff-schema, schemas/decisions-schema | — |
+| SW Quality | severity-taxonomy, quality-principles, quality-dimensions, schemas/handoff-schema, schemas/principles-schema | — |
 | CR Analyzer | severity-taxonomy, quality-principles, quality-dimensions | — |
 | SW Engineer, Developer | severity-taxonomy, quality-principles, guard-tokens, schemas/handoff-schema | story-schema, story-tiers |
 | Test Agent | severity-taxonomy, guard-tokens, schemas/handoff-schema | — |
 | TPM Quality | severity-taxonomy, quality-dimensions, guard-tokens, schemas/design-doc-schema | story-schema, story-tiers |
 | Scrum Master | — | story-schema, story-tiers, sprint-schema |
 | Architect | quality-principles, quality-dimensions, schemas/design-doc-schema | — |
-| Memory Curator | schemas/lessons-schema, schemas/handoff-schema | — |
+| Memory Curator | schemas/principles-schema, schemas/observations-schema, schemas/anti-patterns-schema, schemas/procedures-schema, schemas/handoff-schema | — |
 | Bug Diagnostician | severity-taxonomy, guard-tokens | story-schema |
-| CBA Analyzer | quality-principles, schemas/decisions-schema, schemas/analysis-manifest-schema | — |
-| Product Manager | schemas/decisions-schema, schemas/prd-schema, schemas/persona-schema, schemas/journey-schema, schemas/research-schema | story-schema, story-tiers, sprint-schema |
+| CBA Analyzer | quality-principles, schemas/principles-schema, schemas/analysis-manifest-schema | — |
+| Product Manager | schemas/principles-schema, schemas/prd-schema, schemas/persona-schema, schemas/journey-schema, schemas/research-schema | story-schema, story-tiers, sprint-schema |
+
+**Note:** Memory Curator also loads the `shaktra-memory` skill for consolidation algorithms.

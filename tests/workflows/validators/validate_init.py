@@ -69,13 +69,17 @@ def validate_init(
         check_is_dir(report, os.path.join(shaktra, subdir), f"{subdir}/ exists")
 
     # --- Memory templates ---
-    decisions = os.path.join(shaktra, "memory", "decisions.yml")
-    if check_is_file(report, decisions, "decisions.yml exists"):
-        check_valid_yaml(report, decisions, "decisions.yml valid YAML")
+    principles = os.path.join(shaktra, "memory", "principles.yml")
+    if check_is_file(report, principles, "principles.yml exists"):
+        check_valid_yaml(report, principles, "principles.yml valid YAML")
 
-    lessons = os.path.join(shaktra, "memory", "lessons.yml")
-    if check_is_file(report, lessons, "lessons.yml exists"):
-        check_valid_yaml(report, lessons, "lessons.yml valid YAML")
+    anti_patterns = os.path.join(shaktra, "memory", "anti-patterns.yml")
+    if check_is_file(report, anti_patterns, "anti-patterns.yml exists"):
+        check_valid_yaml(report, anti_patterns, "anti-patterns.yml valid YAML")
+
+    procedures = os.path.join(shaktra, "memory", "procedures.yml")
+    if check_is_file(report, procedures, "procedures.yml exists"):
+        check_valid_yaml(report, procedures, "procedures.yml valid YAML")
 
     # --- Sprints ---
     sprints = os.path.join(shaktra, "sprints.yml")

@@ -28,7 +28,7 @@ You receive:
 - `dimension_name`: human-readable name (dimension mode only)
 - `static_path`: path to `.shaktra/analysis/static.yml` (ground truth — dimension mode)
 - `overview_path`: path to `.shaktra/analysis/overview.yml` (project context — dimension mode)
-- `decisions_path`: path to `.shaktra/memory/decisions.yml` (optional)
+- `principles_path`: path to `.shaktra/memory/principles.yml` (optional)
 - `input_path`: path to source artifact (debt-strategy/dependency-audit modes — `tech-debt.yml` or `dependencies.yml`)
 - `output_path`: path where your YAML artifact must be written
 

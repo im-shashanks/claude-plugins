@@ -48,6 +48,22 @@ pm:
   big_bet_impact_threshold: integer   # default: 7 — min impact score for Big Bet classification
   min_persona_evidence: integer       # default: 2 — minimum evidence entries per persona
   min_journey_stages: integer         # default: 3 — minimum stages in a journey map
+
+memory:
+  confidence_start: float          # default: 0.6 — initial confidence for new entries
+  confidence_reinforce: float      # default: 0.08 — confidence boost per reinforcing observation
+  confidence_weaken: float         # default: 0.08 — confidence reduction per weakening observation
+  confidence_contradict: float     # default: 0.20 — confidence reduction per contradicting observation
+  confidence_archive: float        # default: 0.2 — entries below this are archived
+  max_principles: integer          # default: 200 — max active principles
+  max_anti_patterns: integer       # default: 100 — max active anti-patterns
+  max_procedures: integer          # default: 50 — max active procedures
+  max_observations_per_story: integer # default: 30 — max observations per story
+  briefing_confidence_threshold: float # default: 0.4 — min confidence for briefing inclusion
+  retrieval_tier1_max: integer         # default: 100 — max entries for inline briefing (Tier 1)
+  retrieval_tier2_max: integer         # default: 500 — max entries for single-agent retrieval (Tier 2)
+  max_briefing_entries: integer        # default: 15 — max entries in a generated briefing
+  retrieval_chunk_size: integer        # default: 150 — entries per chunk in Tier 3 retrieval
 ```
 
 ## Consumer Reference
@@ -82,6 +98,20 @@ pm:
 | `pm.big_bet_impact_threshold` | product-manager (RICE classification) |
 | `pm.min_persona_evidence` | product-manager (persona-create validation) |
 | `pm.min_journey_stages` | product-manager (journey-create validation) |
+| `memory.confidence_start` | memory-curator (new entry creation) |
+| `memory.confidence_reinforce` | memory-curator (reinforcement) |
+| `memory.confidence_weaken` | memory-curator (weakening) |
+| `memory.confidence_contradict` | memory-curator (contradiction) |
+| `memory.confidence_archive` | memory-curator (archival threshold) |
+| `memory.max_principles` | memory-curator (rotation limit) |
+| `memory.max_anti_patterns` | memory-curator (rotation limit) |
+| `memory.max_procedures` | memory-curator (rotation limit) |
+| `memory.max_observations_per_story` | all observation-writing agents (cap check) |
+| `memory.briefing_confidence_threshold` | orchestrators (inline briefing), memory-retriever |
+| `memory.retrieval_tier1_max` | orchestrators via `memory_retrieval.py` |
+| `memory.retrieval_tier2_max` | orchestrators via `memory_retrieval.py` |
+| `memory.max_briefing_entries` | orchestrators (inline briefing), memory-retriever |
+| `memory.retrieval_chunk_size` | `memory_retrieval.py` (Tier 3 splitting) |
 
 ## Environment Variable Overrides
 

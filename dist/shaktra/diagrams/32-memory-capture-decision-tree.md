@@ -1,54 +1,70 @@
 # 32. Memory Capture Decision Tree
 
-Shaktra maintains two memory files: `decisions.yml` for architectural patterns and conventions, and `lessons.yml` for workflow insights. The capture bar is deliberately high — "Would this materially change future workflow execution?" Routine operations are noise and must be filtered out. This diagram shows how the memory curator decides what to capture and where.
+Shaktra maintains three long-term memory files: `principles.yml` for project patterns and constraints, `anti-patterns.yml` for failure patterns, and `procedures.yml` for workflow adaptations. During workflows, agents write observations to per-story `.observations.yml` files. After each workflow, the memory-curator consolidates observations into the long-term stores using confidence-based math.
 
 ```mermaid
 flowchart TD
-    START([Workflow Complete]) --> TYPE{Memory<br/>type?}
+    START([Workflow Complete]) --> READ["Read<br/>.observations.yml"]
 
-    TYPE -->|Decision from<br/>quality phase| DEC_PATH["Decision Path"]
-    TYPE -->|Lesson from<br/>any workflow| LES_PATH["Lesson Path"]
+    READ --> EMPTY{Observations<br/>exist?}
+    EMPTY -->|No| DONE_SKIP["Set memory_captured:<br/>true in handoff"]
 
-    DEC_PATH --> DEC_CAT{Decision<br/>category?}
-    DEC_CAT -->|New design pattern| CAP_D["Capture to<br/>decisions.yml"]
-    DEC_CAT -->|New convention| CAP_D
-    DEC_CAT -->|Pattern deviation| CAP_D
-    DEC_CAT -->|Canonical example| CAP_D
+    EMPTY -->|Yes| CLASSIFY["CLASSIFY each<br/>observation by type"]
 
-    LES_PATH --> BAR{"Capture bar:<br/>Would this change<br/>future workflow<br/>execution?"}
-    BAR -->|No| SKIP["Do NOT capture<br/>Routine observation"]
+    CLASSIFY --> TYPE{Observation<br/>type?}
 
-    BAR -->|Yes| NEWDEV{"New developer<br/>test: Would this save<br/>them from a real<br/>mistake?"}
-    NEWDEV -->|No| SKIP
-    NEWDEV -->|Yes| DUP{"Duplicate<br/>check: Similar<br/>lesson exists?"}
-    DUP -->|Yes| SKIP
-    DUP -->|No| ACTION{"Has concrete<br/>action field?"}
-    ACTION -->|No| SKIP
-    ACTION -->|Yes| COUNT{"lessons.yml<br/>count >= 100?"}
-    COUNT -->|Yes| ARCHIVE["Archive oldest to<br/>lessons-archive.yml"]
-    COUNT -->|No| CAP_L["Capture to<br/>lessons.yml"]
-    ARCHIVE --> CAP_L
+    TYPE -->|discovery / fix-rationale /<br/>deviation| PR_CAND["Principle<br/>candidate"]
+    TYPE -->|quality-loop-finding<br/>resolved: false| AP_CHECK{"2+ failures<br/>same pattern<br/>within 3 stories?"}
+    TYPE -->|quality-loop-finding<br/>resolved: true| PR_CAND
+    TYPE -->|observation /<br/>workflow-level| PC_CHECK{"3+ observations<br/>across different<br/>stories?"}
+    TYPE -->|consistency-check| MATCH_EXIST["Reinforce / weaken /<br/>contradict existing"]
 
-    CAP_L --> FORMAT["Entry format:<br/>id, date, source,<br/>insight, action"]
-    CAP_D --> DFMT["Entry format:<br/>category, title,<br/>summary, guidance[]"]
+    PR_CAND --> MATCH{"Match existing<br/>principle?<br/>(title + category +<br/>guidance overlap)"}
+    MATCH -->|Yes| REINFORCE["Reinforce:<br/>confidence += 0.08"]
+    MATCH -->|No| CREATE_PR["Create new principle<br/>confidence = 0.6"]
 
-    FORMAT --> DONE["Set memory_captured:<br/>true in handoff"]
-    DFMT --> LOADED["Loaded by architect,<br/>sw-engineer, developer<br/>for all future stories"]
+    AP_CHECK -->|Yes| CREATE_AP["Create anti-pattern<br/>with trigger patterns"]
+    AP_CHECK -->|No| PR_CAND
 
-    SKIP --> DONE_SKIP["Set memory_captured:<br/>true in handoff<br/>(even if nothing captured)"]
+    PC_CHECK -->|Yes| CREATE_PC["Create procedure<br/>with applies_to"]
+    PC_CHECK -->|No| SKIP_OBS["Skip — insufficient<br/>evidence"]
 
-    style SKIP fill:#f5f5f5,stroke:#999,color:#999
+    MATCH_EXIST --> CONF_UPDATE["Update confidence:<br/>reinforce +0.08<br/>weaken -0.08<br/>contradict -0.20"]
+
+    REINFORCE --> ARCHIVE_CHECK
+    CREATE_PR --> ARCHIVE_CHECK
+    CREATE_AP --> ARCHIVE_CHECK
+    CREATE_PC --> ARCHIVE_CHECK
+    CONF_UPDATE --> ARCHIVE_CHECK
+
+    ARCHIVE_CHECK{"Confidence<br/>< 0.2?"}
+    ARCHIVE_CHECK -->|Yes| ARCHIVE["Set status:<br/>archived"]
+    ARCHIVE_CHECK -->|No| ROTATE{"Exceeds<br/>max limit?"}
+    ROTATE -->|Yes| ROTATE_ACT["Archive lowest<br/>confidence entries"]
+    ROTATE -->|No| WRITE["Write updated<br/>memory files"]
+    ROTATE_ACT --> WRITE
+    ARCHIVE --> WRITE
+
+    WRITE --> DONE["Set memory_captured:<br/>true in handoff"]
+
+    SKIP_OBS --> DONE
+
+    style SKIP_OBS fill:#f5f5f5,stroke:#999,color:#999
     style DONE_SKIP fill:#f5f5f5,stroke:#999,color:#999
-    style CAP_D fill:#337ab7,stroke:#2a6496,color:#fff
-    style CAP_L fill:#5ba85b,stroke:#3a7a3a,color:#fff
-    style BAR fill:#f0ad4e,stroke:#c09032,color:#333
-    style NEWDEV fill:#f0ad4e,stroke:#c09032,color:#333
+    style CREATE_PR fill:#337ab7,stroke:#2a6496,color:#fff
+    style REINFORCE fill:#337ab7,stroke:#2a6496,color:#fff
+    style CREATE_AP fill:#d9534f,stroke:#b52b27,color:#fff
+    style CREATE_PC fill:#5ba85b,stroke:#3a7a3a,color:#fff
+    style CONF_UPDATE fill:#f0ad4e,stroke:#c09032,color:#333
+    style ARCHIVE fill:#f5f5f5,stroke:#999,color:#999
 ```
 
 **Reading guide:**
-- **Decision path (blue):** Decisions are promoted during the QUALITY phase of TDD. They capture design patterns, architectural conventions, and canonical examples. These persist in `decisions.yml` and are loaded by architect, sw-engineer, and developer agents for all future stories.
-- **Lesson path (green):** Lessons pass through a multi-step filter (yellow nodes). The capture bar is intentionally strict — "tests passed" or "coverage met" are NOT lessons.
-- **Grey nodes** represent filtered-out observations. Even when nothing is captured, `memory_captured` is set to true to satisfy the handoff completion guard.
-- `lessons.yml` caps at 100 active entries. Oldest entries are archived before new ones are appended.
+- **Blue nodes** — principle creation and reinforcement. Principles are the primary knowledge store.
+- **Red node** — anti-pattern creation. Triggered only by repeated failures (2+ on same pattern).
+- **Green node** — procedure creation. Triggered by workflow-level observations across 3+ stories.
+- **Yellow node** — confidence updates for existing entries (reinforce/weaken/contradict).
+- **Grey nodes** — filtered-out observations or archived entries. Even when nothing is captured, `memory_captured` is set to true.
+- All confidence thresholds are read from `settings.memory.*` — never hardcoded.
 
-**Source:** `dist/shaktra/agents/shaktra-memory-curator.md`, `dist/shaktra/skills/shaktra-reference/schemas/handoff-schema.md`
+**Source:** `dist/shaktra/agents/shaktra-memory-curator.md`, `dist/shaktra/skills/shaktra-memory/consolidation-guide.md`

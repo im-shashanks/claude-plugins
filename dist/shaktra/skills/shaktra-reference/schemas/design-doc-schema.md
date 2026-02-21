@@ -24,7 +24,7 @@ Defines the structure of design documents in `.shaktra/designs/`. Sections scale
 
 ## Section 3 — Pattern Justification Requirements
 
-Section 3 "Proposed Solution" must include a **Pattern Justification** subsection that documents architectural and design pattern choices. This ensures patterns are selected deliberately and persist via `decisions.yml`.
+Section 3 "Proposed Solution" must include a **Pattern Justification** subsection that documents architectural and design pattern choices. This ensures patterns are selected deliberately and persist via `principles.yml`.
 
 **Required content:**
 - **Architecture alignment** — how this feature fits the project's architecture style (from `settings.project.architecture` or `structure.yml`). If introducing a new layer or module, explain where it sits in the existing structure.

@@ -27,7 +27,7 @@ You receive:
 - `modified_files`: list of file paths changed in this story/PR
 - `test_files`: list of test file paths
 - `context_files`: surrounding application files for context (optional)
-- `decisions_path`: path to `.shaktra/memory/decisions.yml` (optional)
+- `briefing_path`: path to `.briefing.yml` in the story directory (optional)
 
 ## Analysis Context Loading (Optional)
 
@@ -46,7 +46,7 @@ If `.shaktra/analysis/manifest.yml` exists and `status: complete`:
 
 1. **Read all modified files and test files** — understand what changed and how it's tested.
 2. **Read context files** — understand how the changes fit into the broader application.
-3. **Read decisions.yml** — understand prior architectural decisions that constrain this code.
+3. **Read briefing or principles.yml** — understand prior principles that constrain this code.
 4. **For each assigned dimension:**
    a. Apply the 3 key checks from `quality-dimensions.md`
    b. Apply the app-level focus question and checklist from `review-dimensions.md`

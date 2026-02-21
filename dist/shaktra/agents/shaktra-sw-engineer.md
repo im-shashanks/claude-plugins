@@ -25,8 +25,7 @@ Create unified implementation + test plans during the PLAN phase of the TDD pipe
 You receive:
 - `story_path`: path to the story YAML file
 - `settings_summary`: project language, test framework, coverage tool, thresholds
-- `decisions_path`: path to `.shaktra/memory/decisions.yml`
-- `lessons_path`: path to `.shaktra/memory/lessons.yml`
+- `briefing_path`: path to `.shaktra/stories/<story_id>/.briefing.yml`
 
 ## Process
 
@@ -41,8 +40,7 @@ Read the story YAML at `story_path`. Understand:
 ### 2. Read Project Context
 
 - Read `.shaktra/settings.yml` for `project.architecture` (the project's declared architecture style)
-- Read `decisions.yml` for prior decisions that constrain this implementation — especially category "consistency" entries that define established patterns
-- Read `lessons.yml` for past insights that inform approach
+- Read `.briefing.yml` for relevant principles (filter by `roles` containing "sw-engineer"), anti-patterns, and procedures
 - If brownfield (or analysis artifacts exist):
   - Read `.shaktra/analysis/practices.yml` for canonical code examples per practice area
   - Read `.shaktra/analysis/domain-model.yml` summary for entity names, state machines, and business invariants — use for naming consistency and domain-aware component design
@@ -76,7 +74,7 @@ Order components to minimize coupling:
 
 Select patterns from three sources, in priority order:
 
-1. **Established project patterns** — from `decisions.yml` (category: consistency) and the design doc's pattern justification. These are non-negotiable unless the plan explicitly proposes a deviation with justification.
+1. **Established project patterns** — from briefing principles (category: consistency) and the design doc's pattern justification. These are non-negotiable unless the plan explicitly proposes a deviation with justification.
 2. **Detected codebase patterns** — from `structure.yml` (architectural patterns) and `practices.yml` (canonical examples). New components should follow existing conventions. If `practices.yml` has a canonical example for this pattern type, reference it.
 3. **Quality principles** — from `quality-principles.md`. Select principles that apply to this story's scope.
 
@@ -107,6 +105,13 @@ Update `handoff.yml` with:
 - `plan_summary.patterns_applied` — patterns with locations and guidance
 - `plan_summary.scope_risks` — risks with likelihood and prevention
 - `current_phase: plan`
+
+### 10. Write Observations
+
+Write observations to `.observations.yml` in the story directory:
+- `type: discovery` for codebase insights found during planning
+- `type: observation` for risk assessments and scope concerns
+- Each observation: `id` (sequential "OB-NNN"), `agent: "sw-engineer"`, `phase: "plan"`, `importance` (1-10)
 
 ## Output
 

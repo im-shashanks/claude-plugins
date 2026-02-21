@@ -57,23 +57,13 @@ code_summary:
       justification: string # why the deviation was necessary
 ```
 
-## Important Decisions
+## Observations Path
 
 ```yaml
-important_decisions:
-  - category: string      # from decisions-schema categories
-    title: string
-    summary: string
-    guidance: [string]    # 1-5 actionable rules
+observations_path: string  # optional — path to .observations.yml in the story directory
 ```
 
-**Pattern decisions must be captured.** During implementation, if any of the following occur, add an `important_decision` with `category: consistency`:
-- A **new design pattern** is introduced (e.g., "Repository pattern for all data access in this project")
-- A **new architectural convention** is established (e.g., "All services accept dependencies via constructor injection")
-- A **deviation from existing patterns** is made with justification
-- A **canonical example** worth replicating is created (reference the file path in guidance)
-
-These decisions persist in `decisions.yml` and are loaded by the architect, sw-engineer, and developer agents for all future stories — ensuring pattern coherence across the product lifecycle.
+Agents write observations during workflow execution. The memory-curator reads observations from this path during the MEMORY phase.
 
 ## Quality Findings
 

@@ -12,8 +12,9 @@ The `.shaktra/` directory stores all project-level development state — configu
 ├── settings.yml                      # Project configuration (language, test framework, coverage thresholds)
 ├── sprints.yml                       # Sprint tracking and velocity history
 ├── memory/
-│   ├── decisions.yml                 # Architectural decisions (append-only log)
-│   └── lessons.yml                   # Team learnings (append-only log)
+│   ├── principles.yml               # Synthesized principles (confidence-scored)
+│   ├── anti-patterns.yml            # Failure patterns with alternatives
+│   └── procedures.yml               # Workflow adaptation learnings
 ├── stories/                          # User stories (ST-001.md, ST-002.md, etc.)
 ├── designs/                          # Design documents created by architects
 ├── pm/                               # Product management artifacts (personas, journeys, research)
@@ -36,18 +37,22 @@ Sprint planning and velocity tracking:
 - Sprint stories and progress
 - Velocity history for capacity planning
 
-### memory/decisions.yml (append-only)
-Architectural decisions made during development:
-- Major design choices (patterns, technology selections, API design)
-- When to record: During architecture review, design phase, or when significant decision made
-- Format: Date, decision title, reasoning, impact
+### memory/principles.yml (confidence-scored)
+Synthesized principles from cross-story observations:
+- Design patterns, architectural conventions, coding constraints
+- Each principle has confidence (0.2-1.0) that strengthens or weakens with evidence
+- Categories: correctness, reliability, performance, security, maintainability, etc.
+- Written by memory-curator agent after workflow completion
 
-### memory/lessons.yml (append-only)
-Team learnings and retrospective insights:
-- What went well, what could improve
-- Technical discoveries, gotchas to avoid
-- Team process improvements
-- Format: Date, lesson title, context, key takeaway
+### memory/anti-patterns.yml
+Failure patterns detected from repeated quality gate blocks:
+- What went wrong, why it fails, what to do instead
+- Proactively surfaced in story briefings when trigger patterns match
+
+### memory/procedures.yml
+Workflow-level learnings:
+- Process adaptations discovered across multiple stories
+- Informs orchestration and planning decisions
 
 ### stories/
 User stories for implementation:
@@ -82,7 +87,7 @@ Codebase analysis results from `/shaktra:analyze`:
 
 The Shaktra agents read and update these files:
 - **TPM** reads settings.yml, creates stories, updates sprints.yml
-- **Developer** reads/updates stories, adds to decisions.yml and lessons.yml
+- **Developer** reads/updates stories, writes observations consolidated into principles
 - **Code Reviewer** updates stories with review findings
 - **Analyzer** generates analysis/ reports
 

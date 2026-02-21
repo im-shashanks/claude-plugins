@@ -26,7 +26,7 @@ invoke /shaktra:review
         |
         v
   Load Project Context
-  (.shaktra/settings.yml, memory/decisions.yml, memory/lessons.yml)
+  (.shaktra/settings.yml, memory/principles.yml, memory/anti-patterns.yml, memory/procedures.yml)
         |
         v
   Load Changed Files + Test Files + Surrounding Code
@@ -49,7 +49,7 @@ invoke /shaktra:review
   Apply Merge Gate (P0/P1 threshold logic)
         |
         v
-  Memory Capture (lessons.yml)
+  Memory Capture (observations → memory stores)
         |
         v
   Structured Report with Verdict
@@ -87,7 +87,7 @@ Every review evaluates code across 13 quality dimensions. Each dimension has 3 c
 
 ### Group 4 -- Evolution
 
-**H: Maintainability** -- Does this code follow the application's established patterns, or does it introduce drift? Checks module organization, consistency of problem-solving approaches, readability for new team members, and whether new patterns are justified in decisions.yml.
+**H: Maintainability** -- Does this code follow the application's established patterns, or does it introduce drift? Checks module organization, consistency of problem-solving approaches, readability for new team members, and whether new patterns are justified in principles.yml.
 
 **J: Deployment** -- Can this change be safely deployed and rolled back? Checks backward-compatibility with in-flight requests, database migration reversibility, feature flag needs, and deployment ordering constraints.
 

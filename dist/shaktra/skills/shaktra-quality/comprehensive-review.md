@@ -17,7 +17,7 @@ Read before reviewing:
 - All files in `handoff.code_summary.files_modified`
 - All files in `handoff.test_summary.test_files`
 - `.shaktra/settings.yml` — for threshold values
-- `.shaktra/memory/decisions.yml` — for cross-story consistency
+- `.shaktra/memory/principles.yml` — for cross-story consistency
 
 ### 2. Run Tests and Verify Coverage
 
@@ -79,21 +79,19 @@ For each prior P0 or P1 finding where `resolved: false`:
 
 If `quality_findings` is empty, skip this step (first-time review with no prior gates).
 
-### 6. Decision Consolidation
+### 6. Observation Capture
 
-Extract decisions made during development that should persist:
+Write observations about the review findings:
 
-1. Read `handoff.important_decisions`
-2. For each decision:
-   - Does it match an existing entry in `.shaktra/memory/decisions.yml`? → Skip (no duplicate)
-   - Is it specific enough to be actionable? → Promote
-   - Is it too story-specific to generalize? → Skip
-3. Return qualifying decisions in `decisions_promoted` output — the orchestrator writes them to `.shaktra/memory/decisions.yml`
+1. For each P0 or P1 finding: write a `quality-loop-finding` observation
+2. For each fix applied: write a `fix-rationale` observation
+3. For **every** principle and anti-pattern in `.briefing.yml`: write a `consistency-check` observation recording whether it was reinforced, weakened, or contradicted by this implementation. Include `principle_id` and `relationship`. This is mandatory — every briefing entry must have a corresponding consistency-check
+4. Do NOT promote decisions to `decisions.yml` — the memory-curator handles all consolidation
 
 ### 7. Cross-Story Consistency
 
-Compare this story's decisions and patterns against existing `decisions.yml`:
-- Does this implementation contradict a prior decision? → Flag as P1
+Compare this story's patterns against existing `principles.yml`:
+- Does this implementation contradict a prior principle? → Flag as P1
 - Does it establish a new pattern not yet recorded? → Recommend recording
 - Does it deviate from an established pattern? → Flag as P2 if unjustified
 
@@ -139,15 +137,14 @@ coverage_result:
   tier_threshold: integer
   meets_threshold: true|false
 
-decisions_promoted:
-  - category: "category from decisions-schema"
-    title: "decision title"
-    summary: "what was decided and why"
+observations_written:
+  - type: "quality-loop-finding|fix-rationale|consistency-check"
+    text: "observation summary"
 
 cross_story_issues:
   - type: contradiction|new_pattern|deviation
     description: "what was found"
-    existing_decision: "reference to decisions.yml entry"
+    existing_principle: "reference to principles.yml entry"
 ```
 
 ## Evidence Rule

@@ -15,7 +15,7 @@ PRD creation follows a structured process: gather context, select template, guid
 Read:
 - `.shaktra/settings.yml` — project type, language, architecture
 - `.shaktra/pm/brainstorm.md` — if exists, use as input
-- `.shaktra/memory/decisions.yml` — prior decisions
+- `.shaktra/memory/principles.yml` — prior principles
 - `.shaktra/research/synthesis.yml` — if exists, for user insights
 - `.shaktra/personas/*.yml` — if exist, for user references
 

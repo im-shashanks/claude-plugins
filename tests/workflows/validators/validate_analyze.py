@@ -77,9 +77,9 @@ def validate_analyze(project_dir: str) -> ValidationReport:
     )
 
     # --- Memory ---
-    decisions_path = os.path.join(shaktra, "memory", "decisions.yml")
-    if os.path.isfile(decisions_path):
-        check_valid_yaml(report, decisions_path, "decisions.yml valid YAML")
+    principles_path = os.path.join(shaktra, "memory", "principles.yml")
+    if os.path.isfile(principles_path):
+        check_valid_yaml(report, principles_path, "principles.yml valid YAML")
 
     return report
 

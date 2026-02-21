@@ -38,8 +38,8 @@ Classify every request into exactly one domain:
 
 Read if available — do not require or block on missing files:
 - `.shaktra/settings.yml` — project name, language, type (use for context if present)
-- `.shaktra/memory/decisions.yml` — prior architectural decisions (reference if relevant)
-- `.shaktra/memory/lessons.yml` — past insights (incorporate if applicable)
+- `.shaktra/memory/principles.yml` — prior principles (reference if relevant)
+- `.shaktra/memory/anti-patterns.yml` — failure patterns (reference if applicable)
 
 If `.shaktra/` does not exist, proceed without project context. This skill does not require `/shaktra:init`.
 
@@ -59,8 +59,8 @@ Read the matched `specialist-{domain}.md` file from this skill's directory. Adop
 ### 4. Formulate Response
 
 Apply domain expertise (specialist or general) to the user's request:
-- Reference prior decisions from `decisions.yml` if they relate to the topic
-- Reference lessons from `lessons.yml` if they provide relevant context
+- Reference prior principles from `principles.yml` if they relate to the topic
+- Reference anti-patterns from `anti-patterns.yml` if they provide relevant context
 - Include trade-offs and risks — never present a single option without alternatives
 - Identify when the response connects to other Shaktra workflows (cross-references, not escalation)
 
@@ -73,20 +73,17 @@ Use the output template below. Adapt section depth to the complexity of the ques
 Spawn memory-curator **only** when a specialist was loaded (not for `none` domain):
 
 ```
-You are the shaktra-memory-curator agent. Capture lessons from the general-purpose workflow.
+You are the shaktra-memory-curator agent. Consolidate observations from the completed workflow.
 
+Story path: .shaktra/memory/
 Workflow type: general-{domain}
-Artifacts path: .shaktra/memory/
+Settings: {settings_path}
 
-Review the conversation for insights that meet the capture bar. This was an advisory
-interaction — there is no handoff file. Append lessons to .shaktra/memory/lessons.yml only.
-Each lesson entry MUST have exactly these 5 fields:
-  id: "LS-NNN" (sequential, check existing entries for next number)
-  date: "YYYY-MM-DD"
-  source: workflow type (e.g., "general-architecture")
-  insight: what was learned (1-3 sentences)
-  action: concrete change to future behavior (1-2 sentences)
-Skip memory_captured handoff update.
+Read .observations.yml from the story directory. Follow consolidation-guide.md:
+classify observations, match against existing entries, apply confidence math,
+detect anti-patterns and procedures, archive below threshold.
+Write updated principles.yml, anti-patterns.yml, procedures.yml.
+Set memory_captured: true in handoff.
 ```
 
 Skip memory capture entirely for `none` domain (trivial/general questions).

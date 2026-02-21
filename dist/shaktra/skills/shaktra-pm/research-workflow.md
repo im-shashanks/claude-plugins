@@ -35,7 +35,7 @@ Supported formats:
 Read:
 - `.shaktra/settings.yml` — project context
 - `.shaktra/prd.md` — if exists, for requirement validation
-- `.shaktra/memory/decisions.yml` — prior decisions
+- `.shaktra/memory/principles.yml` — prior principles
 
 ### Step 3 — Extract Per-Source Findings
 

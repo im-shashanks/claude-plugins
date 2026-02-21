@@ -92,6 +92,14 @@ Write to `handoff.yml`:
 - `test_summary.test_count`: number of tests written
 - `test_summary.test_files`: list of test file paths
 
+### 7. Write Observations (Optional)
+
+If non-obvious test patterns are discovered, write observations to `.observations.yml`:
+- `type: discovery` for test patterns that deviate from project conventions
+- Each observation: `agent: "test-agent"`, `phase: "tests"`, `importance` (1-10)
+
+Most test writing is routine — only observe genuinely non-obvious discoveries.
+
 ## Output
 
 - Test files written to the project's test directory

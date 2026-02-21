@@ -112,20 +112,19 @@ def validate_pm(project_dir: str) -> ValidationReport:
         report.add("brainstorm notes found", True)
 
     # --- Memory (optional for PM) ---
-    decisions_path = os.path.join(shaktra, "memory", "decisions.yml")
-    if os.path.isfile(decisions_path):
-        check_valid_yaml(report, decisions_path, "decisions.yml valid YAML")
+    principles_path = os.path.join(shaktra, "memory", "principles.yml")
+    if os.path.isfile(principles_path):
+        check_valid_yaml(report, principles_path, "principles.yml valid YAML")
 
-    # --- Memory capture: lessons with PM source ---
-    lessons_path = os.path.join(shaktra, "memory", "lessons.yml")
-    if os.path.isfile(lessons_path):
-        ld = check_valid_yaml(report, lessons_path, "lessons.yml valid YAML")
-        if isinstance(ld, dict):
-            entries = ld.get("lessons", []) or []
+    # --- Memory capture: principles with PM source ---
+    if os.path.isfile(principles_path):
+        pd = check_valid_yaml(report, principles_path, "principles.yml valid YAML (entries)")
+        if isinstance(pd, dict):
+            entries = pd.get("principles", []) or []
             pm_entries = [e for e in entries if isinstance(e, dict)
                           and "pm" in str(e.get("source", "")).lower()]
-            report.add("lessons captured with PM source", len(pm_entries) > 0,
-                       f"no lessons with PM source (total: {len(entries)})"
+            report.add("principles captured with PM source", len(pm_entries) > 0,
+                       f"no principles with PM source (total: {len(entries)})"
                        if not pm_entries else "")
 
     return report

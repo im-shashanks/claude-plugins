@@ -1,6 +1,6 @@
 # 10. Agent Hierarchy
 
-Shaktra's 10 user-invocable skills dispatch work to 12 specialized sub-agents. Each agent runs on a specific model tier -- Opus for deep reasoning and code generation, Sonnet for structured analysis and process execution, Haiku for lightweight knowledge tasks. Skills never execute work directly; they classify intent, dispatch agents, and enforce quality gates.
+Shaktra's 14 user-invocable skills dispatch work to 14 specialized sub-agents. Each agent runs on a specific model tier -- Opus for deep reasoning and code generation, Sonnet for structured analysis and process execution, Haiku for lightweight knowledge tasks. Skills never execute work directly; they classify intent, dispatch agents, and enforce quality gates.
 
 ```mermaid
 flowchart TD
@@ -75,7 +75,7 @@ flowchart TD
 ### Reading Guide
 
 - **Top row:** The 10 skills users invoke directly. Left 6 are main agent skills; right 4 are utilities (init, doctor, workflow have no sub-agents shown -- they execute inline).
-- **Middle rows:** The 12 sub-agents grouped by model tier. Opus handles tasks requiring deep reasoning (architecture, code generation, analysis). Sonnet handles structured processes (reviews, story creation, prioritization). Haiku handles lightweight extraction (memory curation).
+- **Middle rows:** The 14 sub-agents grouped by model tier. Opus handles tasks requiring deep reasoning (architecture, code generation, analysis, adversarial probing). Sonnet handles structured processes (reviews, story creation, prioritization, memory retrieval). Haiku handles lightweight extraction (memory curation).
 - **Arrows:** Each arrow represents a dispatch relationship -- the skill spawns the agent via Task(). A single skill may dispatch multiple agents sequentially or in parallel depending on the workflow phase.
 - **Shared agents:** Memory Curator is dispatched by every main skill at workflow end. SW Quality and Developer are shared between /shaktra:dev and /shaktra:bugfix (bugfix reuses the full TDD pipeline for remediation).
 

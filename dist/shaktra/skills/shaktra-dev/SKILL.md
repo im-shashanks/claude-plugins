@@ -30,8 +30,18 @@ If the intent is `refactor`, route to `refactoring-pipeline.md`. The refactoring
 
 Before any work:
 - Read `.shaktra/settings.yml` — if missing, inform user to run `/shaktra:init` and stop
-- Read `.shaktra/memory/decisions.yml` — for prior decisions (if exists)
-- Read `.shaktra/memory/lessons.yml` — for past insights (if exists)
+- Read `.shaktra/memory/principles.yml` (if exists)
+- Read `.shaktra/memory/anti-patterns.yml` (if exists)
+- Read `.shaktra/memory/procedures.yml` (if exists)
+- Determine memory retrieval tier:
+  ```bash
+  python3 ${CLAUDE_PLUGIN_ROOT}/scripts/memory_retrieval.py <story_dir> <settings_path>
+  ```
+- Generate `.shaktra/stories/<story_id>/.briefing.yml` per retrieval tier (see `retrieval-guide.md`):
+  - **Tier 1:** Generate inline following the retrieval algorithm
+  - **Tier 2:** Spawn memory-retriever (briefing mode) using dispatch template
+  - **Tier 3:** Spawn parallel chunk retrievers + consolidation retriever using dispatch templates
+- Create empty `.shaktra/stories/<story_id>/.observations.yml`
 
 ### 2. Classify Intent
 
@@ -59,7 +69,8 @@ After the pipeline completes, present a structured summary (see below).
 | shaktra-test-agent | opus | shaktra-reference, shaktra-tdd | RED phase |
 | shaktra-developer | opus | shaktra-reference, shaktra-tdd | BRANCH + GREEN phase |
 | shaktra-sw-quality | sonnet | shaktra-reference, shaktra-quality | All quality gates |
-| shaktra-memory-curator | sonnet | shaktra-reference | Memory capture |
+| shaktra-memory-curator | sonnet | shaktra-reference, shaktra-memory | Memory capture |
+| shaktra-memory-retriever | sonnet | shaktra-reference, shaktra-memory | Tiered briefing generation (Tier 2/3) |
 
 ---
 
@@ -74,8 +85,8 @@ You are the shaktra-sw-engineer agent. Create a unified implementation + test pl
 
 Story: {story_path}
 Settings: {settings_summary — language, test_framework, coverage_tool, thresholds}
-Decisions: {decisions_path}
-Lessons: {lessons_path}
+Briefing: {briefing_path}
+Observations: {observations_path}
 
 Follow your process: read story, design components, map tests, define order, identify patterns and risks.
 Write implementation_plan.md to {story_dir}/implementation_plan.md.
@@ -141,6 +152,8 @@ Story: {story_path}
 Plan: {plan_path}
 Handoff: {handoff_path}
 Settings: {settings_summary}
+Briefing: {briefing_path}
+Briefing highlights: {top_3_principles_one_line_each} | Anti-patterns: {count}
 Mode: implement
 
 Follow implementation_order from plan. Make all tests pass. Check coverage against tier threshold.
@@ -199,6 +212,7 @@ Review mode: COMPREHENSIVE
 Artifact paths: [{all_code_and_test_paths}]
 Handoff: {handoff_path}
 Settings: {settings_path}
+Briefing: {briefing_path}
 
 Follow comprehensive-review.md: run tests, verify coverage, apply dimensions A-N,
 consolidate decisions, check cross-story consistency.
@@ -208,18 +222,16 @@ Emit QUALITY_PASS or QUALITY_BLOCKED.
 ### Memory Curator — Capture
 
 ```
-You are the shaktra-memory-curator agent. Capture lessons from the completed TDD workflow.
+You are the shaktra-memory-curator agent. Consolidate observations from the completed workflow.
 
+Story path: {story_dir}
 Workflow type: tdd
-Artifacts path: {story_dir}
+Settings: {settings_path}
 
-Extract lessons that meet the capture bar. Append to .shaktra/memory/lessons.yml.
-Each lesson entry MUST have exactly these 5 fields:
-  id: "LS-NNN" (sequential, check existing entries for next number)
-  date: "YYYY-MM-DD"
-  source: story ID or workflow type (e.g., "tdd", "ST-001")
-  insight: what was learned (1-3 sentences)
-  action: concrete change to future behavior (1-2 sentences)
+Read .observations.yml from the story directory. Follow consolidation-guide.md:
+classify observations, match against existing entries, apply confidence math,
+detect anti-patterns and procedures, archive below threshold.
+Write updated principles.yml, anti-patterns.yml, procedures.yml.
 Set memory_captured: true in handoff.
 ```
 
@@ -253,8 +265,10 @@ After the TDD pipeline completes, present:
 - Created: {list of new files}
 - Modified: {list of modified files}
 
-### Decisions Captured
-- {count} decisions promoted to decisions.yml (or "None")
+### Memory Updates
+- Principles: {reinforced} reinforced, {created} created
+- Anti-patterns: {count} (or "None")
+- Procedures: {count} (or "None")
 
 ### Unresolved Items
 - {any items needing attention, or "None"}

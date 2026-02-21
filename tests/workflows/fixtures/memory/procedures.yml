@@ -1,0 +1,15 @@
+# Seeded procedures — workflow learnings from prior stories
+# Used by dev test to verify memory-driven development
+procedures:
+  - id: PC-001
+    text: "Run test coverage check after implementing each file rather than only at the end — catches coverage gaps early and avoids large rework"
+    confidence: 0.68
+    source_count: 3
+    tags: [coverage, testing, incremental, tdd]
+    roles: [developer]
+    applies_to: [tdd]
+    scope: project
+    status: active
+    source: ST-PRIOR-004
+    created: "2026-01-15"
+    last_reinforced: "2026-02-05"

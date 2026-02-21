@@ -73,14 +73,15 @@ Create the following directories:
 
 Read template files from `${CLAUDE_PLUGIN_ROOT}/templates/` and write them into `.shaktra/`:
 
-**All 6 template files must be copied.** Read each from `${CLAUDE_PLUGIN_ROOT}/templates/` and write to `.shaktra/`:
+**All 7 template files must be copied.** Read each from `${CLAUDE_PLUGIN_ROOT}/templates/` and write to `.shaktra/`:
 
 1. `templates/settings.yml` → `.shaktra/settings.yml` — Replace empty `project:` fields with user's answers from Step 2
-2. `templates/decisions.yml` → `.shaktra/memory/decisions.yml` — Copy as-is
-3. `templates/lessons.yml` → `.shaktra/memory/lessons.yml` — Copy as-is
-4. `templates/sprints.yml` → `.shaktra/sprints.yml` — Copy as-is
-5. `templates/analysis-manifest.yml` → `.shaktra/analysis/manifest.yml` — Copy as-is
-6. `templates/shaktra-CLAUDE.md` → `.shaktra/CLAUDE.md` — Copy as-is (project state documentation — describes what `.shaktra/` contains)
+2. `templates/principles.yml` → `.shaktra/memory/principles.yml` — Copy as-is
+3. `templates/anti-patterns.yml` → `.shaktra/memory/anti-patterns.yml` — Copy as-is
+4. `templates/procedures.yml` → `.shaktra/memory/procedures.yml` — Copy as-is
+5. `templates/sprints.yml` → `.shaktra/sprints.yml` — Copy as-is
+6. `templates/analysis-manifest.yml` → `.shaktra/analysis/manifest.yml` — Copy as-is
+7. `templates/shaktra-CLAUDE.md` → `.shaktra/CLAUDE.md` — Copy as-is (project state documentation — describes what `.shaktra/` contains)
 
 For `settings.yml`, populate the `project:` section with the gathered values:
 
@@ -96,10 +97,10 @@ project:
 ```
 
 **Architecture field notes:**
-- For **greenfield**: ask user to choose an architecture style. If unsure, leave blank — the architect agent will propose one in the first design doc and it gets recorded in `decisions.yml`.
+- For **greenfield**: ask user to choose an architecture style. If unsure, leave blank — the architect agent will propose one in the first design doc and it gets recorded in `principles.yml`.
 - For **brownfield**: leave blank at init. The `/shaktra:analyze` workflow detects the existing architecture (D1: structure.yml) and the user can populate this field after analysis.
 
-All other sections (`tdd`, `quality`, `analysis`, `sprints`) retain their template defaults.
+All other sections (`tdd`, `quality`, `analysis`, `sprints`, `memory`) retain their template defaults.
 
 ### Step 5: Handle Project CLAUDE.md
 
@@ -123,6 +124,15 @@ This template is a generic project documentation wireframe — no Shaktra-specif
 - Do NOT overwrite the existing file.
 - Report to user: "CLAUDE.md already exists. Shaktra initialization complete. You can update CLAUDE.md with your project-specific information, or run `/init CLAUDE.md` to have Claude fill it in."
 
+### Step 5b: Handle Legacy Migration (Upgrade Path)
+
+If `.shaktra/memory/decisions.yml` or `.shaktra/memory/lessons.yml` already exist (upgrading from a previous Shaktra version):
+
+1. Inform the user: "Legacy memory files detected (decisions.yml, lessons.yml). These have been replaced by the new principles-based memory system."
+2. Offer to run migration: "Run the migration script to convert existing decisions and lessons into principles? (recommended)"
+3. If yes: execute `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/migrate_memory.py <project_root>`
+4. If no: inform user they can run it later manually
+
 ### Step 6: Report Results
 
 Display a summary of what was created:
@@ -140,8 +150,9 @@ Created:
   .shaktra/CLAUDE.md                    # Project state documentation (.shaktra/ structure and contents)
   .shaktra/settings.yml
   .shaktra/sprints.yml
-  .shaktra/memory/decisions.yml
-  .shaktra/memory/lessons.yml
+  .shaktra/memory/principles.yml
+  .shaktra/memory/anti-patterns.yml
+  .shaktra/memory/procedures.yml
   .shaktra/analysis/manifest.yml
   .shaktra/memory/
   .shaktra/stories/

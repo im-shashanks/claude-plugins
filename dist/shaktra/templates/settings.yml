@@ -41,3 +41,26 @@ pm:
   big_bet_impact_threshold: 7      # min impact score for Big Bet
   min_persona_evidence: 2          # minimum evidence entries per persona
   min_journey_stages: 3            # minimum stages in a journey map
+
+adversarial_review:
+  mutation_kill_threshold: 80      # % mutations killed for PASS
+  max_mutations_per_function: 5    # cap mutations per changed function
+  mutation_timeout: 30             # seconds timeout per mutation test run
+  max_adversarial_tests: 20        # cap generated adversarial tests per group
+  test_persistence: ask            # auto | always | never | ask
+
+memory:
+  confidence_start: 0.6
+  confidence_reinforce: 0.08
+  confidence_weaken: 0.08
+  confidence_contradict: 0.20
+  confidence_archive: 0.2
+  max_principles: 200
+  max_anti_patterns: 100
+  max_procedures: 50
+  max_observations_per_story: 30
+  briefing_confidence_threshold: 0.4
+  retrieval_tier1_max: 100
+  retrieval_tier2_max: 500
+  max_briefing_entries: 15
+  retrieval_chunk_size: 150

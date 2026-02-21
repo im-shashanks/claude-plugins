@@ -22,7 +22,7 @@ flowchart LR
     S4["Section 4:\nQuality Summary"] -->|reads| S4src[".shaktra/stories/*/handoff.yml\n+ .shaktra/settings.yml\n(quality_findings, p1_threshold)"]
 
     S4 --> S5
-    S5["Section 5:\nMemory Health"] -->|reads| S5src[".shaktra/memory/decisions.yml\n.shaktra/memory/lessons.yml"]
+    S5["Section 5:\nMemory Health"] -->|reads| S5src[".shaktra/memory/principles.yml\n.shaktra/memory/anti-patterns.yml\n.shaktra/memory/procedures.yml"]
 
     S5 --> S6
     S6["Section 6:\nAnalysis Progress"] -->|reads| S6src[".shaktra/analysis/manifest.yml\n(D1-D9 dimension status)"]

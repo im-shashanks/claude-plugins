@@ -21,6 +21,9 @@
 | `QUALITY_BLOCKED` | Quality gate failed (P0 exists or P1 exceeds threshold) | SW Quality, TPM Quality | Block — resolve findings first |
 | `REFACTOR_PASS` | Refactoring verification passed — behavior preserved, metrics improved | SW Quality | Proceed to completion |
 | `REFACTOR_BLOCKED` | Refactoring verification failed — tests broken, coverage decreased, or P0/P1 found | SW Quality | Return to fix loop — address regressions |
+| `ADVERSARIAL_PASS` | Adversarial review passed — mutation score above threshold, no P0, P1 within limit | Adversarial Review | Proceed with confidence |
+| `ADVERSARIAL_CONCERN` | Mutation score below threshold or significant blind spots found | Adversarial Review | Review blind spots — merge with awareness |
+| `ADVERSARIAL_BLOCKED` | P0 findings from adversarial testing | Adversarial Review | Fix critical issues before merge |
 
 ## Workflow
 

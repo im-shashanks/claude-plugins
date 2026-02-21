@@ -169,7 +169,7 @@ Guard tokens:
 2. SW quality runs full review:
    - Executes tests, verifies coverage
    - Applies dimensions A-M + N (Plan Adherence)
-   - Identifies decisions to promote (orchestrator writes to `.shaktra/memory/decisions.yml`)
+   - Identifies observations for memory consolidation (memory-curator handles promotion)
    - Checks cross-story consistency
    - For Thorough tier: expanded review (architecture, performance, dependencies)
 3. Run quality loop:
@@ -185,6 +185,35 @@ Guard tokens:
 
 ---
 
+## Consistency Gate
+
+**When:** After QUALITY phase passes, before MEMORY CAPTURE (Medium+ tiers only).
+
+Verify that sw-quality wrote consistency-check observations for every briefing entry.
+
+1. Read `.briefing.yml` — collect all `id` values from `relevant_principles` and `relevant_anti_patterns`. If briefing missing or both lists empty → skip, proceed to MEMORY CAPTURE.
+2. Read `.observations.yml` — collect `principle_id` values from all `type: consistency-check` observations
+3. Compare: every briefing ID must have at least one matching consistency-check
+4. **All covered** → proceed to MEMORY CAPTURE
+5. **Missing entries** → emit `CONSISTENCY_GATE_FAILED`, list missing IDs, return to sw-quality to write the missing checks. Max 2 attempts:
+
+```
+consistency_gate(story_dir, max_attempts=2):
+  briefing_ids = load_briefing_ids(story_dir/.briefing.yml)
+  IF briefing_ids is empty: RETURN PASS
+  attempt = 0
+  WHILE attempt < max_attempts:
+    attempt += 1
+    missing = briefing_ids - load_consistency_check_ids(story_dir/.observations.yml)
+    IF missing is empty: RETURN PASS
+    EMIT CONSISTENCY_GATE_FAILED
+    spawn sw-quality(review_mode: "COMPREHENSIVE", gate: "consistency", missing_ids: missing)
+  # Attempts exhausted — present missing IDs to user, proceed anyway
+  RETURN PASS
+```
+
+---
+
 ## MEMORY CAPTURE
 
 Mandatory final step — the orchestrator must not skip this regardless of tier.
@@ -194,11 +223,11 @@ Mandatory final step — the orchestrator must not skip this regardless of tier.
    - Reads handoff (decisions, findings, patterns, risks)
    - Reads code changes
    - Evaluates capture bar: "Would this materially change future workflow execution?"
-   - Writes actionable insights to `.shaktra/memory/lessons.yml` (if any)
+   - Consolidates actionable insights via consolidation-guide.md (if any)
    - Sets `memory_captured: true` in handoff
 3. Update handoff: set `current_phase: complete`
 
-Note: `decisions.yml` is already updated during QUALITY phase. Memory curator handles lessons only.
+Note: Memory curator consolidates all observations into principles.yml, anti-patterns.yml, and procedures.yml.
 
 ---
 
@@ -240,25 +269,9 @@ Resume entry points:
 
 ## Error Handling
 
-### Agent Failure
-
-If a spawned agent fails (crashes, no output, malformed output):
-1. Retry the same agent spawn once
-2. If retry fails: inform user with error context, do not proceed
-
-### Mid-Workflow Resume
-
-If the user cancels mid-phase:
-1. Artifacts written to disk remain valid
-2. Handoff tracks the last completed phase
-3. User resumes with `/shaktra:dev "Resume {story_id}"`
-
-### Missing Prerequisites
-
-If the story doesn't exist, settings are missing, or dependencies are unresolved:
-1. Report the specific missing prerequisite
-2. Recommend the corrective action (`/shaktra:init`, `/shaktra:tpm enrich`, etc.)
-3. Do not attempt to create prerequisites
+- **Agent failure:** Retry the same agent spawn once. If retry fails: inform user with error context, do not proceed.
+- **Mid-workflow cancel:** Artifacts on disk remain valid. Handoff tracks last completed phase. User resumes with `/shaktra:dev "Resume {story_id}"`.
+- **Missing prerequisites:** Report the specific missing prerequisite and recommend the corrective action (`/shaktra:init`, `/shaktra:tpm enrich`, etc.). Do not attempt to create prerequisites.
 
 ---
 
@@ -275,4 +288,5 @@ Summary of which gates activate per tier (from `story-tiers.md`):
 | GREEN | Required | Required | Required | Required |
 | GREEN quality gate | Quick-check | Quick-check | Quick-check | Quick-check |
 | QUALITY | Skip | Skip | Comprehensive | Comprehensive + expanded |
+| Consistency Gate | Skip | Skip | Required | Required |
 | MEMORY | Required | Required | Required | Required |

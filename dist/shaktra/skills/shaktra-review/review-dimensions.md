@@ -186,7 +186,7 @@ For each dimension: apply the 3 key checks from `quality-dimensions.md`, then ad
 - Does the code follow existing module organization patterns?
 - Are similar problems solved the same way as elsewhere in the codebase?
 - Could a new team member understand this code by reading surrounding code?
-- Does it introduce new patterns without justification in decisions.yml?
+- Does it introduce new patterns without justification in principles.yml?
 
 ### I: Testing — App-Level
 

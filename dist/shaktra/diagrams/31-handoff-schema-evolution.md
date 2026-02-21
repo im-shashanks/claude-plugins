@@ -46,8 +46,8 @@ stateDiagram-v2
     note right of quality
         + quality_findings updated,
         + important_decisions populated,
-        decisions promoted to
-        decisions.yml
+        observations captured for
+        memory consolidation
     end note
 
     note right of complete

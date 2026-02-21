@@ -14,7 +14,7 @@ flowchart TD
 
     Gather --> CreateDirs["Step 3: Create Directories\n.shaktra/\n.shaktra/memory/\n.shaktra/stories/\n.shaktra/designs/\n.shaktra/analysis/"]
 
-    CreateDirs --> Templates["Step 4: Copy Templates\nsettings.yml (populated)\ndecisions.yml\nlessons.yml\nsprints.yml\nanalysis-manifest.yml\nshaktra-CLAUDE.md"]
+    CreateDirs --> Templates["Step 4: Copy Templates\nsettings.yml (populated)\nobservations.yml\nprinciples.yml\nanti-patterns.yml\nprocedures.yml\nsprints.yml\nanalysis-manifest.yml\nshaktra-CLAUDE.md"]
 
     Templates --> ClaudeMD{"Step 5:\nCLAUDE.md\nexists?"}
 

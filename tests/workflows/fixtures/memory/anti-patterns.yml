@@ -1,0 +1,16 @@
+# Seeded anti-patterns — failure patterns from prior stories
+# Used by dev test to verify memory-driven development
+anti_patterns:
+  - id: AP-001
+    failed_approach: "Returning raw database errors (e.g., IntegrityError, OperationalError) directly in API responses"
+    failure_mode: "Leaks internal implementation details to clients and makes error handling inconsistent across endpoints"
+    severity: P1
+    recommended_approach: "Catch database exceptions in the service layer, map them to domain-specific errors, and return standardized error responses from the API layer"
+    trigger_patterns: [database, error, exception, api, response, integrity]
+    confidence: 0.72
+    tags: [error-handling, api, database, security]
+    roles: [developer, sw-quality]
+    scope: project
+    status: active
+    source: ST-PRIOR-003
+    created: "2026-01-12"

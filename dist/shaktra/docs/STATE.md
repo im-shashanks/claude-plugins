@@ -10,8 +10,10 @@ The `.shaktra/` directory holds all project-level development state. It is creat
   stories/               # User story files (ST-001.yml, ST-002.yml, ...)
   designs/               # Design documents from architecture phase
   memory/
-    decisions.yml        # Architectural decisions (append-only)
-    lessons.yml          # Team learnings (append-only, max 100 entries)
+    observations.yml     # Raw observations from workflows (input mechanism)
+    principles.yml       # Consolidated architectural principles
+    anti-patterns.yml    # Proven failure modes to avoid
+    procedures.yml       # Validated workflows and processes
   analysis/              # Brownfield analysis results (9 dimensions)
   templates/             # Artifact templates for stories, designs, etc.
 ```
@@ -93,27 +95,49 @@ Design documents produced during architecture and planning phases.
 
 Append-only logs that preserve project knowledge across conversations.
 
-### decisions.yml
+### observations.yml
 
-Architectural decisions made during development.
-
-**Created by:** `/shaktra:init` (empty template)
-**Updated by:** SW Quality agent during the MEMORY phase of TDD
-
-**Entry format:** Each decision records a date, title, reasoning, and impact. Entries are never modified or deleted -- the log is append-only.
-
-**Lifecycle:** Grows throughout the project. Consulted by agents before making architectural choices to avoid contradicting prior decisions.
-
-### lessons.yml
-
-Team learnings and retrospective insights.
+Raw observations captured by agents during workflows. Serves as the input mechanism for the memory system.
 
 **Created by:** `/shaktra:init` (empty template)
-**Updated by:** Memory Curator agent during the MEMORY phase of TDD
+**Updated by:** Agents during workflows (SW Quality, Developer, etc.)
 
-**Entry format:** Each lesson records a date, title, context, and key takeaway. Capped at 100 entries to keep the file manageable.
+**Entry format:** Each observation records a date, source workflow, context, and insight. Observations accumulate until the Memory Curator consolidates them.
 
-**Lifecycle:** Grows during development. Agents read lessons to avoid repeating past mistakes and to apply proven patterns.
+**Lifecycle:** Grows during development. Periodically consolidated by the Memory Curator into the three curated memory stores below.
+
+### principles.yml
+
+Consolidated architectural principles derived from observations.
+
+**Created by:** `/shaktra:init` (empty template)
+**Updated by:** Memory Curator agent during the MEMORY phase
+
+**Entry format:** Each principle records a title, reasoning, impact, and source observations. Entries are curated -- the Memory Curator adds, refines, or merges principles as new observations arrive.
+
+**Lifecycle:** Grows throughout the project. Consulted by agents before making architectural choices to maintain consistency with established principles.
+
+### anti-patterns.yml
+
+Proven failure modes and approaches to avoid, derived from observations.
+
+**Created by:** `/shaktra:init` (empty template)
+**Updated by:** Memory Curator agent during the MEMORY phase
+
+**Entry format:** Each anti-pattern records the pattern to avoid, why it fails, and the recommended alternative.
+
+**Lifecycle:** Grows as the project encounters and learns from failures. Agents consult anti-patterns to avoid repeating known mistakes.
+
+### procedures.yml
+
+Validated workflows and processes that have proven effective, derived from observations.
+
+**Created by:** `/shaktra:init` (empty template)
+**Updated by:** Memory Curator agent during the MEMORY phase
+
+**Entry format:** Each procedure records the process, when to apply it, and evidence of its effectiveness.
+
+**Lifecycle:** Grows as the team discovers effective patterns. Agents reference procedures for proven approaches to recurring tasks.
 
 ---
 

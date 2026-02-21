@@ -14,8 +14,8 @@ Brainstorming produces structured notes that feed into PRD creation. The goal is
 
 Read:
 - `.shaktra/settings.yml` — project type, language, architecture
-- `.shaktra/memory/decisions.yml` — prior decisions that might constrain options
-- `.shaktra/memory/lessons.yml` — past learnings relevant to ideation
+- `.shaktra/memory/principles.yml` — prior principles that might constrain options
+- `.shaktra/memory/anti-patterns.yml` — past observations relevant to ideation
 
 ### Step 2 — Problem Exploration
 

@@ -16,7 +16,7 @@ You are the Shaktra help system. When invoked, present the guide below **verbati
 
 ### Shaktra — Software Development Framework for Claude Code
 
-Shaktra orchestrates 12 specialized AI agents through agile-inspired workflows. Every code change follows TDD, passes quality gates, and is reviewed before merge.
+Shaktra orchestrates 14 specialized AI agents through agile-inspired workflows. Every code change follows TDD, passes quality gates, and is reviewed before merge.
 
 **Core pillars:** TDD-first | Multi-agent orchestration | Quality gates (P0-P3) | Sprint planning | Ceremony scaling
 
@@ -139,7 +139,7 @@ Quality  Quality  Quality   Quality
 - **RED** — Test Agent writes failing tests (behavioral, story-scoped)
 - **GREEN** — Developer implements code to make tests pass and hit coverage
 - **QUALITY** — SW Quality runs comprehensive 14-dimension review
-- **MEMORY** — Memory Curator captures lessons to `.shaktra/memory/lessons.yml`
+- **MEMORY** — Memory Curator consolidates observations into principles, anti-patterns, and procedures
 
 ---
 
@@ -196,6 +196,6 @@ Hooks are all-or-nothing — they block or they don't exist. No warn-only mode.
 - **Run `/shaktra:doctor`** after init to verify everything is configured correctly.
 - **Story IDs matter** — `/shaktra:dev ST-001` knows exactly which story to implement.
 - **Hotfixes are fast** — `/shaktra:tpm hotfix: ...` skips ceremony and routes straight to dev.
-- **Memory persists** — lessons are captured in `.shaktra/memory/lessons.yml` and inform future work.
+- **Memory persists** — observations are consolidated into principles, anti-patterns, and procedures in `.shaktra/memory/` and inform future work.
 - **Ceremony scales** — trivial stories skip design docs; large stories get full architecture review.
 - **Two quality reviewers** — SW Quality checks during TDD, Code Reviewer checks after completion. They are intentionally separate.

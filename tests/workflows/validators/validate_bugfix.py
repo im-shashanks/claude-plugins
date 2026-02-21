@@ -51,7 +51,7 @@ def validate_bugfix(project_dir: str) -> ValidationReport:
         stories = list(Path(shaktra).glob("stories/ST-*.yml"))
         report.add("bugfix story or artifact created",
                     len(stories) > 0 or os.path.isfile(
-                        os.path.join(shaktra, "memory", "lessons.yml")),
+                        os.path.join(shaktra, "memory", "principles.yml")),
                     "no stories or memory updates found")
 
     # --- Diagnosis artifact ---
@@ -95,18 +95,18 @@ def validate_bugfix(project_dir: str) -> ValidationReport:
     report.add("root cause identified", rc_found,
                "no root cause reference in .shaktra/" if not rc_found else "")
 
-    # --- Memory: bugfix lessons ---
-    lp = os.path.join(shaktra, "memory", "lessons.yml") if has_shaktra else ""
-    if os.path.isfile(lp):
-        ld = check_valid_yaml(report, lp, "lessons.yml valid YAML")
-        if isinstance(ld, dict):
-            entries = ld.get("lessons", []) or []
-            bl = [e for e in entries if isinstance(e, dict)
+    # --- Memory: bugfix principles ---
+    pp = os.path.join(shaktra, "memory", "principles.yml") if has_shaktra else ""
+    if os.path.isfile(pp):
+        pd = check_valid_yaml(report, pp, "principles.yml valid YAML")
+        if isinstance(pd, dict):
+            entries = pd.get("principles", []) or []
+            bp = [e for e in entries if isinstance(e, dict)
                   and any(k in str(e.get("source", "")).lower()
                           for k in ["bugfix", "bug"])]
-            report.add("bugfix lessons captured", len(bl) > 0,
-                       f"no bugfix source lessons (total: {len(entries)})"
-                       if not bl else "")
+            report.add("bugfix principles captured", len(bp) > 0,
+                       f"no bugfix source principles (total: {len(entries)})"
+                       if not bp else "")
 
     return report
 

@@ -40,8 +40,8 @@ Analysis without ground truth is guessing. Stage 1 produces factual data via too
 ### Step 1: Read Project Context
 
 - Read `.shaktra/settings.yml` — project config, language, thresholds
-- Read `.shaktra/memory/decisions.yml` — architectural decisions (if exists)
-- Read `.shaktra/memory/lessons.yml` — past insights (if exists)
+- Read `.shaktra/memory/principles.yml` — project principles (if exists)
+- Read `.shaktra/memory/anti-patterns.yml` — failure patterns (if exists)
 
 ### Step 2: Check Manifest for Resumability
 
@@ -203,6 +203,28 @@ When user requests dependency audit or upgrade planning:
 | `dependency-audit.md` | Dependency risk categorization and upgrade assessment rules |
 
 ---
+
+## Step 5b — Memory Capture
+
+After analysis completes (`ANALYSIS_COMPLETE` or `ANALYSIS_PARTIAL`):
+
+1. Create `.shaktra/observations/analysis-<date>.yml` (create directory if needed)
+2. Write observations about significant findings:
+   - `type: discovery` — unexpected architecture patterns, hidden dependencies, undocumented conventions
+   - `type: observation` — practice gaps, risk patterns, quality hotspots
+   - Limit to findings that would materially change future development decisions
+   - Cap at `settings.memory.max_observations_per_story` entries
+3. Spawn memory-curator:
+
+```
+You are the shaktra-memory-curator agent. Consolidate analysis observations.
+
+Observations path: {observations_path}
+Workflow type: analysis
+Settings: {settings_path}
+
+Promote significant findings to principles/anti-patterns/procedures.
+```
 
 ## Guard Tokens
 

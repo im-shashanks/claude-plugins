@@ -6,6 +6,44 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Version numbers 
 
 ---
 
+## [0.3.0] - 2026-02-20
+
+### Added
+- **`/shaktra:adversarial-review` skill** — Adversarial review workflow that treats code changes as behavioral hypotheses and systematically falsifies them through mutation testing, adversarial inputs, and fault injection. Dispatches 3 parallel adversary agents (mutation probes, input/boundary probes, fault/resilience probes). Produces execution-based risk assessment with mutation score and structured findings.
+- **`shaktra-adversary` agent** — Chaos engineer agent for executing adversarial probes. Supports mutation testing with strict safety protocol (apply-run-restore-verify), adversarial input generation, and fault injection testing.
+- **Mutation testing strategy** — 8 mutation operator categories (arithmetic, relational, logical, conditional, return value, exception, boundary, deletion) with safety protocol and surviving-mutation-to-severity mapping.
+- **Adversarial probe strategies** — Input/boundary probes (null/empty, type mismatch, boundary values, injection, format) and fault/resilience probes (timeout, error response, partial response, connection refused, race condition, idempotency).
+- **3 adversarial guard tokens** — `ADVERSARIAL_PASS`, `ADVERSARIAL_CONCERN`, `ADVERSARIAL_BLOCKED` in guard-tokens.md.
+- **`adversarial_review` settings section** — `mutation_kill_threshold`, `max_mutations_per_function`, `mutation_timeout`, `max_adversarial_tests`, `test_persistence` in settings.yml template.
+- **Memory system enhancements** — Trigger matching for memory entries, briefing dispatch across all workflows, workflow observation capture, and `shaktra-memory` internal skill with consolidation, observation, and retrieval guides.
+- **`/shaktra:memory-stats` skill** — Memory inspector for auditing learned knowledge, checking entries near archive threshold, inspecting story briefings, and seeding new entries.
+- **2 E2E tests for adversarial review** — Happy-path test (full pipeline with mutations and probes) and negative test (incomplete dev blocked).
+
+### Changed
+- **Component counts updated** — 14 agents (added adversary, memory-retriever), 19 skills (added adversarial-review, memory, memory-stats), across all docs, diagrams, doctor checks, CI, and publish scripts.
+- **`/shaktra:doctor`** — Updated expected counts (14 agents, 19 skills).
+- **Documentation** — Updated AGENTS.md (adversary + memory-retriever entries), COMMANDS.md (adversarial-review entry), README (counts, examples), CHANGELOG, diagrams.
+
+---
+
+## [0.2.0] - 2026-02-17
+
+### Added
+- **Tiered memory retrieval** — 3-tier architecture for briefing generation that scales with memory store size. Tier 1 (≤100 entries): inline generation. Tier 2 (≤500): dedicated memory-retriever agent. Tier 3 (500+): parallel chunk retrieval with consolidation.
+- **`shaktra-memory-retriever` agent** — New sonnet-model agent with 3 modes (briefing, chunk, consolidate) for offloading context-heavy memory filtering from orchestrators.
+- **`memory_retrieval.py` script** — Counts active memory entries, determines retrieval tier, and splits entries into chunks for Tier 3 processing.
+- **`retrieval-guide.md`** — Shared retrieval algorithm (relevance scoring, dispatch templates) referenced by all orchestrators and the memory-retriever agent. Eliminates duplication across workflows.
+- **5 new memory settings** — `briefing_confidence_threshold`, `retrieval_tier1_max`, `retrieval_tier2_max`, `max_briefing_entries`, `retrieval_chunk_size` in `settings.yml`.
+
+### Changed
+- **`/shaktra:dev` and `/shaktra:review`** — Replaced inline briefing generation with tier-aware retrieval (calls `memory_retrieval.py`, dispatches memory-retriever for Tier 2/3).
+- **`/shaktra:bugfix`** — Added missing `procedures.yml` reading and `.observations.yml` creation.
+- **`briefing-schema.md`** — Removed hardcoded 0.4 confidence threshold, now references `settings.memory.briefing_confidence_threshold`. Added tier selection table.
+- **`/shaktra:doctor`** — Updated expected counts (13 agents, 8 scripts).
+- **CI and publish script** — Updated structural validation counts (13 agents, 8 scripts).
+
+---
+
 ## [0.1.5] - 2026-02-16
 
 ### Changed

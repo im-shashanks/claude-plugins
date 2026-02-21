@@ -32,8 +32,9 @@ If the intent is ambiguous, ask the user to clarify before proceeding.
 
 Before dispatching any workflow:
 - Read `.shaktra/settings.yml` — if missing, inform user to run `/shaktra:init` and stop
-- Read `.shaktra/memory/decisions.yml` — for prior decisions (if exists)
-- Read `.shaktra/memory/lessons.yml` — for past insights (if exists)
+- Read `.shaktra/memory/principles.yml` — for project principles (if exists)
+- Read `.shaktra/memory/anti-patterns.yml` — for failure patterns (if exists)
+- Read `.shaktra/memory/procedures.yml` — for workflow learnings (if exists)
 
 ### 2. Classify Intent
 
@@ -57,7 +58,7 @@ After any workflow completes, present a structured summary (see Completion Repor
 | shaktra-product-manager | sonnet | shaktra-reference | Gap answering, RICE, coverage |
 | shaktra-scrummaster | sonnet | shaktra-stories | Story creation/enrichment |
 | shaktra-tpm-quality | sonnet | shaktra-reference, shaktra-tdd | Quality review loops |
-| shaktra-memory-curator | sonnet | shaktra-reference | End of every workflow |
+| shaktra-memory-curator | sonnet | shaktra-reference, shaktra-memory | End of every workflow |
 
 ---
 
@@ -106,8 +107,8 @@ Source documents:
 - PRD: .shaktra/prd.md
 - Architecture: .shaktra/architecture.md
 
-Search priority: PRD → Architecture → decisions.yml → lessons.yml → escalate.
-Log every answer to .shaktra/memory/decisions.yml.
+Search priority: PRD → Architecture → principles.yml → anti-patterns.yml → escalate.
+Log significant answers as observations if story context exists.
 ```
 
 ### Product Manager — RICE Prioritization
@@ -216,18 +217,17 @@ Return ONLY a one-line verdict — do NOT include findings in your response.
 ### Memory Curator — Capture
 
 ```
-You are the shaktra-memory-curator agent. Capture lessons from the completed workflow.
+You are the shaktra-memory-curator agent. Consolidate observations from the completed workflow.
 
+Story path: {story_dir}
 Workflow type: {workflow_type}
-Artifacts path: {artifacts_path}
+Settings: {settings_path}
 
-Extract lessons that meet the capture bar. Append to .shaktra/memory/lessons.yml.
-Each lesson entry MUST have exactly these 5 fields:
-  id: "LS-NNN" (sequential, check existing entries for next number)
-  date: "YYYY-MM-DD"
-  source: story ID or workflow type (e.g., "tpm-planning", "ST-001")
-  insight: what was learned (1-3 sentences)
-  action: concrete change to future behavior (1-2 sentences)
+Read .observations.yml from the story directory. Follow consolidation-guide.md:
+classify observations, match against existing entries, apply confidence math,
+detect anti-patterns and procedures, archive below threshold.
+Write updated principles.yml, anti-patterns.yml, procedures.yml.
+Set memory_captured: true in handoff.
 ```
 
 ---

@@ -48,8 +48,8 @@ Classify the user's request:
 
 Before dispatching any workflow:
 - Read `.shaktra/settings.yml` — if missing, inform user to run `/shaktra:init` and stop
-- Read `.shaktra/memory/decisions.yml` — for prior product decisions (if exists)
-- Read `.shaktra/memory/lessons.yml` — for past insights (if exists)
+- Read `.shaktra/memory/principles.yml` — for project principles (if exists)
+- Read `.shaktra/memory/anti-patterns.yml` — for failure patterns (if exists)
 
 ### 2. Classify Intent
 
@@ -193,6 +193,24 @@ After every workflow, present:
 
 ### Next Step
 - {recommended next action}
+```
+
+## Memory Capture (brainstorm and research modes only)
+
+After `RESEARCH_SYNTHESIZED` or brainstorm completion:
+
+1. Create `.shaktra/observations/<mode>-<date>.yml` (create directory if needed)
+2. Write observations:
+   - `type: discovery` — surprising market findings, domain constraints, user behavior patterns
+   - `type: observation` — requirements patterns, persona insights that inform future stories
+3. Spawn memory-curator:
+
+```
+You are the shaktra-memory-curator agent. Consolidate PM workflow observations.
+
+Observations path: {observations_path}
+Workflow type: pm
+Settings: {settings_path}
 ```
 
 ## Guard Tokens

@@ -61,7 +61,7 @@ PRD is created LAST, after personas and journeys, so it incorporates:
 ### Memory Capture (Mandatory)
 
 1. Spawn **memory-curator** with workflow artifacts
-2. Append lessons to `.shaktra/memory/lessons.yml`
+2. Consolidate observations via memory-curator
 
 ---
 

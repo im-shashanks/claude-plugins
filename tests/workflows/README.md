@@ -83,7 +83,7 @@ The bugfix test starts with a calculator module containing a zero-division bug a
 [PASS] diagnosis artifact exists
 [PASS] bugfix story created
 [PASS] root cause identified
-[PASS] lessons.yml valid YAML
+[PASS] principles.yml valid YAML
 ```
 
 ### Dev Workflow (18/19 validator checks passed)

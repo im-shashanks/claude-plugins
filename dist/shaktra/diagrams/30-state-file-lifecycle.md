@@ -24,8 +24,8 @@ sequenceDiagram
     TPM->>TPM: Scrummaster writes .shaktra/stories/*.yml
     TPM->>TPM: PM writes RICE scores to stories
     TPM->>TPM: Scrummaster writes .shaktra/sprints.yml
-    TPM->>MEM: Capture planning lessons
-    MEM->>MEM: Append to .shaktra/memory/lessons.yml
+    TPM->>MEM: Capture planning observations
+    MEM->>MEM: Consolidate into principles/anti-patterns/procedures
 
     Note over U,MEM: Phase 3 — Development (TDD Pipeline)
     U->>DEV: /shaktra:dev ST-001
@@ -34,10 +34,10 @@ sequenceDiagram
     DEV->>DEV: RED: populate test_summary
     DEV->>DEV: GREEN: populate code_summary
     DEV->>DEV: QUALITY: populate quality_findings
-    DEV->>DEV: QUALITY: promote decisions
-    DEV->>DEV: Write to .shaktra/memory/decisions.yml
-    DEV->>MEM: Capture development lessons
-    MEM->>MEM: Append to .shaktra/memory/lessons.yml
+    DEV->>DEV: QUALITY: capture observations
+    DEV->>DEV: Write to .shaktra/memory/observations.yml
+    DEV->>MEM: Consolidate development observations
+    MEM->>MEM: Update principles/anti-patterns/procedures
     MEM->>DEV: Set memory_captured: true
     DEV->>DEV: Update story status to done
     DEV->>DEV: Update .shaktra/sprints.yml velocity
@@ -46,18 +46,18 @@ sequenceDiagram
     U->>REV: /shaktra:review ST-001
     REV->>REV: Read handoff.yml + code changes
     REV->>REV: Produce review findings
-    REV->>MEM: Capture review lessons
-    MEM->>MEM: Append to .shaktra/memory/lessons.yml
+    REV->>MEM: Capture review observations
+    MEM->>MEM: Consolidate into principles/anti-patterns/procedures
 
     Note over U,MEM: Ongoing — Memory Growth
-    Note right of MEM: lessons.yml: max 100 active<br/>Archive oldest to lessons-archive.yml<br/>decisions.yml: pattern coherence<br/>across all future stories
+    Note right of MEM: observations.yml: raw input<br/>Memory Curator consolidates into:<br/>principles.yml, anti-patterns.yml,<br/>procedures.yml
 ```
 
 **Reading guide:**
 - **Phase 1** creates the skeleton — `settings.yml` is the project-wide configuration that every workflow reads.
 - **Phase 2** populates planning artifacts — designs, stories, sprints. The TPM workflow ends with memory capture.
-- **Phase 3** is the TDD pipeline where `handoff.yml` accumulates state through each phase (plan, tests, code, quality). Decisions are promoted to `decisions.yml` for cross-story consistency. Sprint velocity updates after each story completes.
-- **Phase 4** adds review-level insights to lessons.
-- Memory files grow across all workflows. `lessons.yml` caps at 100 entries with archival. `decisions.yml` accumulates architectural patterns that influence all future stories.
+- **Phase 3** is the TDD pipeline where `handoff.yml` accumulates state through each phase (plan, tests, code, quality). Observations are captured and consolidated into memory stores for cross-story consistency. Sprint velocity updates after each story completes.
+- **Phase 4** adds review-level observations to memory.
+- Memory grows across all workflows. Observations are the input mechanism; the Memory Curator consolidates them into `principles.yml`, `anti-patterns.yml`, and `procedures.yml`.
 
 **Source:** `dist/shaktra/skills/shaktra-reference/schemas/handoff-schema.md`, `dist/shaktra/skills/shaktra-tpm/workflow-template.md`, `dist/shaktra/skills/shaktra-dev/tdd-pipeline.md`

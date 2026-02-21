@@ -78,8 +78,8 @@ The full workflow is the default path for new features. It proceeds through four
 
 **Agent:** Memory Curator (Sonnet)
 
-1. Captures lessons learned from the planning session
-2. Appends to `.shaktra/memory/lessons.yml`
+1. Captures observations from the planning session
+2. Consolidates into `.shaktra/memory/principles.yml`, `anti-patterns.yml`, and `procedures.yml`
 
 This step runs automatically at the end of every workflow.
 
@@ -105,7 +105,7 @@ You ──► /shaktra:tpm
             │                             │
             ├─► Scrummaster ──────► Sprint Allocation
             │                             │
-            └─► Memory Curator ───► Lessons Captured
+            └─► Memory Curator ───► Observations Consolidated
 ```
 
 ## Quality Gates

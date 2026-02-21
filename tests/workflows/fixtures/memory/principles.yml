@@ -1,0 +1,35 @@
+# Seeded principles — learnings from prior stories
+# Used by dev test to verify memory-driven development
+principles:
+  - id: PR-001
+    text: "Always validate email format with a regex check in the service layer before passing to the repository"
+    categories: [correctness, reliability]
+    guidance:
+      - "Use a standard email regex or a validation library — do not rely on database constraints alone"
+      - "Return a clear validation error (422) to the caller when the format is invalid"
+    confidence: 0.76
+    source_count: 3
+    tags: [email, validation, input-validation, service-layer]
+    roles: [developer, sw-engineer]
+    scope: project
+    status: active
+    source: ST-PRIOR-002
+    created: "2026-01-10"
+    last_reinforced: "2026-02-01"
+
+  - id: PR-002
+    text: "Service layer functions must raise domain-specific exceptions, never generic Python exceptions or raw database errors"
+    categories: [maintainability, correctness]
+    guidance:
+      - "Define custom exception classes for each business error (e.g., DuplicateEmailError, WeakPasswordError)"
+      - "Catch repository/database exceptions in the service layer and re-raise as domain exceptions"
+      - "Never let sqlalchemy.IntegrityError or similar leak to the API layer"
+    confidence: 0.84
+    source_count: 5
+    tags: [exceptions, error-handling, service-layer, domain-errors]
+    roles: [developer, sw-engineer, sw-quality]
+    scope: project
+    status: active
+    source: ST-PRIOR-005
+    created: "2026-01-05"
+    last_reinforced: "2026-02-10"

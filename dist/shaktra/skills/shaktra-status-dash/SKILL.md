@@ -101,12 +101,18 @@ Merge status: Clear (P1: 1/2 threshold)
 
 ## Section 5 — Memory Health
 
-1. Read `.shaktra/memory/decisions.yml` → count top-level entries. If file is missing or empty, count is 0.
-2. Read `.shaktra/memory/lessons.yml` → count top-level entries. If file is missing or empty, count is 0.
-3. Display:
-   - `Decisions: {count}`
-   - `Lessons: {count} / 100` — 100 is the retention limit
-4. If lessons count is 90 or above, add note: "Approaching limit — oldest lessons will be rotated."
+1. Read `.shaktra/memory/principles.yml` → count entries by confidence band. If file is missing or empty, count is 0.
+   - High: `confidence >= 0.7`
+   - Moderate: `confidence >= 0.4` and `< 0.7`
+   - Low: `confidence >= 0.2` and `< 0.4`
+2. Read `.shaktra/memory/anti-patterns.yml` → count active entries. If missing or empty, count is 0.
+3. Read `.shaktra/memory/procedures.yml` → count active entries. If missing or empty, count is 0.
+4. Read `.shaktra/settings.yml` → `memory.max_principles`, `memory.max_anti_patterns`, `memory.max_procedures` for limits.
+5. Display:
+   - `Principles: {total_count} ({high}↑ {moderate}~ {low}↓)`
+   - `Anti-patterns: {count}`
+   - `Procedures: {count}`
+6. If any file is at 80% or more of its max limit, add warning: "Approaching limit — lowest confidence entries will be archived."
 
 ---
 
@@ -171,8 +177,9 @@ Velocity trend: 18 → 21 → 24
 Merge status: Clear (P1: 1/2 threshold)
 
 ### Memory Health
-Decisions: 4
-Lessons: 12 / 100
+Principles: 12 (8↑ 3~ 1↓)
+Anti-patterns: 2
+Procedures: 1
 
 ### Analysis Progress
 Not applicable — no analysis manifest found.

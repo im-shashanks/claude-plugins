@@ -30,8 +30,9 @@ You orchestrate the bug fix lifecycle: **investigation** (new) followed by **rem
 
 Before any work:
 - Read `.shaktra/settings.yml` — if missing, inform user to run `/shaktra:init` and stop
-- Read `.shaktra/memory/decisions.yml` — for prior decisions (if exists)
-- Read `.shaktra/memory/lessons.yml` — for past bug patterns (if exists)
+- Read `.shaktra/memory/principles.yml` — for project principles (if exists)
+- Read `.shaktra/memory/anti-patterns.yml` — for known failure patterns (if exists)
+- Read `.shaktra/memory/procedures.yml` — for workflow learnings (if exists)
 
 ### 2. Classify Intent
 
@@ -50,8 +51,7 @@ You are the shaktra-bug-diagnostician agent. Investigate this bug.
 Bug description: {bug_description}
 Error context: {error_context or "None provided"}
 Settings: {settings_path}
-Decisions: {decisions_path}
-Lessons: {lessons_path}
+Briefing: {briefing_path}
 
 Follow the 5-step diagnosis methodology. Produce a diagnosis artifact and story draft.
 ```
@@ -60,6 +60,7 @@ Follow the 5-step diagnosis methodology. Produce a diagnosis artifact and story 
 
 **On `DIAGNOSIS_COMPLETE`:**
 - Read the diagnosis artifact and story draft
+- Create empty `.shaktra/stories/<story_id>/.observations.yml` in the new story directory
 - Present the diagnosis summary to the user
 - If `diagnose_only` intent: stop here, present findings
 - If `bugfix` intent: proceed to remediation
@@ -90,14 +91,15 @@ The entire TDD pipeline runs unchanged:
 
 ### 6. Memory Enhancement
 
-After remediation completes, the memory-curator captures lessons with enhanced metadata:
+After remediation completes, the memory-curator consolidates observations:
 
 ```yaml
-source: "bugfix-{story_id}"
-tags: ["bug-pattern", "{root_cause_category}"]
+# Observations from diagnosis and remediation are consolidated into:
+# - principles.yml (root cause patterns, fix approaches)
+# - anti-patterns.yml (repeated failure patterns)
 ```
 
-This enables future diagnoses to reference past bug patterns from `lessons.yml`.
+Bug diagnosis observations are high-value for anti-pattern detection.
 
 ---
 
@@ -111,6 +113,7 @@ This enables future diagnoses to reference past bug patterns from `lessons.yml`.
 | shaktra-developer | Remediation — GREEN | Implement the fix |
 | shaktra-sw-quality | Remediation — All gates | Quality review at every transition |
 | shaktra-memory-curator | Remediation — Memory | Capture bug patterns as lessons |
+| shaktra-memory-retriever | Remediation — Briefing | Tiered briefing generation (spawned by `/shaktra:dev` during remediation) |
 
 ---
 

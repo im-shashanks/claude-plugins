@@ -62,15 +62,27 @@ def validate_review(project_dir: str, story_id: str) -> ValidationReport:
         report.add("review artifact created", True)
     # Not required — review may only update handoff.yml
 
-    # --- Memory capture ---
-    lessons = None
-    lessons_path = os.path.join(shaktra, "memory", "lessons.yml")
-    if check_is_file(report, lessons_path, "lessons.yml exists"):
-        lessons = check_valid_yaml(report, lessons_path, "lessons.yml valid YAML")
-        if lessons:
-            entries = lessons.get("lessons", [])
+    # --- Observations (written during review) ---
+    obs_path = os.path.join(story_dir, ".observations.yml")
+    obs_exists = os.path.isfile(obs_path)
+    report.add("observations file exists", obs_exists,
+               "no .observations.yml in story dir" if not obs_exists else "")
+
+    # --- Briefing (generated at review start) ---
+    briefing_path = os.path.join(story_dir, ".briefing.yml")
+    briefing_exists = os.path.isfile(briefing_path)
+    report.add("briefing file generated", briefing_exists,
+               "no .briefing.yml in story dir" if not briefing_exists else "")
+
+    # --- Memory capture: principles ---
+    pr_data = None
+    principles_path = os.path.join(shaktra, "memory", "principles.yml")
+    if check_is_file(report, principles_path, "principles.yml exists"):
+        pr_data = check_valid_yaml(report, principles_path, "principles.yml valid YAML")
+        if pr_data:
+            entries = pr_data.get("principles", [])
             report.add(
-                "lessons.yml has entries",
+                "principles.yml has entries",
                 isinstance(entries, list) and len(entries) > 0,
                 f"found {len(entries) if isinstance(entries, list) else 0} entries",
             )
@@ -85,16 +97,16 @@ def validate_review(project_dir: str, story_id: str) -> ValidationReport:
         if not findings and not all_review else "",
     )
 
-    # --- Memory: lessons have source attribution ---
-    if lessons:
-        entries = lessons.get("lessons", [])
+    # --- Memory: principles have source attribution ---
+    if pr_data:
+        entries = pr_data.get("principles", [])
         if isinstance(entries, list) and entries:
             has_source = any(
                 isinstance(e, dict) and e.get("source") for e in entries)
             report.add(
-                "lessons have source attribution",
+                "principles have source attribution",
                 has_source,
-                "no lessons have a source field" if not has_source else "",
+                "no principles have a source field" if not has_source else "",
             )
 
     return report

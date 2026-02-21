@@ -34,8 +34,8 @@ This skill never restates severity definitions or quality dimension frameworks â
 
 - Full 14-dimension review (A-M from `quality-dimensions.md` + Dimension N: Plan Adherence)
 - Coverage verification via actual test execution
-- Decision consolidation: extract `important_decisions` from handoff, promote to `decisions.yml`
-- Cross-story consistency: compare decisions against existing `decisions.yml`
+- Observation capture: extract observations from handoff for memory-curator consolidation
+- Cross-story consistency: compare against existing `principles.yml`
 - Defined in `comprehensive-review.md`
 
 ### REFACTOR_VERIFY (Refactoring Verification)

@@ -99,36 +99,32 @@ def validate_tpm(project_dir: str, expect_hotfix: bool = False) -> ValidationRep
                 f"current_sprint is set: {cs}" if cs and cs != {} else "",
             )
 
-    # --- Memory: decisions ---
-    decisions_path = os.path.join(shaktra, "memory", "decisions.yml")
-    if check_is_file(report, decisions_path, "decisions.yml exists"):
-        dec_data = check_valid_yaml(report, decisions_path, "decisions.yml valid YAML")
-        if dec_data and not expect_hotfix:
-            check_field_nonempty(
-                report, dec_data, "decisions",
-                "at least 1 decision recorded",
-            )
-
-    # --- Memory: lessons (evidence memory-curator ran) ---
-    lessons_path = os.path.join(shaktra, "memory", "lessons.yml")
-    if check_is_file(report, lessons_path, "lessons.yml exists"):
-        les_data = check_valid_yaml(report, lessons_path, "lessons.yml valid YAML")
-        if les_data:
+    # --- Memory: principles (evidence memory-curator ran) ---
+    principles_path = os.path.join(shaktra, "memory", "principles.yml")
+    if check_is_file(report, principles_path, "principles.yml exists"):
+        pr_data = check_valid_yaml(report, principles_path, "principles.yml valid YAML")
+        if pr_data and not expect_hotfix:
             check_list_min_length(
-                report, les_data, "lessons", 1,
-                "lessons.yml has at least 1 entry (memory-curator ran)",
+                report, pr_data, "principles", 1,
+                "principles.yml has at least 1 entry (memory-curator ran)",
             )
-            # Validate lesson entry structure
-            lessons = les_data.get("lessons", [])
-            if lessons and isinstance(lessons, list):
-                entry = lessons[-1]  # check the latest entry
-                for field in ["id", "date", "source", "insight", "action"]:
+            # Validate principle entry structure
+            principles = pr_data.get("principles", [])
+            if principles and isinstance(principles, list):
+                entry = principles[-1]
+                for field in ["id", "text", "confidence", "source", "status"]:
                     has = isinstance(entry, dict) and field in entry
                     report.add(
-                        f"latest lesson has '{field}' field",
+                        f"latest principle has '{field}' field",
                         has,
-                        f"missing from lesson entry" if not has else "",
+                        f"missing from principle entry" if not has else "",
                     )
+
+    # --- Memory: anti-patterns + procedures exist ---
+    for mem_file in ["anti-patterns.yml", "procedures.yml"]:
+        mp = os.path.join(shaktra, "memory", mem_file)
+        if check_is_file(report, mp, f"{mem_file} exists"):
+            check_valid_yaml(report, mp, f"{mem_file} valid YAML")
 
     # --- No YAML parse errors in stories ---
     validate_all_yaml_in_dir(report, stories_dir)

@@ -16,7 +16,7 @@ Spawn **9 CBA Analyzer agents** in parallel. Each receives its dimension specifi
 
 - Path to `static.yml` (ground truth input)
 - Path to `overview.yml` (project context)
-- Path to `.shaktra/memory/decisions.yml` (if exists)
+- Path to `.shaktra/memory/principles.yml` (if exists)
 
 **Dispatch all 9 dimensions simultaneously:**
 
@@ -40,7 +40,7 @@ You are the shaktra-cba-analyzer agent. Execute analysis dimension {dimension_id
 Dimension: {dimension_name}
 Static data: .shaktra/analysis/static.yml
 Overview: .shaktra/analysis/overview.yml
-Decisions: .shaktra/memory/decisions.yml
+Principles: .shaktra/memory/principles.yml
 Output path: .shaktra/analysis/{output_file}
 
 Read your dimension specification from analysis-dimensions-core.md (D1-D4), analysis-dimensions-health.md (D5-D8), or analysis-dimensions-git.md (D9).
@@ -92,5 +92,5 @@ You are the shaktra-memory-curator agent. Capture lessons from the completed ana
 Workflow type: analysis
 Artifacts path: .shaktra/analysis/
 
-Extract lessons that meet the capture bar. Append to .shaktra/memory/lessons.yml.
+Extract observations that meet the capture bar. Consolidate via consolidation-guide.md.
 ```

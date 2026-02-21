@@ -35,8 +35,8 @@ Read ALL of the following before starting the design:
 - PRD at `.shaktra/prd.md`
 - Architecture at `.shaktra/architecture.md`
 - `.shaktra/settings.yml` — project type, language, and `project.architecture` (the declared architecture style)
-- `.shaktra/memory/decisions.yml` — prior decisions that constrain this design (especially category "consistency" for pattern decisions)
-- `.shaktra/memory/lessons.yml` — past insights that inform approach
+- `.shaktra/memory/principles.yml` — prior principles that constrain this design (especially category "consistency" for pattern decisions)
+- `.shaktra/memory/anti-patterns.yml` — failure patterns to avoid (if exists)
 - If brownfield (or `analysis_path` provided): read these analysis artifacts:
   - `.shaktra/analysis/structure.yml` — detected architectural patterns, module boundaries, layer dependencies
   - `.shaktra/analysis/practices.yml` — 14 practice areas with canonical code examples
@@ -57,8 +57,8 @@ Examine inputs for completeness. Categorize each gap using this structure:
 Search order before declaring a gap:
 1. PRD (`.shaktra/prd.md`) — does it answer this explicitly?
 2. Architecture doc (`.shaktra/architecture.md`) — does the system design imply an answer?
-3. `decisions.yml` — has this been decided before?
-4. `lessons.yml` — did a past project learn something relevant?
+3. `principles.yml` — has this been established as a principle?
+4. `anti-patterns.yml` — is there a known failure pattern related to this?
 
 Only gaps that survive all four sources become questions.
 
@@ -82,12 +82,19 @@ For each section:
 - If a section would be empty or trivially obvious, omit it. No section earns its place by existing.
 
 **Section 3 — Pattern Justification (mandatory):**
-- Verify the proposed solution aligns with `settings.project.architecture`. If `architecture` is set, the design must fit that style. If deviating, explain why and propose a `decisions.yml` update.
+- Verify the proposed solution aligns with `settings.project.architecture`. If `architecture` is set, the design must fit that style. If deviating, explain why and record an observation for the memory-curator.
 - For brownfield: cross-reference `structure.yml` detected patterns and `practices.yml` canonical examples. New components must match existing patterns unless the design explicitly justifies a deviation.
-- For greenfield with no `architecture` set: use the Architecture Style Selection Guide in `design-doc-schema.md` to evaluate which style fits the project based on PRD characteristics. Propose the best fit in Section 3 and recommend the user update `settings.project.architecture`. Record the choice as an `important_decision` (category: consistency).
+- For greenfield with no `architecture` set: use the Architecture Style Selection Guide in `design-doc-schema.md` to evaluate which style fits the project based on PRD characteristics. Propose the best fit in Section 3 and recommend the user update `settings.project.architecture`. Record the choice as an observation (`type: discovery`, `tags: ["consistency"]`).
 - Name specific design patterns used (repository, factory, strategy, etc.) and why they fit this feature.
 
 Store at `.shaktra/designs/<project-name>-design.md`.
+
+### 5. Write Observations
+
+Write observations to `.observations.yml` in the story directory (if one exists):
+- `type: discovery` for architectural insights and pattern justifications
+- `type: observation` for gaps found and design constraints identified
+- Each observation: `agent: "architect"`, `phase: "plan"`, `importance` (1-10)
 
 ## Output
 

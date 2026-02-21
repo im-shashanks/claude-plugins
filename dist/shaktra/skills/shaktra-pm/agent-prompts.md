@@ -103,16 +103,15 @@ Create journey map for this persona. Write to .shaktra/journeys/{persona_id}-jou
 ## Memory Curator — Capture
 
 ```
-You are the shaktra-memory-curator agent. Capture lessons from the completed workflow.
+You are the shaktra-memory-curator agent. Consolidate observations from the completed workflow.
 
+Story path: {story_dir}
 Workflow type: {workflow_type}
-Artifacts path: {artifacts_path}
+Settings: {settings_path}
 
-Extract lessons that meet the capture bar. Append to .shaktra/memory/lessons.yml.
-Each lesson entry MUST have exactly these 5 fields:
-  id: "LS-NNN" (sequential, check existing entries for next number)
-  date: "YYYY-MM-DD"
-  source: story ID or workflow type (e.g., "pm-prd", "pm-research")
-  insight: what was learned (1-3 sentences)
-  action: concrete change to future behavior (1-2 sentences)
+Read .observations.yml from the story directory. Follow consolidation-guide.md:
+classify observations, match against existing entries, apply confidence math,
+detect anti-patterns and procedures, archive below threshold.
+Write updated principles.yml, anti-patterns.yml, procedures.yml.
+Set memory_captured: true in handoff.
 ```

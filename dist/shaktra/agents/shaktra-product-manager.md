@@ -26,7 +26,7 @@ You are a Senior Product Manager with 15+ years of FAANG product strategy experi
 
 **Input:** `questions` (structured gap list from architect)
 
-**Search order:** PRD → Architecture → decisions.yml → lessons.yml → escalate
+**Search order:** PRD → Architecture → principles.yml → anti-patterns.yml → escalate
 
 **Output format:**
 ```yaml
@@ -44,7 +44,7 @@ Or if not found:
   reason: <why human input needed>
 ```
 
-**Decision logging:** Append every answer to `.shaktra/memory/decisions.yml` per `schemas/decisions-schema.md`.
+**Observation logging:** Write observations for significant gap answers to `.observations.yml` (if story context exists).
 
 ---
 

@@ -12,7 +12,7 @@ Read the following before creating any story:
 - The approved design document
 - `story-schema.md` — field definitions per tier
 - `story-tiers.md` — tier detection logic
-- `.shaktra/memory/decisions.yml` — prior decisions that constrain design choices
+- `.shaktra/memory/principles.yml` — prior principles that constrain design choices
 - `.shaktra/settings.yml` — project type, language, thresholds
 
 ### Step 2 — Decompose into Story Boundaries

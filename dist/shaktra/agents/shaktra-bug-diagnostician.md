@@ -26,8 +26,7 @@ You receive:
 - `bug_description`: what the user reported (symptom, context, reproduction steps if available)
 - `error_context`: (optional) error messages, stack traces, log snippets
 - `settings_path`: path to `.shaktra/settings.yml`
-- `decisions_path`: (optional) path to `.shaktra/memory/decisions.yml`
-- `lessons_path`: (optional) path to `.shaktra/memory/lessons.yml`
+- `briefing_path`: (optional) path to `.briefing.yml` in the story directory
 
 ## Analysis Context Loading (Optional)
 
@@ -52,7 +51,7 @@ You NEVER modify production code or existing tests. You may write a reproduction
 ### 1. Read Context
 
 - Read `.shaktra/settings.yml` for project language, test framework, architecture
-- Read `decisions.yml` and `lessons.yml` if provided — past bugs may reveal patterns
+- Read briefing if provided — past principles and anti-patterns may reveal patterns
 - Read `diagnosis-methodology.md` for the full 5-step process
 
 ### 2. Triage
@@ -143,6 +142,13 @@ For each `similar_patterns` entry with `risk: medium+`, recommend a separate sto
 |---|------|---------|------|-------------------|
 | 1 | path | description | high | "Fix [pattern] in [component]" |
 ```
+
+### 7. Write Observations
+
+Write observations to `.observations.yml` in the story directory:
+- `type: discovery` for root cause categories and blast radius patterns
+- `type: observation` for diagnostic methodology insights
+- Each observation: `agent: "bug-diagnostician"`, `phase: "diagnosis"`, `importance` based on severity
 
 ## Output
 

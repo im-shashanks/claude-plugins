@@ -110,8 +110,8 @@ Process:
 2. Run tests and verify coverage (actual execution, not self-reported)
 3. Apply dimensions A-M from `quality-dimensions.md`
 4. Apply Dimension N: Plan Adherence
-5. Identify decisions to promote (returned in output — orchestrator writes to `decisions.yml`)
-6. Check cross-story consistency against existing decisions
+5. Write observations about quality findings, fix patterns, and principle validations
+6. Check cross-story consistency against existing principles
 7. For Thorough tier: add expanded review (architecture, performance, dependencies)
 
 Gate logic: same as QUICK_CHECK, applied to comprehensive findings.
@@ -152,6 +152,7 @@ review_result:
 | `COVERAGE_GATE_FAILED` | Coverage below tier threshold |
 | `REFACTOR_PASS` | Refactoring verification passed — behavior preserved, metrics improved |
 | `REFACTOR_BLOCKED` | Refactoring verification failed — tests broken, coverage decreased, or P0/P1 found |
+| `CONSISTENCY_GATE_FAILED` | Briefing entries missing consistency-check observations |
 | `MAX_LOOPS_REACHED` | Fix loop exhausted (emitted by orchestrator, not directly) |
 
 ## Critical Rules
@@ -163,3 +164,27 @@ review_result:
 - For re-reviews: verify prior findings were addressed before adding new ones.
 - Do not produce a laundry list — prioritize findings by severity and impact.
 - If a finding has no clear fix action, it is not a finding — it is an opinion.
+
+## Observation Capture
+
+During quality gates, write observations to `.observations.yml` in the story directory:
+- `type: quality-loop-finding` for findings that blocked a gate — include `severity`, `resolved`, `iterations`
+- `type: fix-rationale` after fixes are applied — explain why the fix approach was chosen
+- `type: consistency-check` when validating principles from the briefing — include `principle_id`, `relationship` ("reinforce", "weaken", or "contradict")
+- Each observation: `agent: "sw-quality"`, `phase` matches current gate, `importance` based on severity (P0=10, P1=8, P2=5, P3=3)
+
+### Briefing Consistency Evaluation
+
+**When:** COMPREHENSIVE mode only (QUALITY phase, Medium+ tiers).
+
+After completing the review dimensions, evaluate every principle and anti-pattern from the briefing:
+
+1. Read `.briefing.yml` from the story directory (`.shaktra/stories/<story_id>/.briefing.yml`)
+2. If the briefing does not exist or has no `relevant_principles` and no `relevant_anti_patterns`, skip this step
+3. For **every** entry in `relevant_principles` and `relevant_anti_patterns`:
+   - Write a `consistency-check` observation with:
+     - `principle_id`: the entry's ID (e.g., PR-001 or AP-003)
+     - `relationship`: "reinforce", "weaken", or "contradict" — based on actual code evidence
+     - `text`: 1-2 sentences explaining the evidence from the implementation
+   - Determine `importance` from the relationship: reinforce=5, weaken=8, contradict=10
+4. Every briefing entry must have a corresponding consistency-check — this is mandatory, not optional

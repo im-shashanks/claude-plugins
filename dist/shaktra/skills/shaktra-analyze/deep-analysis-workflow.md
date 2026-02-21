@@ -45,7 +45,7 @@ You are Team Member 1: "structure" for Shaktra deep codebase analysis.
 
 CONTEXT:
 - Pre-analysis: .shaktra/analysis/static.yml, overview.yml
-- Memory (if exists): .shaktra/memory/decisions.yml, lessons.yml
+- Memory (if exists): .shaktra/memory/principles.yml, anti-patterns.yml, procedures.yml
 - Dimension specs: analysis-dimensions-core.md (D1), analysis-dimensions-health.md (D5), analysis-dimensions-git.md (D9)
 - Output schemas: analysis-output-schemas.md
 
@@ -73,7 +73,7 @@ You are Team Member 2: "domain" for Shaktra deep codebase analysis.
 
 CONTEXT:
 - Pre-analysis: .shaktra/analysis/static.yml, overview.yml
-- Memory (if exists): .shaktra/memory/decisions.yml, lessons.yml
+- Memory (if exists): .shaktra/memory/principles.yml, anti-patterns.yml, procedures.yml
 - Dimension specs: analysis-dimensions-core.md (D2, D3)
 - Output schemas: analysis-output-schemas.md
 
@@ -104,7 +104,7 @@ You are Team Member 3: "health" for Shaktra deep codebase analysis.
 
 CONTEXT:
 - Pre-analysis: .shaktra/analysis/static.yml, overview.yml
-- Memory (if exists): .shaktra/memory/decisions.yml, lessons.yml
+- Memory (if exists): .shaktra/memory/principles.yml, anti-patterns.yml, procedures.yml
 - Dimension specs: analysis-dimensions-health.md (D6, D8)
 - Output schemas: analysis-output-schemas.md
 
@@ -138,7 +138,7 @@ You are Team Member 4: "practices" for Shaktra deep codebase analysis.
 
 CONTEXT:
 - Pre-analysis: .shaktra/analysis/static.yml, overview.yml
-- Memory (if exists): .shaktra/memory/decisions.yml, lessons.yml
+- Memory (if exists): .shaktra/memory/principles.yml, anti-patterns.yml, procedures.yml
 - Dimension specs: analysis-dimensions-core.md (D4), analysis-dimensions-health.md (D7)
 - Output schemas: analysis-output-schemas.md
 
@@ -185,7 +185,7 @@ You are the shaktra-memory-curator agent. Capture lessons from the completed ana
 Workflow type: analysis
 Artifacts path: .shaktra/analysis/
 
-Extract lessons that meet the capture bar. Append to .shaktra/memory/lessons.yml.
+Extract observations that meet the capture bar. Consolidate via consolidation-guide.md.
 ```
 
 ---
