@@ -461,6 +461,21 @@ def get_test_definitions(test_dir: str) -> list[dict]:
             ),
         },
         # =================================================================
+        # Adversarial review
+        # =================================================================
+        {
+            "name": "adversarial-review",
+            "category": "greenfield",
+            "timeout": 1200,
+            "max_turns": 50,
+            "setup": lambda td: setup_review(td),
+            "prompt": build_prompt(
+                "adversarial-review", "shaktra-adversarial-review",
+                skill_args="adversarial review story ST-TEST-001",
+                validator_cmd=_v("validate_adversarial_review.py", d, "ST-TEST-001"),
+            ),
+        },
+        # =================================================================
         # Hotfix
         # =================================================================
         {
@@ -564,6 +579,19 @@ def get_test_definitions(test_dir: str) -> list[dict]:
             "prompt": build_prompt(
                 "review-incomplete-dev", "shaktra-review",
                 skill_args="review story ST-TEST-001",
+                validator_cmd=_v("validate_negative.py", d,
+                                 "no_progression", "ST-TEST-001"),
+            ),
+        },
+        {
+            "name": "adversarial-review-incomplete-dev",
+            "category": "negative",
+            "timeout": 120,
+            "max_turns": 10,
+            "setup": lambda td: setup_neg_incomplete_dev(td),
+            "prompt": build_prompt(
+                "adversarial-review-incomplete-dev", "shaktra-adversarial-review",
+                skill_args="adversarial review story ST-TEST-001",
                 validator_cmd=_v("validate_negative.py", d,
                                  "no_progression", "ST-TEST-001"),
             ),
