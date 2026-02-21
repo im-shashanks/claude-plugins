@@ -230,3 +230,20 @@ Routes to `/shaktra:analyze` (assessment) + `/shaktra:dev` (refactoring with TDD
 **Purpose:** Shows all commands, workflows, and detailed usage guide.
 
 **Available anytime for reference within Claude Code.**
+
+---
+
+### `/shaktra:memory-stats` — Memory Inspector
+
+**Purpose:** Inspect learned principles, anti-patterns, procedures, per-story briefings, and seed new entries.
+
+**When to use:**
+- Auditing what the system has learned across workflows
+- Checking which entries are near archive threshold
+- Inspecting a specific story's briefing and observation consistency
+- Manually seeding knowledge (e.g., project conventions) before the first workflow
+
+**Modes:**
+- No arguments — Full audit (overview, strongest entries, near-archive, recent, alerts)
+- `<story-id>` — Story briefing detail (entries, relevance, consistency checks)
+- `seed` — Interactive entry seeding (principle, anti-pattern, or procedure)

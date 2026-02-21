@@ -489,7 +489,7 @@ def get_test_definitions(test_dir: str) -> list[dict]:
         {
             "name": "analyze",
             "category": "brownfield",
-            "timeout": 900,
+            "timeout": 1200,
             "max_turns": 40,
             "setup": lambda td: setup_brownfield(td),
             "prompt": build_prompt(

@@ -113,7 +113,7 @@ Do **not** touch `dist/shaktra/skills/shaktra-status-dash/SKILL.md` — the vers
 ## Component Overview
 
 **7 Main Agent Skills:** `/shaktra:tpm`, `/shaktra:dev`, `/shaktra:review`, `/shaktra:analyze`, `/shaktra:general`, `/shaktra:bugfix`, `/shaktra:pm`
-**5 Utility Skills:** `/shaktra:init`, `/shaktra:doctor`, `/shaktra:workflow`, `/shaktra:help`, `/shaktra:status-dash`
+**6 Utility Skills:** `/shaktra:init`, `/shaktra:doctor`, `/shaktra:workflow`, `/shaktra:help`, `/shaktra:status-dash`, `/shaktra:memory-stats`
 **4 Internal Skills:** shaktra-quality, shaktra-tdd, shaktra-reference, shaktra-stories
 **12 Sub-Agents:** architect, tpm-quality, scrummaster, product-manager, sw-engineer, test-agent, developer, sw-quality, cba-analyzer, cr-analyzer, memory-curator, bug-diagnostician
 **1 Command:** `/shaktra-update`

@@ -195,6 +195,24 @@ After every workflow, present:
 - {recommended next action}
 ```
 
+## Memory Capture (brainstorm and research modes only)
+
+After `RESEARCH_SYNTHESIZED` or brainstorm completion:
+
+1. Create `.shaktra/observations/<mode>-<date>.yml` (create directory if needed)
+2. Write observations:
+   - `type: discovery` — surprising market findings, domain constraints, user behavior patterns
+   - `type: observation` — requirements patterns, persona insights that inform future stories
+3. Spawn memory-curator:
+
+```
+You are the shaktra-memory-curator agent. Consolidate PM workflow observations.
+
+Observations path: {observations_path}
+Workflow type: pm
+Settings: {settings_path}
+```
+
 ## Guard Tokens
 
 This workflow emits and responds to:

@@ -52,6 +52,8 @@ relevance_score = semantic_relevance(0-10) × confidence
 - 1-2: Weak connection, unlikely to help
 - 0: No relevance
 
+**Anti-pattern trigger boost** — For anti-pattern entries with `trigger_patterns`, check each trigger against the story's keywords (from Step 1). If any trigger matches (case-insensitive substring), set `semantic_relevance = max(semantic_relevance, 8)`. This ensures known failure patterns surface proactively even when the semantic connection seems indirect.
+
 ### Step 4: Rank and Cap
 
 Sort entries by `relevance_score` descending. Keep top `settings.memory.max_briefing_entries` entries.

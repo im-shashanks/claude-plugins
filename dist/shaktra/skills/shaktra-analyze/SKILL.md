@@ -204,6 +204,28 @@ When user requests dependency audit or upgrade planning:
 
 ---
 
+## Step 5b — Memory Capture
+
+After analysis completes (`ANALYSIS_COMPLETE` or `ANALYSIS_PARTIAL`):
+
+1. Create `.shaktra/observations/analysis-<date>.yml` (create directory if needed)
+2. Write observations about significant findings:
+   - `type: discovery` — unexpected architecture patterns, hidden dependencies, undocumented conventions
+   - `type: observation` — practice gaps, risk patterns, quality hotspots
+   - Limit to findings that would materially change future development decisions
+   - Cap at `settings.memory.max_observations_per_story` entries
+3. Spawn memory-curator:
+
+```
+You are the shaktra-memory-curator agent. Consolidate analysis observations.
+
+Observations path: {observations_path}
+Workflow type: analysis
+Settings: {settings_path}
+
+Promote significant findings to principles/anti-patterns/procedures.
+```
+
 ## Guard Tokens
 
 | Token | When |

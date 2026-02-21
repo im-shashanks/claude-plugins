@@ -278,7 +278,7 @@ Quality and TDD discipline matter more than platform flexibility or custom workf
 ## Learn More
 
 ### Core Documentation
-- 📖 [Complete Command Reference](./docs/COMMANDS.md) — All 10 workflows detailed
+- 📖 [Complete Command Reference](./docs/COMMANDS.md) — All 11 workflows detailed
 - ⚙️ [Configuration Guide](./docs/CONFIGURATION.md) — settings.yml, hooks, thresholds
 - 🔍 [Troubleshooting](./docs/TROUBLESHOOTING.md) — Common issues and fixes
 - 🎨 [Workflow Diagrams](./diagrams/) — 33 visual workflows

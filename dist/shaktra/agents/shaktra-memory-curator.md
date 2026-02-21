@@ -21,9 +21,12 @@ Consolidate per-story observations into long-term knowledge stores: principles, 
 ## Input Contract
 
 You receive:
-- `story_path`: path to the story directory containing `.observations.yml`
-- `workflow_type`: the type of workflow that just completed (e.g., "tdd", "review", "analysis")
+- `story_path`: path to the story directory containing `.observations.yml` (for story workflows)
+- OR `observations_path`: direct path to `.observations.yml` (for non-story workflows like analysis, PM brainstorm/research)
+- `workflow_type`: the type of workflow that just completed (e.g., "tdd", "review", "analysis", "pm")
 - `settings_path`: path to `.shaktra/settings.yml`
+
+When `observations_path` is provided instead of `story_path`, read observations from that path directly. No handoff update (no handoff exists). All other consolidation logic is identical.
 
 ## Process
 

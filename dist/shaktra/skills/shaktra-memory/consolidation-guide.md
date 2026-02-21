@@ -4,7 +4,9 @@ The memory-curator runs this algorithm after every workflow to transform per-sto
 
 ## Input
 
-- `.shaktra/stories/<story_id>/.observations.yml` — observations from the completed workflow
+**Workflow-level observations:** When processing observations from `.shaktra/observations/` (non-story workflows), skip consistency-check processing (no briefing exists to validate against). All other steps apply.
+
+- `.shaktra/stories/<story_id>/.observations.yml` — observations from the completed workflow (or `.shaktra/observations/<workflow_id>.yml` for non-story workflows)
 - `.shaktra/memory/principles.yml` — existing principles
 - `.shaktra/memory/anti-patterns.yml` — existing anti-patterns
 - `.shaktra/memory/procedures.yml` — existing procedures

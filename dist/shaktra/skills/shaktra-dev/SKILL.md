@@ -152,6 +152,8 @@ Story: {story_path}
 Plan: {plan_path}
 Handoff: {handoff_path}
 Settings: {settings_summary}
+Briefing: {briefing_path}
+Briefing highlights: {top_3_principles_one_line_each} | Anti-patterns: {count}
 Mode: implement
 
 Follow implementation_order from plan. Make all tests pass. Check coverage against tier threshold.
@@ -210,6 +212,7 @@ Review mode: COMPREHENSIVE
 Artifact paths: [{all_code_and_test_paths}]
 Handoff: {handoff_path}
 Settings: {settings_path}
+Briefing: {briefing_path}
 
 Follow comprehensive-review.md: run tests, verify coverage, apply dimensions A-N,
 consolidate decisions, check cross-story consistency.

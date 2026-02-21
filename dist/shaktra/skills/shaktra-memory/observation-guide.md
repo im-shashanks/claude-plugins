@@ -66,3 +66,14 @@ Add these only when the type warrants them:
 | `iterations` | quality-loop-finding | Number of fix attempts |
 | `principle_id` | consistency-check | ID of the principle being checked |
 | `relationship` | consistency-check | "reinforce", "weaken", or "contradict" |
+
+## Workflow-Level Observations
+
+For workflows without stories (analysis, PM brainstorm/research), write observations to:
+
+`.shaktra/observations/<workflow_id>.yml`
+
+- `workflow_id` format: `<type>-<YYYY-MM-DD>` (e.g., `analysis-2026-02-18`, `brainstorm-2026-02-18`)
+- Same schema as story observations
+- Types limited to: `discovery`, `observation` (no `consistency-check` — no briefing to validate)
+- Create the `.shaktra/observations/` directory if it doesn't exist
