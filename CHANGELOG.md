@@ -6,6 +6,32 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Version numbers 
 
 ---
 
+## [0.4.0] - 2026-02-21
+
+### Added
+- **`/shaktra:incident` skill** — Incident response workflow for post-incident analysis. Three intents: `post_mortem` (timeline reconstruction, root cause chain, impact assessment, detection gaps, action items), `runbook` (operational runbook generation from diagnosis data), `detection_gap` (quality gate coverage matrix, test gap classification, dimension gap analysis, recommendations). Requires a completed `/shaktra:bugfix` diagnosis as input.
+- **`shaktra-incident-analyst` agent** — Senior incident response engineer agent (Opus) for blameless post-mortem analysis. Produces structured YAML artifacts for post-mortems, runbooks, and detection gap reports. References diagnosis artifacts without re-investigating.
+- **Incident response schemas** — YAML schemas for post-mortem, runbook, and detection gap artifacts in `incident-schema.md`.
+- **Post-mortem methodology** — 5-step process: timeline reconstruction, root cause chain analysis, impact assessment, detection gap summary, action items.
+- **Runbook template** — 6-section operational runbook: identification, severity assessment, immediate response, diagnosis shortcut, resolution, verification.
+- **Detection gap framework** — 4-step gap analysis: quality gate coverage matrix, test gap classification, quality dimension gap analysis, recommendations with effort/impact ratings.
+- **4 incident guard tokens** — `INCIDENT_CONTEXT_MISSING`, `INCIDENT_ANALYSIS_COMPLETE`, `INCIDENT_DETECTION_GAPS_FOUND`, `INCIDENT_MEMORY_CAPTURED`.
+- **`incident` settings section** — `incident_confidence_multiplier`, `auto_detection_gap`, `runbook_auto_generate`, `action_item_default_priority` in settings.yml template.
+- **2 new observation types** — `incident-learning` (importance 8-10) and `detection-gap` (importance 7-9) in observation guide.
+- **Incident memory enhancements** — Confidence multiplier for incident-sourced observations, fast-track anti-pattern creation for high-importance incident learnings, role inference for incident/detection-gap tags.
+- **2 new diagrams** — Incident response workflow (34) and incident agent dispatch (35).
+- **2 E2E tests for incident response** — Happy-path test (post-mortem with auto detection gap + runbook) and negative test (missing diagnosis blocked).
+
+### Changed
+- **Component counts updated** — 15 agents (added incident-analyst), 20 skills (added incident), 35 diagrams, across all docs, CI, diagrams, doctor checks, and publish scripts.
+- **`/shaktra:doctor`** — Updated expected counts (15 agents, 20 skills).
+- **`/shaktra:bugfix` completion report** — Added next-step suggestion for `/shaktra:incident post-mortem` on production incidents.
+- **`/shaktra:workflow` router** — Added Incident Response route with noun signals (post-mortem, runbook, incident review, detection gap).
+- **`/shaktra:help` guide** — Added `/shaktra:incident` to workflow commands table and agent architecture diagram.
+- **Documentation** — Updated AGENTS.md (incident-analyst entry), COMMANDS.md (incident entry), README (counts, examples), diagrams.
+
+---
+
 ## [0.3.0] - 2026-02-20
 
 ### Added
@@ -18,11 +44,6 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Version numbers 
 - **Memory system enhancements** — Trigger matching for memory entries, briefing dispatch across all workflows, workflow observation capture, and `shaktra-memory` internal skill with consolidation, observation, and retrieval guides.
 - **`/shaktra:memory-stats` skill** — Memory inspector for auditing learned knowledge, checking entries near archive threshold, inspecting story briefings, and seeding new entries.
 - **2 E2E tests for adversarial review** — Happy-path test (full pipeline with mutations and probes) and negative test (incomplete dev blocked).
-
-### Changed
-- **Component counts updated** — 14 agents (added adversary, memory-retriever), 19 skills (added adversarial-review, memory, memory-stats), across all docs, diagrams, doctor checks, CI, and publish scripts.
-- **`/shaktra:doctor`** — Updated expected counts (14 agents, 19 skills).
-- **Documentation** — Updated AGENTS.md (adversary + memory-retriever entries), COMMANDS.md (adversarial-review entry), README (counts, examples), CHANGELOG, diagrams.
 
 ---
 

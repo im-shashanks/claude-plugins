@@ -1,10 +1,10 @@
 # Shaktra
 
-**Turn Claude Code into a 14-agent development team — from design to deployment, with zero bugs reaching production.**
+**Turn Claude Code into a 15-agent development team — from design to deployment, with zero bugs reaching production.**
 
 | | |
 |---|---|
-| **Version** | 0.3.0 |
+| **Version** | 0.4.0 |
 | **License** | MIT |
 | **Claude Code** | February 2025+ |
 | **Platform** | Claude code native (macOS, Linux, Windows) |
@@ -81,23 +81,21 @@ Three commands take you from idea to production-ready code:
 
 ## The Problem
 
-❌ **Manual TDD is inconsistent** — Tests written after code (or not at all), coverage spotty, quality varies by developer. No enforcement, just vibes.
-
-❌ **Code reviews catch issues too late** — After implementation, when fixes are expensive. Quality gates happen at merge time, not development time.
-
+❌ **Manual TDD is inconsistent** — Tests written after code (or not at all), coverage spotty, quality varies by developer.
+❌ **Code reviews catch issues too late** — After implementation, when fixes are expensive.
 ❌ **Solo developers lack team capabilities** — No architect, no PM, no dedicated QA. You wear all hats, poorly.
 
-**Shaktra solves this** with enforced quality gates at every phase and 14 specialized AI agents that give you team-level capabilities without the team.
+**Shaktra solves this** with enforced quality gates at every phase and 15 specialized AI agents that give you team-level capabilities without the team.
 
 ---
 
 ## How Shaktra Gives You Superpowers
 
-### 🤖 14-Agent Team. (*pssst! no hiring*)
+### 🤖 15-Agent Team. (*pssst! no hiring*)
 
-From Architect to Adversary, specialized agents handle design, planning, implementation, testing, review, and adversarial probing. Solo developers get team-level capabilities; teams get consistency across all members.
+From Architect to Adversary, specialized agents handle design, planning, implementation, testing, review, adversarial probing, and incident analysis. Solo developers get team-level capabilities; teams get consistency across all members.
 
-**Agents:** Architect (design), Product Manager (requirements), Scrum Master (stories), SW Engineer (planning), Test Agent (TDD), Developer (implementation), SW Quality (story-level QA), Code Reviewer (app-level QA), Bug Diagnostician (root cause analysis), Memory Curator (institutional knowledge), Memory Retriever (briefing generation), CBA Analyzer (brownfield assessment), TPM Quality (artifact review), Adversary (mutation testing & fault injection)
+**Agents:** Architect (design), Product Manager (requirements), Scrum Master (stories), SW Engineer (planning), Test Agent (TDD), Developer (implementation), SW Quality (story-level QA), Code Reviewer (app-level QA), Bug Diagnostician (root cause analysis), Memory Curator (institutional knowledge), Memory Retriever (briefing generation), CBA Analyzer (brownfield assessment), TPM Quality (artifact review), Adversary (mutation testing & fault injection), Incident Analyst (post-mortem & detection gaps)
 
 [See full agent architecture](./docs/AGENTS.md) →
 
@@ -251,43 +249,38 @@ Check your version with `/shaktra:status-dash` — it compares local vs. latest 
 | **Quality Enforcement** | Adversarial review | Spec precision | Context engineering | **P0-P3 taxonomy + blocking hooks** ✅ |
 | **Coverage Guarantees** | Not enforced | Not enforced | Not enforced | **70-95% by tier** ✅ |
 | **TDD State Machine** | No | 6-phase spec flow | Flexible workflow | **PLAN→RED→GREEN→QUALITY** ✅ |
-| **Agent Count** | 26 ✅ | 0 (commands) | Orchestrator + subagents | 12 |
+| **Agent Count** | 26 ✅ | 0 (commands) | Orchestrator + subagents | 15 |
 | **Platform Support** | Any AI assistant ✅ | 15+ tools ✅ | Claude Code, OpenCode | **Claude Code only** ❌ |
 | **Customization** | Builder module ✅ | Limited | State management | settings.yml only |
 | **Community Size** | Large, established ✅ | Growing (GitHub) ✅ | 8.5k stars ✅ | New, building |
 | **Brownfield Analysis** | Modules | Exploration mode | Limited | **9-dimension systematic** ✅ |
 
 ### Where Shaktra is Stronger
-
-- **Formalized quality:** P0-P3 severity taxonomy is documented, enforced by hooks, and blocks merge automatically
+- **Formalized quality:** P0-P3 severity taxonomy enforced by hooks, blocks merge automatically
 - **Enforced coverage:** 70-95% thresholds by tier, not optional
 - **Strict TDD:** Tests always before code, state machine prevents shortcuts
 - **Two-tier quality safety net:** SW Quality (story-level, 36 checks) + Code Reviewer (app-level, 13 dimensions)
 
 ### Where Shaktra is Weaker
-
 - **Platform lock-in:** Claude Code only (vs. BMAD/Speckit multi-platform)
 - **No custom agents:** Can't extend like BMAD's Builder module
 - **Smaller community:** New framework vs. established competitors
 - **Rigid workflow:** TDD state machine less flexible than GSD's "No Agile BS" approach
 
 ### Choose Shaktra If
+Quality and TDD discipline matter more than platform flexibility or custom workflows. You want P0 findings physically blocked, not just warned.
 
-Quality and TDD discipline matter more than platform flexibility or custom workflows. You want P0 findings physically blocked, not just warned. You need brownfield analysis that's systematic, not ad-hoc.
-
-**Choose BMAD if:** You need multi-platform support or want to create custom agents.
-**Choose Speckit if:** You prefer spec-driven development with GitHub ecosystem integration.
-**Choose GSD if:** You're a solo developer prioritizing speed over ceremony.
+**Choose BMAD if:** Multi-platform support or custom agents. **Choose Speckit if:** Spec-driven development with GitHub. **Choose GSD if:** Speed over ceremony.
 
 ---
 
 ## Learn More
 
 ### Core Documentation
-- 📖 [Complete Command Reference](./docs/COMMANDS.md) — All 14 workflows detailed
+- 📖 [Complete Command Reference](./docs/COMMANDS.md) — All 15 workflows detailed
 - ⚙️ [Configuration Guide](./docs/CONFIGURATION.md) — settings.yml, hooks, thresholds
 - 🔍 [Troubleshooting](./docs/TROUBLESHOOTING.md) — Common issues and fixes
-- 🎨 [Workflow Diagrams](./diagrams/) — 33 visual workflows
+- 🎨 [Workflow Diagrams](./diagrams/) — 35 visual workflows
 
 ### Workflow Deep Dives
 - [TPM Workflow](./docs/workflows/TPM.md) — Design → Stories → Sprint planning
@@ -297,13 +290,10 @@ Quality and TDD discipline matter more than platform flexibility or custom workf
 
 ### Advanced Topics
 - [Quality Philosophy](./docs/QUALITY.md) — P0-P3 taxonomy, merge gates, severity criteria
-- [Agent Architecture](./docs/AGENTS.md) — 14 agents, orchestration, model allocation
+- [Agent Architecture](./docs/AGENTS.md) — 15 agents, orchestration, model allocation
 - [State Files](./docs/STATE.md) — How Shaktra tracks memory, observations, and knowledge stores
 
 ### Community & Support
-- 🐛 [Report Issues](https://github.com/im-shashanks/shaktra-plugin/issues)
-- 💬 [Discussions](https://github.com/im-shashanks/shaktra-plugin/discussions)
+- [Report Issues](https://github.com/im-shashanks/shaktra-plugin/issues) | [Discussions](https://github.com/im-shashanks/shaktra-plugin/discussions)
 
----
-
-**License:** MIT • **Version:** 0.3.0 • Built with ❤️ for AI developers
+**License:** MIT • **Version:** 0.4.0

@@ -24,6 +24,8 @@ For each observation, classify by its `type` and `tags`:
 | `fix-rationale` | Principle candidate |
 | `deviation` | Principle candidate (if justified) |
 | `observation` with constraint tags | Principle candidate |
+| `incident-learning` | Anti-pattern candidate (high confidence — production-confirmed failure) |
+| `detection-gap` | Procedure candidate (quality gate improvement) |
 | `consistency-check` | Reinforce/weaken/contradict existing entry |
 
 ## Step 2: Match Against Existing Entries
@@ -47,14 +49,16 @@ All threshold values come from `settings.memory.*`:
 | Existing entry weakened | `confidence -= settings.memory.confidence_weaken` | -0.08 |
 | Existing entry contradicted | `confidence -= settings.memory.confidence_contradict` | -0.20 |
 | Archive threshold | `confidence < settings.memory.confidence_archive` | < 0.2 |
+| Incident multiplier | `adjustment *= settings.incident.incident_confidence_multiplier` when `workflow_type: incident` | 1.5x |
 
-Confidence is clamped to the range [0.0, 1.0].
+Confidence is clamped to the range [0.0, 1.0]. The incident multiplier applies to both new entry creation (start confidence) and reinforcement adjustments for observations from incident workflows.
 
 ## Step 4: Anti-Pattern Detection
 
 Create an anti-pattern entry when:
 - 2+ failure observations (`type: quality-loop-finding`, `resolved: false`) on the **same pattern** within 3 stories
 - Pattern match: same tags and similar issue descriptions
+- **Fast-track:** Create anti-pattern immediately (no 2-story wait) when source is `incident-learning` with importance >= 9. Production incidents are pre-confirmed failures.
 
 Anti-pattern entry fields:
 - `failed_approach`: what went wrong (from observation text)
@@ -100,6 +104,7 @@ Map observation categories/tags to agent roles for the `roles` field:
 | consistency, patterns | developer, sw-engineer, architect |
 | observability, scalability | developer, architect |
 | workflow, process, planning | sdm (orchestrator-level) |
+| incident, detection-gap, post-mortem | developer, sw-engineer, sw-quality, cr-analyzer |
 
 ## Output
 

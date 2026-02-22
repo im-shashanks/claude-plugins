@@ -1,12 +1,12 @@
 # Shaktra Agent Architecture
 
-Shaktra orchestrates 14 specialized sub-agents, each with a defined role, strict input/output contracts, and read/write boundaries. No agent operates independently -- all are spawned by skill orchestrators (`/shaktra:tpm`, `/shaktra:dev`, `/shaktra:review`, `/shaktra:adversarial-review`, `/shaktra:analyze`, `/shaktra:bugfix`, `/shaktra:general`).
+Shaktra orchestrates 15 specialized sub-agents, each with a defined role, strict input/output contracts, and read/write boundaries. No agent operates independently -- all are spawned by skill orchestrators (`/shaktra:tpm`, `/shaktra:dev`, `/shaktra:review`, `/shaktra:adversarial-review`, `/shaktra:analyze`, `/shaktra:bugfix`, `/shaktra:incident`, `/shaktra:general`).
 
 ## Model Allocation
 
 | Model | Agents | Rationale |
 |-------|--------|-----------|
-| Opus | architect, sw-engineer, test-agent, developer, cba-analyzer, cr-analyzer, bug-diagnostician, adversary | Design, planning, code generation, deep analysis, and adversarial probing require highest capability |
+| Opus | architect, sw-engineer, test-agent, developer, cba-analyzer, cr-analyzer, bug-diagnostician, adversary, incident-analyst | Design, planning, code generation, deep analysis, adversarial probing, and incident analysis require highest capability |
 | Sonnet | tpm-quality, scrummaster, product-manager, sw-quality, memory-retriever | Structured review, story creation, checklist-driven work, and memory retrieval |
 | Haiku | memory-curator | Lightweight extraction and append-only writes |
 
@@ -132,7 +132,7 @@ Shaktra orchestrates 14 specialized sub-agents, each with a defined role, strict
 
 **Role:** Extract lessons learned from completed workflows and maintain institutional memory.
 
-**Invoked by:** Every workflow at completion (`/shaktra:tpm`, `/shaktra:dev`, `/shaktra:review`, `/shaktra:adversarial-review`, `/shaktra:bugfix`, `/shaktra:analyze`, `/shaktra:general`).
+**Invoked by:** Every workflow at completion (`/shaktra:tpm`, `/shaktra:dev`, `/shaktra:review`, `/shaktra:adversarial-review`, `/shaktra:bugfix`, `/shaktra:incident`, `/shaktra:analyze`, `/shaktra:general`).
 
 **Produces:** Updated `.shaktra/memory/principles.yml`, `anti-patterns.yml`, and `procedures.yml` by consolidating observations.
 
@@ -147,6 +147,16 @@ Shaktra orchestrates 14 specialized sub-agents, each with a defined role, strict
 **Produces:** `.briefing.yml` in the story directory with filtered, relevance-scored memory entries.
 
 **Key behaviors:** Operates in 3 modes — briefing (full retrieval), chunk (process a subset of entries), and consolidate (merge chunk results). Scores entries by role relevance, keyword match, and recency. Respects `settings.memory.max_briefing_entries` cap.
+
+### Incident Analyst
+
+**Role:** Analyze completed bug diagnoses to produce blameless post-mortems, operational runbooks, and detection gap analyses.
+
+**Invoked by:** `/shaktra:incident` for all three intents (post-mortem, runbook, detection gap).
+
+**Produces:** Post-mortem artifact (timeline, root cause chain, impact, action items), runbook (identification, response, diagnosis shortcut, resolution), detection gap report (gate coverage matrix, test gaps, quality dimension gaps, recommendations). All artifacts written to `.shaktra/incidents/{bug_id}/`.
+
+**Key behaviors:** Never re-investigates the bug — works from the diagnosis artifact as ground truth. Extends single-point root cause to a contributing factors chain. Maps root cause against all quality gates to identify detection gaps. Every finding requires evidence from diagnosis, handoff, or git history. Blameless analysis — focuses on systems and processes, never individuals.
 
 ### Adversary
 
@@ -184,7 +194,7 @@ Each agent reads the prior agent's handoff section and writes its own. The hando
 
 ### Parallel Fan-Out
 
-`/shaktra:analyze` spawns up to 9 CBA Analyzer instances in parallel (one per dimension). `/shaktra:review` spawns CR Analyzer instances in parallel groups. `/shaktra:adversarial-review` spawns 3 Adversary instances in parallel (mutation, input/boundary, fault/resilience). This pattern maximizes throughput for independent analysis work.
+`/shaktra:analyze` spawns up to 9 CBA Analyzer instances in parallel (one per dimension). `/shaktra:review` spawns CR Analyzer instances in parallel groups. `/shaktra:adversarial-review` spawns 3 Adversary instances in parallel (mutation, input/boundary, fault/resilience). `/shaktra:incident` dispatches a single Incident Analyst with the appropriate intent. This pattern maximizes throughput for independent analysis work.
 
 ### Memory Capture
 

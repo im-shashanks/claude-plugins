@@ -45,6 +45,8 @@ observations:
 | `deviation` | Implementation diverged from plan | "Added caching layer not in original plan due to observed N+1 query pattern" |
 | `observation` | General workflow or risk observation | "Stories touching the auth module consistently need extra security review" |
 | `consistency-check` | Validated or challenged existing principle | "PR-003 (always use DI for external services) confirmed applicable here" |
+| `incident-learning` | Post-incident finding about systemic failure or process gap | "Production timeout was caused by unbounded query — no pagination enforced at API layer" |
+| `detection-gap` | Quality gate gap identified during incident analysis | "Code review checked error handling but not timeout behavior on the external call" |
 
 ## Importance Scale
 
@@ -54,6 +56,8 @@ observations:
 | 4-6 | Moderate — useful context for similar work | "This API requires pagination for lists > 100 items" |
 | 7-8 | High — would materially change future planning | "Repository pattern doesn't work here due to multi-tenant isolation" |
 | 9-10 | Critical — ignoring this caused or would cause production issues | "Race condition in session handling under concurrent requests" |
+
+**Incident observations** (`incident-learning`, `detection-gap`) default to importance 8-10. Production incidents represent the strongest signal about quality gate gaps and systemic failures.
 
 ## Optional Fields
 

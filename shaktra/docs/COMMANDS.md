@@ -175,21 +175,39 @@ Complete reference for all Shaktra commands. Commands are organized into **main 
 
 ---
 
+### `/shaktra:incident <bug-id>` — Incident Response
+
+**Purpose:** Post-mortem analysis, runbook generation, and detection gap assessment for completed bugfixes
+
+**When to use:**
+- After a production incident has been diagnosed and fixed via `/shaktra:bugfix`
+- To generate a blameless post-mortem with timeline, root cause chain, and action items
+- To create an operational runbook or identify quality gate detection gaps
+
+**3 intents:**
+
+| Intent | Trigger | What it produces |
+|--------|---------|-----------------|
+| `post_mortem` | "post-mortem", "retro", "incident review" | Timeline, root cause chain, impact, detection gaps, action items |
+| `runbook` | "runbook", "playbook" | Identification, severity criteria, response, diagnosis shortcut, resolution |
+| `detection_gap` | "detection gap", "why didn't we catch" | Gate coverage matrix, test gaps, quality dimension gaps, recommendations |
+
+**Prerequisite:** A completed `/shaktra:bugfix` diagnosis artifact must exist.
+
+**Auto-generation:** Post-mortem automatically includes detection gap analysis and runbook generation by default. Artifacts written to `.shaktra/incidents/{bug_id}/`.
+
+---
+
 ### `/shaktra:general` — Domain Expert
 
 **Purpose:** Domain expertise, architectural guidance, technical questions
 
 **When to use:**
-- Architectural questions (patterns, tradeoffs)
+- Architectural questions, design pattern tradeoffs
 - Domain expertise on unfamiliar technology
-- Technical design review
-- "How do we..." questions
+- Technical design review, "How do we..." questions
 
-**Capabilities:**
-- Design pattern suggestions
-- Technology tradeoff analysis
-- Best practices for your language/framework
-- Architectural alternatives evaluation
+**Capabilities:** Design pattern suggestions, technology tradeoff analysis, best practices for your language/framework, architectural alternatives evaluation.
 
 ---
 

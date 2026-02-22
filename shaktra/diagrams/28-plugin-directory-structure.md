@@ -11,8 +11,8 @@ graph TD
     ROOT --> CM["CLAUDE.md<br/>dev-only"]
 
     DIST --> PLUG[".claude-plugin/<br/>plugin.json"]
-    DIST --> AGENTS["agents/<br/>14 sub-agents"]
-    DIST --> SKILLS["skills/<br/>19 skill dirs"]
+    DIST --> AGENTS["agents/<br/>15 sub-agents"]
+    DIST --> SKILLS["skills/<br/>20 skill dirs"]
     DIST --> HOOKS["hooks/<br/>hooks.json"]
     DIST --> SCRIPTS["scripts/<br/>Python hook scripts"]
     DIST --> TEMPLATES["templates/<br/>state file templates"]
@@ -22,13 +22,13 @@ graph TD
     AGENTS --> A1["shaktra-architect.md"]
     AGENTS --> A2["shaktra-developer.md"]
     AGENTS --> A3["shaktra-sw-quality.md"]
-    AGENTS --> A4["... 9 more agents"]
+    AGENTS --> A4["... 10 more agents"]
 
     SKILLS --> S1["shaktra-tpm/"]
     SKILLS --> S2["shaktra-dev/"]
     SKILLS --> S3["shaktra-review/"]
     SKILLS --> S4["shaktra-reference/"]
-    SKILLS --> S5["... 12 more skills"]
+    SKILLS --> S5["... 13 more skills"]
 
     HOOKS --> H1["block-main-branch"]
     HOOKS --> H2["check-p0"]
