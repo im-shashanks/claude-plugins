@@ -147,6 +147,49 @@ The dev test starts with a pre-built story (ST-TEST-001: user registration) and 
 [PASS] on feature branch
 ```
 
+### Incident Workflow (21/21 validator checks passed)
+
+The incident test starts with completed bugfix artifacts (diagnosis, remediation story, handoff) and validates the full post-mortem analysis pipeline:
+
+```
+[MONITOR] +40s new: .shaktra/incidents/BUG-TEST-001/.observations.yml (159B)
+[MONITOR] +190s new: .shaktra/incidents/BUG-TEST-001/postmortem.yml (6.6KB)
+[MONITOR] +230s new: .shaktra/incidents/BUG-TEST-001/detection-gap.yml (9.4KB)
+[MONITOR] +260s new: .shaktra/incidents/BUG-TEST-001/runbook.yml (5.8KB)
+[MONITOR] +280s modified: .shaktra/incidents/BUG-TEST-001/.observations.yml (159B → 2.5KB, +2.3KB)
+[MONITOR] +380s modified: .shaktra/memory/principles.yml (104B → 1002B, +898B)
+[MONITOR] +380s modified: .shaktra/memory/anti-patterns.yml (107B → 817B, +710B)
+[MONITOR] +380s modified: .shaktra/memory/procedures.yml (96B → 548B, +452B)
+[MONITOR] +400s modified: .shaktra/incidents/BUG-TEST-001/.observations.yml (2.5KB → 2.5KB, -1B)
+```
+
+**Result:** Post-mortem with timeline and root cause chain, detection gap analysis (4 quality gates analyzed), operational runbook, and memory capture (principles, anti-patterns, procedures). Total: ~8 minutes.
+
+**Validator output:**
+```
+[PASS] incident directory exists
+[PASS] postmortem.yml exists
+[PASS] postmortem.yml valid YAML
+[PASS] postmortem has timeline (non-empty list)
+[PASS] postmortem has root_cause_chain.primary
+[PASS] postmortem has impact section
+[PASS] postmortem has action_items (non-empty list)
+[PASS] action_item[0] valid priority
+[PASS] action_item[1] valid priority
+[PASS] action_item[2] valid priority
+[PASS] action_item[3] valid priority
+[PASS] action_item[4] valid priority
+[PASS] detection-gap.yml exists
+[PASS] detection-gap.yml valid YAML
+[PASS] detection gap has gates_passed (non-empty list)
+[PASS] runbook.yml exists
+[PASS] observations file exists
+[PASS] principles.yml exists
+[PASS] principles.yml valid YAML
+[PASS] principles.yml has entries
+[PASS] settings has incident section
+```
+
 ### File System Monitor
 
 The external FileMonitor tracks every file creation and modification in real time, providing independent observability into the agent's work:
@@ -260,7 +303,7 @@ File-read tracking also serves as a regression check — when adding new referen
 
 ## Available Tests
 
-### Positive Tests (14)
+### Positive Tests (16)
 
 | Test | Category | What It Tests | Timeout | Turns |
 |------|----------|---------------|---------|-------|
@@ -272,14 +315,16 @@ File-read tracking also serves as a regression check — when adding new referen
 | `init-greenfield` | greenfield | `.shaktra/` structure, settings, templates | 5m | 15 |
 | `pm` | greenfield | PRD creation, personas, journey maps | 15m | 30 |
 | `tpm` | greenfield | Design doc, quality review, stories, sprints, memory | 25m | 60 |
-| `dev` | greenfield | TDD pipeline: plan, branch, tests, code, quality | 30m | 65 |
+| `dev` | greenfield | TDD pipeline: plan, branch, tests, code, quality | 30m | 85 |
 | `review` | greenfield | Code review findings, verdict, memory capture | 15m | 35 |
+| `adversarial-review` | greenfield | Mutation testing, adversarial probes, fault injection | 20m | 50 |
 | `tpm-hotfix` | hotfix | Trivial-tier story creation, no sprint allocation | 10m | 30 |
 | `init-brownfield` | brownfield | `.shaktra/` for existing project | 5m | 15 |
 | `analyze` | brownfield | 9-dimension codebase analysis | 15m | 40 |
 | `bugfix` | bugfix | Bug diagnosis, TDD fix, quality review | 15m | 55 |
+| `incident` | incident | Post-mortem, detection gap, runbook, memory capture | 20m | 50 |
 
-### Negative Tests (5)
+### Negative Tests (7)
 
 Negative tests verify error paths — they should detect problems at pre-flight and stop quickly.
 
@@ -289,7 +334,9 @@ Negative tests verify error paths — they should detect problems at pre-flight 
 | `dev-blocked-story` | negative | Dev rejects story blocked by dependency | 2m | 10 |
 | `dev-sparse-story` | negative | Dev rejects story missing required fields | 2m | 10 |
 | `review-incomplete-dev` | negative | Review detects incomplete development | 2m | 10 |
+| `adversarial-review-incomplete-dev` | negative | Adversarial review detects incomplete development | 2m | 10 |
 | `init-already-exists` | negative | Init detects `.shaktra/` already exists | 2m | 5 |
+| `incident-no-diagnosis` | negative | Incident rejects missing diagnosis artifact | 2m | 10 |
 
 ### Test Independence
 
@@ -299,7 +346,8 @@ Each test's setup function prepares the exact `.shaktra/` state it needs:
 - **Smoke tests:** greenfield `.shaktra/` with settings
 - **Dev test:** pre-built story + design doc (no prior TPM run needed)
 - **Review test:** completed dev handoff + actual code files (no prior dev run needed)
-- **Negative tests:** deliberately broken state (missing settings, blocked stories, etc.)
+- **Incident test:** completed bugfix artifacts (diagnosis, remediation story, handoff) + code files (no prior bugfix run needed)
+- **Negative tests:** deliberately broken state (missing settings, blocked stories, missing diagnosis, etc.)
 
 ### Time and Cost Expectations
 
@@ -308,7 +356,7 @@ Each test's setup function prepares the exact `.shaktra/` state it needs:
 | Smoke tests (`--smoke`) | 2-3 min | ~$0.10 |
 | Negative tests (`--negative`) | 5-10 min | ~$0.50 |
 | Single workflow (`--test tpm`) | 15-25 min | ~$2-5 |
-| Full suite (all 19 tests) | 60-90 min | ~$10-20 |
+| Full suite (all 23 tests) | 75-120 min | ~$15-30 |
 
 Costs depend on model choice. Using `--model claude-sonnet-4-5-20250929` is recommended for testing (good balance of speed and capability). Opus is more capable but slower and more expensive.
 
@@ -370,6 +418,8 @@ python3 tests/workflows/validators/validate_review.py /path/to/project ST-001
 python3 tests/workflows/validators/validate_pm.py /path/to/project
 python3 tests/workflows/validators/validate_analyze.py /path/to/project
 python3 tests/workflows/validators/validate_bugfix.py /path/to/project
+python3 tests/workflows/validators/validate_adversarial_review.py /path/to/project ST-001
+python3 tests/workflows/validators/validate_incident.py /path/to/project BUG-001
 python3 tests/workflows/validators/validate_negative.py /path/to/project no_handoff ST-001
 ```
 
@@ -440,11 +490,14 @@ tests/workflows/
     validate_pm.py           ← /shaktra:pm checks (PRD, personas, journeys)
     validate_analyze.py      ← /shaktra:analyze checks (analysis artifacts)
     validate_bugfix.py       ← /shaktra:bugfix checks (diagnosis, fix)
-    validate_negative.py     ← Negative test checks (error detection, no handoff, no progression)
+    validate_adversarial_review.py ← /shaktra:adversarial-review checks (mutations, probes, findings)
+    validate_incident.py     ← /shaktra:incident checks (postmortem, detection gap, runbook, memory)
+    validate_negative.py     ← Negative test checks (error detection, no handoff, no progression, no incidents)
   fixtures/
     greenfield/              ← PRD, architecture doc, design doc, code files, handoff fixtures
     brownfield/              ← Sample Python project for analysis tests
     stories/                 ← Pre-built story YAML for dev/review tests
     negative/                ← Broken state fixtures (blocked stories, sparse stories, incomplete handoff)
+    incident/                ← Completed bugfix fixtures (diagnosis, remediation story, handoff)
   reports/                   ← Generated markdown reports (gitignored)
 ```

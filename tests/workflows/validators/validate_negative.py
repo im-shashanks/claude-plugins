@@ -100,11 +100,28 @@ def validate_no_progression(
     return report
 
 
+def validate_no_incidents(
+    project_dir: str,
+) -> ValidationReport:
+    """Confirm no .shaktra/incidents/ directory was created (missing diagnosis blocked)."""
+    report = ValidationReport("negative test (no incidents)")
+
+    incidents_dir = os.path.join(project_dir, ".shaktra", "incidents")
+    exists = os.path.isdir(incidents_dir)
+    report.add(
+        "no incidents directory created",
+        not exists,
+        "incidents/ was created despite missing diagnosis" if exists else "",
+    )
+
+    return report
+
+
 # CLI
 if __name__ == "__main__":
     if len(sys.argv) < 3:
         print("Usage: validate_negative.py <project_dir> <check_type> [args...]")
-        print("  check_type: error_detected|no_handoff|no_progression")
+        print("  check_type: error_detected|no_handoff|no_progression|no_incidents")
         sys.exit(2)
 
     project_dir = sys.argv[1]
@@ -116,6 +133,8 @@ if __name__ == "__main__":
     elif check_type == "no_progression":
         story_id = sys.argv[3] if len(sys.argv) > 3 else "UNKNOWN"
         r = validate_no_progression(project_dir, story_id)
+    elif check_type == "no_incidents":
+        r = validate_no_incidents(project_dir)
     elif check_type == "error_detected":
         patterns = sys.argv[3:]
         r = validate_error_detected(project_dir, patterns)

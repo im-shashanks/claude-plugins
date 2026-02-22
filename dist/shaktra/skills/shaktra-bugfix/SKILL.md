@@ -149,6 +149,7 @@ After the full bugfix lifecycle:
 
 ### Next Step
 - {recommended action}
+- For production incidents, run `/shaktra:incident post-mortem {bug_id}` to generate a post-mortem and identify detection gaps
 ```
 
 ---

@@ -21,6 +21,7 @@ Classify intent using a **noun-first, two-signal model**. Shaktra-specific nouns
 |---|---|---|---|
 | TPM | design doc, architecture, PRD, stories (creation context), sprint, backlog, feature (planning context), hotfix, enrich | plan, design, create, break down, enrich, prioritize | `/shaktra:tpm` |
 | Bug Fix | bug, bugfix, debug, diagnose (code context), error message, stack trace, "why does this fail" | debug, diagnose, fix (with bug noun), investigate | `/shaktra:bugfix` |
+| Incident Response | post-mortem, postmortem, runbook, playbook, incident review, detection gap, "why didn't we catch" | review (with incident noun), analyze (with incident noun) | `/shaktra:incident` |
 | Dev | ST-### (without "review"), tests (writing context), code, implementation, TDD | develop, implement, build, code, write, resume | `/shaktra:dev` |
 | Review | PR, pull request, PR #/URL, "review" + ST-### | review (with PR/story noun) | `/shaktra:review` |
 | Analyze | codebase, brownfield, analysis, dimension names (architecture, practices, dependencies, tech-debt, data-flows, critical-paths, domain-model, entry-points), debt, tech debt, debt strategy, dependency audit, dependency health, upgrade dependencies | analyze (codebase context), prioritize, audit | `/shaktra:analyze` |
@@ -39,10 +40,11 @@ When multiple routes match, resolve in this order:
 1. **Story ID + "review"** → Review (e.g., "review ST-001")
 2. **Story ID** (without "review") → Dev (e.g., "implement ST-001")
 3. **PR reference** (#number, PR URL, "pull request") → Review
-4. **Utility match** ("init", "initialize", "set up shaktra") → Init; ("doctor", "health") → Doctor; ("help", "commands", "guide") → Help; ("status", "dashboard", "overview") → Status Dash
-5. **Noun match** → per route table; noun beats verb
-6. **Verb-only match** (no Shaktra noun) → confirm with user before routing
-7. **No match** → General
+4. **"post-mortem" + bug/story reference** → Incident Response (e.g., "post-mortem BUG-001")
+5. **Utility match** ("init", "initialize", "set up shaktra") → Init; ("doctor", "health") → Doctor; ("help", "commands", "guide") → Help; ("status", "dashboard", "overview") → Status Dash
+6. **Noun match** → per route table; noun beats verb
+7. **Verb-only match** (no Shaktra noun) → confirm with user before routing
+8. **No match** → General
 
 Key overlap resolutions:
 - "review the design" → TPM (noun "design" outranks verb "review")
@@ -96,6 +98,7 @@ When invoked with no request text (just `/shaktra:workflow`), present available 
 | Development | `/shaktra:dev` | TDD implementation of stories |
 | Code Review | `/shaktra:review` | PR reviews, app-level review |
 | Analysis | `/shaktra:analyze` | Brownfield codebase analysis |
+| Incident Response | `/shaktra:incident` | Post-mortem, runbook, detection gap analysis |
 | General | `/shaktra:general` | Domain expertise, architectural guidance |
 | Doctor | `/shaktra:doctor` | Health checks, config validation, diagnostics |
 | Help | `/shaktra:help` | All commands, workflows, architecture, usage guide |

@@ -54,7 +54,7 @@ Skills are namespaced as `/shaktra:skill-name` when installed by users.
 
 ### Automated Tests
 
-The `tests/workflows/` directory contains 21 E2E tests covering all skills (happy path and error scenarios). Run them with:
+The `tests/workflows/` directory contains 23 E2E tests covering all skills (happy path and error scenarios). Run them with:
 
 ```bash
 cd tests/workflows && python3 run_workflow_tests.py
@@ -112,9 +112,9 @@ Do **not** touch `dist/shaktra/skills/shaktra-status-dash/SKILL.md` — the vers
 
 ## Component Overview
 
-**8 Main Agent Skills:** `/shaktra:tpm`, `/shaktra:dev`, `/shaktra:review`, `/shaktra:adversarial-review`, `/shaktra:analyze`, `/shaktra:general`, `/shaktra:bugfix`, `/shaktra:pm`
+**9 Main Agent Skills:** `/shaktra:tpm`, `/shaktra:dev`, `/shaktra:review`, `/shaktra:adversarial-review`, `/shaktra:analyze`, `/shaktra:general`, `/shaktra:bugfix`, `/shaktra:pm`, `/shaktra:incident`
 **6 Utility Skills:** `/shaktra:init`, `/shaktra:doctor`, `/shaktra:workflow`, `/shaktra:help`, `/shaktra:status-dash`, `/shaktra:memory-stats`
 **5 Internal Skills:** shaktra-quality, shaktra-tdd, shaktra-reference, shaktra-stories, shaktra-memory
-**14 Sub-Agents:** architect, tpm-quality, scrummaster, product-manager, sw-engineer, test-agent, developer, sw-quality, cba-analyzer, cr-analyzer, memory-curator, bug-diagnostician, memory-retriever, adversary
+**15 Sub-Agents:** architect, tpm-quality, scrummaster, product-manager, sw-engineer, test-agent, developer, sw-quality, cba-analyzer, cr-analyzer, memory-curator, bug-diagnostician, memory-retriever, adversary, incident-analyst
 **1 Command:** `/shaktra-update`
 **4 Hooks:** block-main-branch, check-p0, validate-story-scope, validate-schema

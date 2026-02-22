@@ -92,17 +92,17 @@ jobs:
             errors=$((errors + 1))
           fi
 
-          # Count agents in shaktra (14 expected)
+          # Count agents in shaktra (15 expected)
           agent_count=$(ls "$BUILD/shaktra/agents/"*.md 2>/dev/null | wc -l | tr -d ' ')
-          if [ "$agent_count" -ne 14 ]; then
-            echo "FAIL: expected 14 agents in shaktra, found $agent_count"
+          if [ "$agent_count" -ne 15 ]; then
+            echo "FAIL: expected 15 agents in shaktra, found $agent_count"
             errors=$((errors + 1))
           fi
 
-          # Count skills in shaktra (19 expected)
+          # Count skills in shaktra (20 expected)
           skill_count=$(ls -d "$BUILD/shaktra/skills/"*/ 2>/dev/null | wc -l | tr -d ' ')
-          if [ "$skill_count" -ne 19 ]; then
-            echo "FAIL: expected 19 skills in shaktra, found $skill_count"
+          if [ "$skill_count" -ne 20 ]; then
+            echo "FAIL: expected 20 skills in shaktra, found $skill_count"
             errors=$((errors + 1))
           fi
 

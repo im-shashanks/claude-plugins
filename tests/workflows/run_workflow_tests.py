@@ -39,7 +39,7 @@ from test_runner import (
 REPORTS_DIR = Path(__file__).resolve().parent / "reports"
 
 ALL_CATEGORIES = [
-    "smoke", "greenfield", "brownfield", "hotfix", "bugfix", "negative",
+    "smoke", "greenfield", "brownfield", "hotfix", "bugfix", "incident", "negative",
 ]
 
 

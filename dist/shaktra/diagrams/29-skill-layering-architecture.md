@@ -1,6 +1,6 @@
 # 29. Skill Layering Architecture
 
-Shaktra organizes its 19 skills into three distinct layers: user-invocable skills (the entry points users interact with), internal skills (loaded by agents, never called directly), and the shared reference layer (schemas, taxonomies, and practices used by all components). The key design rule is **no content duplication** — skills define behavior, agents reference it, and the reference layer provides shared definitions.
+Shaktra organizes its 20 skills into three distinct layers: user-invocable skills (the entry points users interact with), internal skills (loaded by agents, never called directly), and the shared reference layer (schemas, taxonomies, and practices used by all components). The key design rule is **no content duplication** — skills define behavior, agents reference it, and the reference layer provides shared definitions.
 
 ```mermaid
 graph TD

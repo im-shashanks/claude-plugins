@@ -16,7 +16,7 @@ You are the Shaktra help system. When invoked, present the guide below **verbati
 
 ### Shaktra — Software Development Framework for Claude Code
 
-Shaktra orchestrates 14 specialized AI agents through agile-inspired workflows. Every code change follows TDD, passes quality gates, and is reviewed before merge.
+Shaktra orchestrates 15 specialized AI agents through agile-inspired workflows. Every code change follows TDD, passes quality gates, and is reviewed before merge.
 
 **Core pillars:** TDD-first | Multi-agent orchestration | Quality gates (P0-P3) | Sprint planning | Ceremony scaling
 
@@ -33,6 +33,7 @@ Shaktra orchestrates 14 specialized AI agents through agile-inspired workflows. 
 | `/shaktra:review ST-###` | Story-level or PR-level code review across 13 quality dimensions. |
 | `/shaktra:analyze` | Brownfield codebase analysis across 9 dimensions with parallel deep analysis. |
 | `/shaktra:bugfix <desc>` | Bug diagnosis (5-step) followed by TDD remediation. |
+| `/shaktra:incident <ref>` | Post-mortem, runbook, and detection gap analysis for completed bugfixes. |
 | `/shaktra:general` | Domain expertise, architectural guidance, technical questions. |
 
 #### Utility Commands
@@ -102,6 +103,8 @@ User
  ├─ /shaktra:analyze ──→ CBA Analyzer (9 parallel dimensions)
  │
  ├─ /shaktra:bugfix ───→ Bug Diagnostician → then reuses Dev pipeline
+ │
+ ├─ /shaktra:incident ─→ Incident Analyst (post-mortem, runbook, gaps)
  │
  └─ /shaktra:general ──→ (no sub-agents — direct domain expertise)
 ```

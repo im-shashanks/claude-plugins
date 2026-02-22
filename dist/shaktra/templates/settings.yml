@@ -49,6 +49,12 @@ adversarial_review:
   max_adversarial_tests: 20        # cap generated adversarial tests per group
   test_persistence: ask            # auto | always | never | ask
 
+incident:
+  incident_confidence_multiplier: 1.5   # multiplier for incident-sourced memory entries
+  auto_detection_gap: true              # automatically run detection gap analysis with post-mortem
+  runbook_auto_generate: true           # automatically generate runbook with post-mortem
+  action_item_default_priority: P1      # default priority for action items
+
 memory:
   confidence_start: 0.6
   confidence_reinforce: 0.08

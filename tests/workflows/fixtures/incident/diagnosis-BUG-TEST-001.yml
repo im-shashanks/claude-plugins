@@ -1,0 +1,28 @@
+bug_id: BUG-TEST-001
+story_id: ST-FIX-001
+reported_date: "2026-02-20"
+reporter: "automated-test"
+
+symptom:
+  type: runtime_error
+  description: "divide function raises ZeroDivisionError instead of ValueError on zero input"
+  severity: P2
+
+triage:
+  is_real_bug: true
+  reproducible: true
+  security_related: false
+
+root_cause:
+  category: RC-LOGIC
+  location: "src/calculator.py:15"
+  explanation: "divide function performs b division without checking for zero, causing unhandled ZeroDivisionError instead of raising a domain-specific ValueError"
+
+blast_radius:
+  similar_patterns_found: 0
+  affected_modules:
+    - "src/calculator.py"
+
+remediation:
+  story_id: ST-FIX-001
+  approach: "Add zero-check guard clause before division, raise ValueError with descriptive message"

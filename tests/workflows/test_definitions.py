@@ -277,6 +277,46 @@ def _deep_merge(base: dict, override: dict) -> None:
 # ---------------------------------------------------------------------------
 # Negative test setup helpers
 # ---------------------------------------------------------------------------
+def setup_incident(test_dir: Path) -> None:
+    """Incident setup: greenfield + completed bugfix artifacts."""
+    setup_greenfield(test_dir)
+
+    shaktra = test_dir / ".shaktra"
+
+    # Copy diagnosis artifact
+    diag_src = FIXTURES_DIR / "incident" / "diagnosis-BUG-TEST-001.yml"
+    if diag_src.exists():
+        shutil.copy2(diag_src, shaktra / "stories" / "diagnosis-BUG-TEST-001.yml")
+
+    # Copy remediation story
+    story_src = FIXTURES_DIR / "incident" / "ST-FIX-001.yml"
+    if story_src.exists():
+        shutil.copy2(story_src, shaktra / "stories" / "ST-FIX-001.yml")
+
+    # Copy completed bugfix handoff
+    story_dir = shaktra / "stories" / "ST-FIX-001"
+    story_dir.mkdir(parents=True, exist_ok=True)
+    handoff_src = FIXTURES_DIR / "incident" / "handoff-bugfix-complete.yml"
+    if handoff_src.exists():
+        shutil.copy2(handoff_src, story_dir / "handoff.yml")
+
+    # Copy code files (the fixed implementation)
+    code_src = FIXTURES_DIR / "greenfield" / "code"
+    if code_src.exists():
+        for item in code_src.iterdir():
+            dest = test_dir / item.name
+            if item.is_dir():
+                shutil.copytree(item, dest, dirs_exist_ok=True)
+            else:
+                shutil.copy2(item, dest)
+
+
+def setup_neg_no_diagnosis(test_dir: Path) -> None:
+    """Greenfield setup with NO diagnosis artifact for incident negative test."""
+    setup_greenfield(test_dir)
+    # Deliberately no diagnosis artifact — incident skill should detect and block
+
+
 def setup_neg_no_settings(test_dir: Path) -> None:
     """Dev test with story but NO settings.yml."""
     setup_git_init(test_dir)
@@ -529,6 +569,21 @@ def get_test_definitions(test_dir: str) -> list[dict]:
             ),
         },
         # =================================================================
+        # Incident
+        # =================================================================
+        {
+            "name": "incident",
+            "category": "incident",
+            "timeout": 1200,
+            "max_turns": 50,
+            "setup": lambda td: setup_incident(td),
+            "prompt": build_prompt(
+                "incident", "shaktra-incident",
+                skill_args="post-mortem BUG-TEST-001",
+                validator_cmd=_v("validate_incident.py", d, "BUG-TEST-001"),
+            ),
+        },
+        # =================================================================
         # Negative tests (error path — short timeout, should fail fast)
         # =================================================================
         {
@@ -604,6 +659,18 @@ def get_test_definitions(test_dir: str) -> list[dict]:
             "setup": lambda td: setup_greenfield(td),
             "prompt": build_smoke_prompt("init-already-exists", "shaktra-init")
             + '\n\nIf the skill reports the project is already initialized, that is the expected outcome. Print:\n  [TEST:init-already-exists] VERDICT: PASS\nIf it proceeds to initialize anyway, print:\n  [TEST:init-already-exists] VERDICT: FAIL',
+        },
+        {
+            "name": "incident-no-diagnosis",
+            "category": "negative",
+            "timeout": 120,
+            "max_turns": 10,
+            "setup": lambda td: setup_neg_no_diagnosis(td),
+            "prompt": build_prompt(
+                "incident-no-diagnosis", "shaktra-incident",
+                skill_args="post-mortem BUG-MISSING-001",
+                validator_cmd=_v("validate_negative.py", d, "no_incidents"),
+            ),
         },
     ]
 

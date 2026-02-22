@@ -1,6 +1,6 @@
 # Shaktra — Maintainer & Contributor Guide
 
-**Shaktra is an opinionated AI development framework distributed as a Claude Code plugin, orchestrating 14 specialized agents through TDD workflows to produce production-ready code.**
+**Shaktra is an opinionated AI development framework distributed as a Claude Code plugin, orchestrating 15 specialized agents through TDD workflows to produce production-ready code.**
 
 ## What Makes Shaktra Unique
 
@@ -13,8 +13,8 @@
 **Key Metrics:**
 | Component | Count | Purpose |
 |-----------|-------|---------|
-| Agents | 14 | Domain experts spawned by skills |
-| Skills | 19 | User-invocable orchestrators + internal references |
+| Agents | 15 | Domain experts spawned by skills |
+| Skills | 20 | User-invocable orchestrators + internal references |
 | Hooks | 4 | Enforcement layer (block on failure) |
 | State Schemas | 5 | YAML templates for `.shaktra/` state files |
 
@@ -220,8 +220,8 @@ shaktra-plugin/
 ├── .claude-plugin/marketplace.json  # Marketplace catalog
 ├── dist/shaktra/                    # THE PLUGIN (installed by users)
 │   ├── .claude-plugin/plugin.json   # Plugin manifest
-│   ├── agents/                      # 14 sub-agent definitions
-│   ├── skills/                      # 19 skills (14 user-invocable + 5 internal)
+│   ├── agents/                      # 15 sub-agent definitions
+│   ├── skills/                      # 20 skills (15 user-invocable + 5 internal)
 │   ├── hooks/hooks.json             # Hook configurations
 │   ├── scripts/                     # Hook implementations (Python)
 │   ├── templates/                   # State file templates
@@ -272,8 +272,8 @@ shaktra-plugin/
 
 These must match validation expectations (checked in publish-release.sh):
 
-- **Agents:** 14
-- **Skills:** 19 (14 user-invocable, 5 internal)
+- **Agents:** 15
+- **Skills:** 20 (15 user-invocable, 5 internal)
 - **Hook scripts:** 5
 - **State schemas:** 5
 
@@ -941,7 +941,7 @@ A: Split it:
 
 See GitHub releases for changelog and version history.
 
-Current version: **0.3.0**
+Current version: **0.4.0**
 
 ---
 

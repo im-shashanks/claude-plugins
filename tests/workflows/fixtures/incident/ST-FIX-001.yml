@@ -1,0 +1,33 @@
+story_id: ST-FIX-001
+title: "Fix ZeroDivisionError in calculator divide function"
+scope: bug_fix
+bug_id: BUG-TEST-001
+tier: XS
+status: done
+story_points: 1
+priority: high
+
+acceptance_criteria:
+  - id: AC-1
+    description: "divide(10, 0) raises ValueError with message containing 'zero'"
+  - id: AC-2
+    description: "divide(10, 2) returns 5.0 (existing behavior preserved)"
+
+test_specs:
+  - id: T-01
+    description: "Test zero divisor raises ValueError"
+    type: unit
+  - id: T-02
+    description: "Test valid division returns correct result"
+    type: unit
+
+interfaces:
+  implements:
+    - name: divide
+      signature: "divide(a: float, b: float) -> float"
+      module: src.calculator
+
+error_handling:
+  - error: ValueError
+    condition: "b == 0"
+    message: "Cannot divide by zero"
