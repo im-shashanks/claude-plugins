@@ -1,13 +1,14 @@
-# Shaktra
+<p align="center">
+  <img src="./docs/img-res/shaktra-logo.png" alt="Shaktra" width="600">
+</p>
 
-**Turn Claude Code into a 15-agent development team — from design to deployment, with zero bugs reaching production.**
+<h1 align="center">Shaktra</h1>
 
-| | |
-|---|---|
-| **Version** | 0.4.0 |
-| **License** | MIT |
-| **Claude Code** | February 2025+ |
-| **Platform** | Claude code native (macOS, Linux, Windows) |
+<p align="center"><strong>Turn Claude Code into a 15-agent development team — from design to deployment, with zero bugs reaching production.</strong></p>
+
+<p align="center">
+  <code>v0.4.1</code> · MIT · Claude Code February 2025+ · macOS, Linux, Windows
+</p>
 
 ---
 
@@ -296,4 +297,4 @@ Quality and TDD discipline matter more than platform flexibility or custom workf
 ### Community & Support
 - [Report Issues](https://github.com/im-shashanks/shaktra-plugin/issues) | [Discussions](https://github.com/im-shashanks/shaktra-plugin/discussions)
 
-**License:** MIT • **Version:** 0.4.0
+**License:** MIT • **Version:** 0.4.1

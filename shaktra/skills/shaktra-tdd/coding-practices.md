@@ -17,10 +17,14 @@ Each function, class, or module has one reason to change. If the name contains "
 
 ### Dependency Injection
 
-Accept collaborators as parameters; never construct them internally. This enables testing and swapping.
+Accept collaborators as parameters when they need to be testable or swappable. This enables test doubles and runtime substitution.
 
-**BAD:** `def send_email(): client = SmtpClient("smtp.prod.com")` — untestable.
+**BAD:** `def send_email(): client = SmtpClient("smtp.prod.com")` — untestable, hardcoded endpoint.
 **GOOD:** `def send_email(client: EmailClient):` — injectable, testable.
+
+**When to apply:** Use DI for external services and anything you'd replace in tests: databases, HTTP clients, email senders, clocks, queues. Do NOT inject stable internal utilities (string formatters, pure validators, math helpers) — constructing those directly keeps call sites readable and traceable.
+
+**The traceability test:** If understanding a failure requires following injection chains through 3+ constructors to find what class is actually running, the abstraction is hurting debuggability. Prefer shallow injection at service boundaries; avoid deep injection hierarchies inside a single component.
 
 ### Early Returns
 
