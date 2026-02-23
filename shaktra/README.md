@@ -1,8 +1,7 @@
 <p align="center">
-  <img src="./docs/img-res/shaktra-logo.png" alt="Shaktra" width="600">
+  <img src="./docs/img-res/shaktra-logo.png" alt="Shaktra" width="300">
 </p>
-
-<h1 align="center">Shaktra</h1>
+<h1 align="center">S H A K T R A</h1>
 
 <p align="center"><strong>Turn Claude Code into a 15-agent development team — from design to deployment, with zero bugs reaching production.</strong></p>
 
