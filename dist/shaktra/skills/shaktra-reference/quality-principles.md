@@ -1,6 +1,6 @@
 # Quality Principles
 
-10 core principles for all Shaktra agents. Each principle has 2 verification checks — concrete questions to confirm the principle is met.
+11 core principles for all Shaktra agents. Each principle has 2 verification checks — concrete questions to confirm the principle is met.
 
 ## 1. Correct Before Fast
 
@@ -30,12 +30,12 @@ Each function, class, or module should have a single reason to change.
 - **Verify:** Can you describe what this unit does in one sentence without "and"?
 - **Verify:** Would a change to an unrelated feature require modifying this unit?
 
-## 5. Inject Dependencies, Own State
+## 5. Inject External Dependencies, Own State
 
-Accept collaborators from the outside; manage your own internal state. This enables testing and swapping.
+Accept external collaborators (services, I/O, clocks) from the outside; manage your own internal state. Inject what you'd replace in tests. Construct internal utilities directly.
 
 - **Verify:** Can every external dependency be replaced with a test double without modifying the unit?
-- **Verify:** Does the unit create or manage its own state rather than relying on global mutable state?
+- **Verify:** Does the unit avoid global mutable state, and avoid injecting stable utilities it will never swap?
 
 ## 6. Handle Every Error Path
 
@@ -71,3 +71,12 @@ When choosing between alternatives, record what was chosen, what was rejected, a
 
 - **Verify:** Is there a decision record for each non-obvious architectural or design choice?
 - **Verify:** Does the record state at least one rejected alternative and the reason for rejection?
+
+## 11. Keep Behavior Local
+
+Code that changes together should live together. A unit is debuggable when a reader can understand its full behavior without opening other files.
+
+SRP says split when two things have different reasons to change. Locality says don't split when a reader needs both halves to understand either one. Splitting purely for "cleanliness" creates indirection that costs more at 3 AM than it saves at code-review time.
+
+- **Verify:** Can you understand what this function does — including its error paths — without jumping to other files?
+- **Verify:** Does the split between units reduce cognitive load, or just distribute it across more files?

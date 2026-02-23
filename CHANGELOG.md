@@ -6,6 +6,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Version numbers 
 
 ---
 
+## [0.4.1] - 2026-02-22
+
+### Changed
+- **Dependency injection guidance** — Qualified DI rule: inject external services (databases, HTTP clients, clocks), construct stable internal utilities directly. Added traceability test for DI depth.
+- **Quality Principle 5** renamed to "Inject External Dependencies, Own State" — title now carries the scope.
+- **Quality Principle 11 added: Keep Behavior Local** — counterweight to SRP. Code that changes together should live together. Splitting purely for "cleanliness" creates indirection that costs more at 3 AM than it saves at code-review time.
+- **README** — Added Shaktra logo, centered header layout.
+
+---
+
 ## [0.4.0] - 2026-02-21
 
 ### Added
