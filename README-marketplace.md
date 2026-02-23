@@ -2,6 +2,10 @@
 
 A curated collection of production-grade plugins for Claude Code.
 
+<p align="center">
+  <img src="./dist/shaktra/docs/img-res/shaktra-logo.png" alt="Shaktra" width="150">
+</p>
+
 ## Shaktra -- AI Development Framework
 
 What if Claude Code had a 15-agent engineering team behind every command? Shaktra gives you an Architect, PM, QA, Adversary, Incident Analyst, and 10 more specialized agents that enforce TDD, block bugs from merging, and scale ceremony to match complexity. Solo developers get team-level rigor; teams get consistency across every contributor.
