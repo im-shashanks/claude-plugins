@@ -58,8 +58,13 @@ for plugin in data.get('plugins', []):
     json.dumps(data, indent=2) + '\n')
 "
 
-# Copy marketplace README for release branch root
+# Copy marketplace README for release branch root, rewriting dev paths to release paths
 cp README-marketplace.md "$BUILD/README.md"
+python3 -c "
+import pathlib
+p = pathlib.Path('$BUILD/README.md')
+p.write_text(p.read_text().replace('./dist/shaktra/', './shaktra/'))
+"
 
 # Copy CHANGELOG for user visibility
 cp CHANGELOG.md "$BUILD/CHANGELOG.md"

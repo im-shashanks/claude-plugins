@@ -2,13 +2,17 @@
 
 A curated collection of production-grade plugins for Claude Code.
 
+---
+
 <p align="center">
   <img src="./dist/shaktra/docs/img-res/shaktra-logo.png" alt="Shaktra" width="150">
 </p>
 
-## Shaktra -- AI Development Framework
+## Shaktra — AI Development Framework · [Full documentation](./dist/shaktra/README.md)
 
-What if Claude Code had a 15-agent engineering team behind every command? Shaktra gives you an Architect, PM, QA, Adversary, Incident Analyst, and 10 more specialized agents that enforce TDD, block bugs from merging, and scale ceremony to match complexity. Solo developers get team-level rigor; teams get consistency across every contributor.
+What if Claude Code had a 15-agent engineering team behind every command?
+
+Shaktra is a Claude Code plugin that runs a full agile engineering team inside your editor — planning, coding, reviewing, and blocking bad merges automatically. Solo developers get team-level rigor; teams get consistency across every contributor.
 
 ### See it in action
 
@@ -17,38 +21,32 @@ Three commands take you from idea to production-ready, fully tested code:
 ```bash
 # 1. Plan your feature
 /shaktra:tpm "add OAuth 2.0 support to the API"
-# -> Design doc, 8 stories generated, sprint planned
+# -> Design doc written. 8 stories created. Sprint ready to go.
 
-# 2. Implement with TDD enforcement
+# 2. Implement with TDD
 /shaktra:dev ST-001
-# -> Tests written first, code passes, 36 quality checks, done
+# -> Tests written first. Code written to pass them. 36 quality checks cleared.
 
 # 3. Review before merge
 /shaktra:review ST-001
-# -> 13-dimension analysis, P0 findings block merge automatically
+# -> Found 2 P0 bugs. Merge blocked before they hit main.
 ```
+
+All 9 workflows, agent roster, and configuration guide on the [plugin page](./dist/shaktra/README.md) →
 
 ### Highlights
 
-- **15 specialized agents** -- Architect, PM, QA, Developer, Code Reviewer, Memory Retriever, Adversary, Incident Analyst, and more
-- **TDD state machine** -- tests before code, enforced at every transition
-- **P0 findings blocked from merge** -- hooks, not warnings
-- **70-95% coverage by story tier** -- hotfix ships fast, features ship thoroughly
-- **Brownfield + greenfield** -- 9-dimension codebase analysis for existing projects
+- **15 specialized agents** — an Architect who designs, a QA who enforces, an Adversary who tries to break it, all working automatically
+- **Tests always come first** — the workflow won't let you skip ahead, so coverage gaps never sneak into review
+- **Critical bugs can't merge** — not flagged, not warned, physically blocked
+- **Coverage scales with stakes** — a hotfix ships at 70%, a feature ships at 95%, automatically
+- **Works on existing codebases** — 9-dimension analysis maps what you have before touching anything
 
 ### Install
 
 ```bash
-# Marketplace
 /plugin marketplace add https://github.com/im-shashanks/claude-plugins.git
 /plugin install shaktra@cc-plugins
-
-# Direct
-/plugin install https://github.com/im-shashanks/claude-plugins.git
 ```
 
-v0.4.1 | MIT License | [Full documentation](./shaktra/README.md)
-
----
-
-*More plugins coming soon. Watch this space.*
+`v0.4.1` · MIT License
