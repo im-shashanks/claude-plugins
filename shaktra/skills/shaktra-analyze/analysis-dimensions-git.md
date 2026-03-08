@@ -19,6 +19,7 @@ All data in this dimension comes from **tool-based extraction** — the same phi
 ## D9: Git Intelligence → `git-intelligence.yml`
 
 **Scope:** Historical change patterns, bug-fix density, co-change coupling, knowledge distribution, and code age across all tracked source files.
+**Downstream impact:** The cross-cutting risk correlation (D8) uses change frequency and bug-fix density as key risk factors. The sw-quality agent uses hotspots and bus factor to identify files needing extra review attention. Co-change patterns reveal hidden coupling that static analysis misses — the architect uses these to validate or challenge module boundary decisions.
 
 **What to extract:**
 
@@ -83,3 +84,10 @@ details:
       last_modified: ISO-8601
       age_category: fresh | recent | aging | stale
 ```
+
+**Self-check before writing:**
+- All data comes from actual git command output — no numbers inferred or estimated
+- Hotspot thresholds are percentile-based on the actual commit distribution — not arbitrary cutoffs
+- Co-change patterns have minimum 3 co-occurrences — don't report noise from single shared commits
+- If commit count is <10 (shallow clone), this is noted in summary and only minimal output is produced
+- Knowledge distribution uses commit count attribution — acknowledge this is an approximation in the summary

@@ -11,6 +11,7 @@ Dimensions that answer "How HEALTHY is this codebase?" — its dependencies, deb
 ## D5: Dependencies & Tech Stack → `dependencies.yml`
 
 **Scope:** All project dependencies, their health, version currency, and potential risks.
+**Downstream impact:** The dependency-audit workflow transforms these findings into upgrade stories. The architect uses dependency health to assess feasibility of design decisions that rely on specific libraries.
 
 **What to analyze:**
 1. **Direct dependencies** — name, version, purpose, last updated, license
@@ -53,11 +54,17 @@ details:
       recommendation: string
 ```
 
+**Self-check before writing:**
+- Versions come from actual lockfile/manifest content — not from memory or guesses
+- Every dependency has a `purpose` field explaining why the project uses it
+- Summary includes total dependency count, health distribution, and any critical CVEs
+
 ---
 
 ## D6: Technical Debt & Security → `tech-debt.yml`
 
 **Scope:** Code quality issues, technical debt indicators, security posture, and an overall health score.
+**Downstream impact:** The debt-strategy workflow transforms these findings into prioritized remediation stories. The sw-quality agent uses the health score as a baseline. The cross-cutting risk correlation (D8) combines debt data with critical paths to identify the highest-risk files in the codebase.
 
 **What to analyze:**
 1. **Debt indicators** — TODO/FIXME/HACK counts with context, dead code, unused imports, disabled tests, commented-out code blocks
@@ -74,7 +81,7 @@ details:
 **Output structure:**
 ```yaml
 summary: |
-  {Self-contained 350-token overview: health score, debt density,
+  {Self-contained 400-token overview: health score, debt density,
    critical security issues, test coverage status}
 details:
   health_score: integer  # 1-10
@@ -117,11 +124,19 @@ details:
     percent_files_tested: float
 ```
 
+**Self-check before writing:**
+- Debt indicators cite specific files and line numbers — not just counts without locations
+- Complexity metrics (function length, nesting depth) are measured from actual code, not estimated
+- Security findings reference specific code patterns in specific files — not theoretical risks that "could" exist
+- Health score breakdown has non-zero values in all 4 categories (code_quality, test_coverage, security, consistency)
+- `quantitative_metrics` section is fully populated with actual measurements
+
 ---
 
 ## D7: Data Flows & Integration → `data-flows.yml`
 
 **Scope:** How data moves through the system, integration points with external services, and critically: integration gotchas that cause production incidents.
+**Downstream impact:** The bug diagnostician uses data flows to trace issues across service boundaries. The sw-engineer uses integration point details to write correct mocks and integration tests. The architect uses flow criticality tiers to prioritize design decisions.
 
 **What to analyze:**
 1. **Data flows** — trace data from entry point through processing to storage/response. Classify each flow by criticality:
@@ -172,11 +187,18 @@ details:
       current_mitigation: string | none
 ```
 
+**Self-check before writing:**
+- Data flows are traced through actual code paths — each step in `path:` references a real file:function
+- Integration points verified via actual connection config or client instantiation in code
+- Gotchas cite specific code locations where the risk pattern exists — not theoretical possibilities
+- Flows are classified by criticality tier with justification
+
 ---
 
 ## D8: Critical Paths & Risk → `critical-paths.yml`
 
 **Scope:** Code paths that require extra caution — revenue-critical, security-sensitive, performance-critical, and data-integrity code. Includes blast radius assessment and lessons learned from the codebase's history.
+**Downstream impact:** The sw-quality agent uses the change risk index to calibrate review depth — high-risk files get more scrutiny. The developer agent checks critical path membership before modifying files. The cross-cutting risk section (combining D6, D8, D9) is the single most important risk signal for the entire framework.
 
 **What to analyze:**
 1. **Critical path identification** — classify code areas by risk category:
@@ -203,7 +225,7 @@ details:
 **Output structure:**
 ```yaml
 summary: |
-  {Self-contained 400-token overview: critical path count by category,
+  {Self-contained 500-token overview: critical path count by category,
    highest-risk areas, key lessons learned}
 details:
   critical_paths:
@@ -237,3 +259,10 @@ details:
       composite_risk: critical | high | medium | low
       recommendation: string
 ```
+
+**Self-check before writing:**
+- Critical paths trace to actual code locations — not inferred from module names
+- Blast radius derived from the dependency graph (who calls this code?) — not guessed
+- Lessons learned cite specific commits, comments, or test names as evidence
+- Change risk index factors are measurable and referenced — not subjective opinions
+- Cross-cutting risk section references source dimension for each factor (D6 for debt, D9 for change frequency)

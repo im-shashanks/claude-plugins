@@ -1,9 +1,11 @@
 ---
 name: shaktra-analyze
 description: >
-  Codebase Analyzer workflow — brownfield analysis producing structured, token-efficient output
-  for downstream agents. 2-stage model: tool-based pre-analysis for ground truth, then parallel
-  LLM-driven deep analysis across 9 dimensions. Outputs 13 YAML artifacts to .shaktra/analysis/.
+  Codebase Analyzer workflow for brownfield codebases — deep structural analysis producing
+  structured YAML artifacts for downstream agents. Use this skill whenever the user wants to
+  analyze, assess, or understand an existing codebase — including requests like "analyze my
+  codebase", "what's the health of this project", "check for tech debt", "audit dependencies",
+  "understand this codebase before we start", or any brownfield due diligence task.
 user-invocable: true
 ---
 
@@ -19,6 +21,10 @@ Analysis without ground truth is guessing. Stage 1 produces factual data via too
 
 - `.shaktra/` directory must exist — if missing, inform user to run `/shaktra:init` and stop
 - Read `.shaktra/settings.yml` — project type must be `brownfield` (warn if `greenfield` — analysis is for existing codebases)
+
+## Skill Directory
+
+When spawning CBA Analyzer subagents, they need paths to dimension specs and schema files. Use `this skill's directory` (the directory containing this SKILL.md) as the base. Pass the full absolute path in every subagent prompt — subagents cannot resolve relative paths.
 
 ---
 
@@ -53,23 +59,11 @@ Read `.shaktra/analysis/manifest.yml`. If it exists and has incomplete stages:
 
 If manifest does not exist or all stages are incomplete, start fresh.
 
-### Step 3: Choose Execution Mode
+### Step 3: Stage 1 — Pre-Analysis (Sequential)
 
-Check if agent teams are available (TeamCreate tool accessible):
+This stage runs in the main thread using tools directly. No LLM analysis — only factual extraction. This ground truth is what makes Stage 2 reliable — without it, subagents would guess at structure rather than analyzing it.
 
-- **IF TeamCreate IS available:** After Step 4 completes, read `deep-analysis-workflow.md`
-  in this skill's directory and follow it completely.
-- **IF TeamCreate IS NOT available:** Warn user: "Teams unavailable — running standard
-  single-session analysis." After Step 4 completes, read `standard-analysis-workflow.md`
-  in this skill's directory and follow it completely.
-
-After the chosen workflow file completes, return here and continue with Step 5.
-
-### Step 4: Stage 1 — Pre-Analysis (Sequential)
-
-This stage runs in the main thread using tools directly. No LLM analysis — only factual extraction.
-
-**4a. Static Extraction → `static.yml`**
+**3a. Static Extraction → `static.yml`**
 
 Use Glob, Grep, and Bash to extract:
 
@@ -82,7 +76,7 @@ Use Glob, Grep, and Bash to extract:
 
 Write results to `.shaktra/analysis/static.yml`.
 
-**4b. System Overview → `overview.yml`**
+**3b. System Overview → `overview.yml`**
 
 Scan project root to determine:
 1. **Project identity** — name, primary language, framework(s), runtime version
@@ -94,6 +88,27 @@ Scan project root to determine:
 Write results to `.shaktra/analysis/overview.yml` with a `summary:` section (~300 tokens).
 
 Update `manifest.yml` with Stage 1 completion state.
+
+### Step 4: Stage 2 — Deep Analysis (Delegated)
+
+Stage 1 is now complete. Agent teams are the primary execution mode — they produce richer artifacts through cross-cutting correlations between dimensions.
+
+**4a. Attempt agent teams (primary path):**
+
+1. Use ToolSearch to discover the `TeamCreate` tool: `query: "select:TeamCreate"`
+2. If TeamCreate is found and available:
+   - Inform user: "Using agent teams for deep analysis (4 team members, parallel subagents)."
+   - Read `deep-analysis-workflow.md` in this skill's directory and follow it completely.
+   - After the workflow completes, continue with Step 5 below.
+
+**4b. Fall back to subagents (only if teams unavailable):**
+
+1. If ToolSearch does not find TeamCreate, or if TeamCreate fails when invoked:
+   - Warn user: "Agent teams unavailable — falling back to standard single-session analysis with parallel subagents."
+   - Read `standard-analysis-workflow.md` in this skill's directory and follow it completely.
+   - After the workflow completes, continue with Step 5 below.
+
+Both workflow files handle Stages 2-3 (dimension analysis + finalization).
 
 ### Step 5: Update Settings from Analysis
 
@@ -109,59 +124,86 @@ After all dimensions are validated, back-fill `settings.project.architecture` if
    - "Detected mixed architecture: {styles}. Please set `project.architecture` in `.shaktra/settings.yml` to the intended target style."
 5. If `project.architecture` is already set: validate it matches the detected patterns. If it conflicts, report the mismatch as a finding.
 
-### Step 6: Report Summary
+### Step 6: Memory Capture
 
-Display to user:
+After analysis completes (`ANALYSIS_COMPLETE` or `ANALYSIS_PARTIAL`):
+
+1. Create `.shaktra/observations/analysis-<date>.yml` (create directory if needed)
+2. Write observations about significant findings:
+   - `type: discovery` — unexpected architecture patterns, hidden dependencies, undocumented conventions
+   - `type: observation` — practice gaps, risk patterns, quality hotspots
+   - Limit to findings that would materially change future development decisions
+   - Cap at `settings.memory.max_observations_per_story` entries
+3. Spawn memory-curator:
 
 ```
-## Codebase Analysis Complete
+You are the shaktra-memory-curator agent. Consolidate analysis observations.
 
-**Project:** {name} ({language})
-**Artifacts:** .shaktra/analysis/ (13 files)
+Observations path: {observations_path}
+Workflow type: analysis
+Settings: {settings_path}
 
-### Key Findings
-{Top 3-5 findings from across all dimensions, highest severity first}
-
-### Architecture Overview
-{Mermaid diagram from structure.yml}
-
-### Dimension Summary
-| Dimension | Status | Key Finding |
-|---|---|---|
-| D1: Architecture & Structure | complete | {one-line summary} |
-| ... | ... | ... |
-
-### Architecture
-- {project.architecture setting status — auto-populated, user action needed, or already set}
-
-### Next Steps
-- Run `/shaktra:tpm` to start planning — architect will consume analysis automatically
-- Run `/shaktra:analyze refresh` after code changes to update stale dimensions
+Promote significant findings to principles/anti-patterns/procedures.
 ```
+
+### Step 7: Report Summary
+
+Display to user: project name/language, artifact count, top 3-5 findings (highest severity first), Mermaid architecture diagram from structure.yml, dimension status table (dimension | status | key finding), architecture setting status, and next steps (`/shaktra:tpm` for planning, `/shaktra:analyze refresh` for updates).
 
 ---
 
 ## Targeted Analysis
 
-When user specifies a dimension (e.g., "analyze practices"):
-1. Map user intent to dimension ID (D1-D9)
-2. Check if `static.yml` exists — if not, run Stage 1 first
-3. Spawn single CBA Analyzer for the requested dimension
-4. Update manifest for that dimension only
-5. Report results
+When user specifies a dimension (e.g., "analyze practices", "check the architecture"):
+
+### Dimension Mapping
+
+Map user intent to dimension ID:
+
+| User Says | Dimension |
+|---|---|
+| architecture, structure, modules, boundaries | D1 |
+| domain, entities, business rules, state machines | D2 |
+| endpoints, APIs, interfaces, entry points | D3 |
+| practices, conventions, coding style, patterns | D4 |
+| dependencies, packages, tech stack, libraries | D5 |
+| debt, quality, security, health score | D6 |
+| data flows, integrations, external services | D7 |
+| critical paths, risk, blast radius | D8 |
+| git history, churn, hotspots, bus factor | D9 |
+
+If ambiguous, ask the user which dimension they mean.
+
+### Execution
+
+1. Check if `.shaktra/analysis/static.yml` exists — if not, run Stage 1 (Step 3) first
+2. If `static.yml` exists, check `checksum.yml` — if source files have changed since extraction, warn user: "Pre-analysis data is stale. Re-run Stage 1? (recommended)" and re-run if confirmed
+3. Spawn a single CBA Analyzer for the requested dimension using the same prompt template from the workflow files, with full paths to dimension specs and output schemas
+4. Update `manifest.yml` for that dimension only
+5. Report results: show the dimension's `summary:` section and top findings
 
 ---
 
 ## Incremental Refresh
 
 When user says "refresh" or "update analysis":
-1. Read `checksum.yml` — get stored hashes
-2. Recompute hashes for all source files
-3. Identify changed files and map to affected dimensions
-4. Report which dimensions are stale
-5. Ask user: "Re-analyze stale dimensions? (D1, D4, D7)"
-6. Re-run only confirmed dimensions
-7. Update checksums and manifest
+
+1. Read `.shaktra/analysis/checksum.yml` — get stored file hashes
+2. Recompute SHA256 hashes for all source files listed in `static.yml` file inventory
+3. Compare: identify files whose hash has changed
+4. Map changed files to affected dimensions using `checksum.yml` → `files[].dimensions` mapping
+5. Report staleness:
+   ```
+   ## Stale Dimensions
+   | Dimension | Changed Files | Status |
+   |---|---|---|
+   | D1: Architecture & Structure | 3 files changed | stale |
+   | D4: Coding Practices | 2 files changed | stale |
+   | D9: Git Intelligence | always stale (new commits) | stale |
+   ```
+6. Ask user: "Re-analyze stale dimensions? (D1, D4, D9)"
+7. If confirmed: re-run Stage 1 (to update `static.yml`), then spawn CBA Analyzers only for confirmed dimensions
+8. Update checksums and manifest for re-analyzed dimensions
 
 ---
 
@@ -189,6 +231,34 @@ When user requests dependency audit or upgrade planning:
 
 ---
 
+## Analysis Status
+
+When user asks "what's been analyzed" or "analysis status":
+
+1. Read `.shaktra/analysis/manifest.yml` — if missing, report "No analysis has been run. Use `/shaktra:analyze` to start."
+2. Display:
+   ```
+   ## Analysis Status
+
+   **Mode:** {execution_mode} | **Started:** {started_at} | **Status:** {status}
+
+   ### Dimensions
+   | # | Dimension | Status | Completed |
+   |---|---|---|---|
+   | D1 | Architecture & Structure | complete | 2025-02-15T10:30:00Z |
+   | D2 | Domain Model | failed | — |
+   | ... | ... | ... | ... |
+
+   ### Staleness
+   {Run checksum comparison if checksum.yml exists, report stale dimensions}
+
+   ### Available Actions
+   - `/shaktra:analyze refresh` — re-analyze stale dimensions
+   - `/shaktra:analyze D2` — retry failed dimension
+   ```
+
+---
+
 ## Sub-Files
 
 | File | Purpose |
@@ -203,28 +273,6 @@ When user requests dependency audit or upgrade planning:
 | `dependency-audit.md` | Dependency risk categorization and upgrade assessment rules |
 
 ---
-
-## Step 5b — Memory Capture
-
-After analysis completes (`ANALYSIS_COMPLETE` or `ANALYSIS_PARTIAL`):
-
-1. Create `.shaktra/observations/analysis-<date>.yml` (create directory if needed)
-2. Write observations about significant findings:
-   - `type: discovery` — unexpected architecture patterns, hidden dependencies, undocumented conventions
-   - `type: observation` — practice gaps, risk patterns, quality hotspots
-   - Limit to findings that would materially change future development decisions
-   - Cap at `settings.memory.max_observations_per_story` entries
-3. Spawn memory-curator:
-
-```
-You are the shaktra-memory-curator agent. Consolidate analysis observations.
-
-Observations path: {observations_path}
-Workflow type: analysis
-Settings: {settings_path}
-
-Promote significant findings to principles/anti-patterns/procedures.
-```
 
 ## Guard Tokens
 

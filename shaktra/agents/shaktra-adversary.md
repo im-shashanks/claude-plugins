@@ -8,6 +8,7 @@ skills:
 tools:
   - Read
   - Write
+  - Edit
   - Glob
   - Grep
   - Bash
@@ -43,7 +44,7 @@ You receive:
    - For **input_boundary** group: follow `probe-strategies.md` Group 2 — generate adversarial input tests, execute them.
    - For **fault_resilience** group: follow `probe-strategies.md` Group 3 — generate fault injection tests, execute them.
 5. **Record findings** with execution evidence (test output, stack traces, error messages).
-6. **Write observations** to `.observations.yml` in the story directory.
+6. **Collect observations** — non-routine insights (unexpected behavior, pattern discoveries, quality gaps) that would materially change future workflow execution. Return these in your structured output alongside findings.
 
 ## Output Format
 
@@ -73,6 +74,11 @@ adversary_analysis:
       description: "what was found"
       evidence: "test output, stack trace, or execution result"
       guidance: "specific action to fix"
+  observations:               # non-routine insights for memory system
+    - type: "discovery|quality-loop-finding|observation"
+      text: "1-3 sentence description"
+      tags: ["input-validation", "error-handling"]
+      importance: 7           # 1-10 scale
   summary:
     p0_count: integer
     p1_count: integer
@@ -87,7 +93,8 @@ adversary_analysis:
 - **Every finding must include execution evidence** — "this looks wrong" is never a finding. Show the test output, stack trace, or error message that proves the issue.
 - **Respect test timeouts** — use `settings.adversarial_review.mutation_timeout` for mutation test runs.
 - **If mutation restoration fails, STOP immediately** — report the failure and do not continue. A stuck mutation is worse than an incomplete review.
-- **Adversarial tests go in a dedicated location** — alongside existing tests with `_adversarial` suffix, or in `tests/adversarial/` if no clear test directory exists.
+- **Adversarial tests go in a dedicated location** — alongside existing tests with the agent-specific suffix from your dispatch prompt, or in `tests/adversarial/` if no clear test directory exists.
 - **Cap probe counts** — respect `settings.adversarial_review.max_mutations_per_function` and `settings.adversarial_review.max_adversarial_tests`.
 - **Apply severity strictly** per `severity-taxonomy.md` — do not inflate or deflate.
 - **If a probe type is not applicable** (e.g., no external dependencies for fault probes), document the skip reason and move on.
+- **Do not write to the observations file directly** — return observations in your structured output. The orchestrator consolidates and writes them.

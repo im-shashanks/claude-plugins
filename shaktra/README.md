@@ -6,7 +6,7 @@
 <p align="center"><strong>Turn Claude Code into a 15-agent development team — from design to deployment, with zero bugs reaching production.</strong></p>
 
 <p align="center">
-  <code>v0.4.1</code> · MIT · Claude Code February 2025+ · macOS, Linux, Windows
+  <code>v0.4.2</code> · MIT · Claude Code February 2025+ · macOS, Linux, Windows
 </p>
 
 ---
@@ -296,4 +296,4 @@ Quality and TDD discipline matter more than platform flexibility or custom workf
 ### Community & Support
 - [Report Issues](https://github.com/im-shashanks/shaktra-plugin/issues) | [Discussions](https://github.com/im-shashanks/shaktra-plugin/discussions)
 
-**License:** MIT • **Version:** 0.4.1
+**License:** MIT • **Version:** 0.4.2
