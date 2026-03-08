@@ -45,15 +45,15 @@ Subagents cannot resolve variables — every path must be a concrete absolute pa
    TeamCreate(team_name: "shaktra-analyze", description: "Deep codebase analysis — 4 team members analyzing 9 dimensions")
    ```
 
-2. **Create 4 tasks** — one per team member, using TaskCreate with the team:
-   - Task 1: "TM-1: Analyze D1 Architecture, D5 Dependencies, D9 Git Intelligence"
-   - Task 2: "TM-2: Analyze D2 Domain Model, D3 Entry Points + error propagation correlation"
-   - Task 3: "TM-3: Analyze D6 Tech Debt, D8 Critical Paths + cross-cutting risk correlation"
-   - Task 4: "TM-4: Analyze D4 Practices, D7 Data Flows + test intelligence correlation"
+2. **Create 4 tasks** — use TaskCreate (the `subject` parameter is the task title):
+   - `subject: "TM-1: Analyze D1 Architecture, D5 Dependencies, D9 Git Intelligence"`
+   - `subject: "TM-2: Analyze D2 Domain Model, D3 Entry Points + error propagation correlation"`
+   - `subject: "TM-3: Analyze D6 Tech Debt, D8 Critical Paths + cross-cutting risk correlation"`
+   - `subject: "TM-4: Analyze D4 Practices, D7 Data Flows + test intelligence correlation"`
 
-3. **Spawn 4 teammates** — use the Agent tool with `team_name: "shaktra-analyze"` for each. Spawn all 4 in the same message for parallel execution. Use the prompt templates below for each teammate's prompt. Each teammate spawns its own subagents for individual dimensions.
+3. **Spawn 4 teammates** — use the Agent tool with `team_name: "shaktra-analyze"` and a `name` for each (e.g., `name: "tm-1-structure"`). Spawn all 4 in the same message for parallel execution. Use the prompt templates below for each teammate's prompt.
 
-4. **Assign tasks** — use TaskUpdate to assign each task to its corresponding teammate.
+4. **Assign tasks** — use TaskUpdate with `owner` set to the teammate's name.
 
 5. **Wait for completion** — teammates send messages when done. After all 4 complete, proceed to Stage 3.
 
