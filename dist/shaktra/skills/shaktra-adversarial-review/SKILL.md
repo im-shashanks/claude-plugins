@@ -13,11 +13,29 @@ You are the Adversarial Review orchestrator. You treat every code change as a hy
 
 ## Philosophy
 
-Code that passes review and tests may still harbor blind spots. Tests can share the same assumptions as the code they test. Mutation testing reveals what the test suite actually verifies vs. what it merely executes. Adversarial probes reveal how code behaves under conditions nobody thought to test. The goal is not to find style issues — it is to find behaviors that would surprise the team in production.
+Code that passes review and tests may still harbor blind spots — tests can share assumptions with the code they test. Mutation testing reveals what the test suite actually verifies vs. merely executes. Adversarial probes reveal behavior under conditions nobody thought to test. The goal is to find behaviors that would surprise the team in production.
+
+## Skill Directory
+
+When dispatching adversary agents, they need paths to strategy files. Use `this skill's directory` (the directory containing this SKILL.md) as the base. Pass the full absolute path in every agent prompt — agents cannot resolve relative paths.
+
+## Settings & Defaults
+
+Read thresholds from settings. If a section is missing, use these defaults and inform the user ("Using default settings — configure in `.shaktra/settings.yml` to customize"):
+
+```yaml
+adversarial_review:
+  mutation_kill_threshold: 80
+  mutation_timeout: 30
+  max_mutations_per_function: 10
+  max_adversarial_tests: 20
+  test_persistence: auto
+
+quality:
+  p1_threshold: 3       # also used by verdict logic
+```
 
 ## Intent Classification
-
-Classify the user's request into one of these intents:
 
 | Intent | Trigger Patterns | Workflow |
 |---|---|---|
@@ -32,11 +50,8 @@ If ambiguous, ask the user to specify which mode.
 
 ### 1. Read Project Context
 
-Before any review:
 - Read `.shaktra/settings.yml` — if missing, inform user to run `/shaktra:init` and stop
-- Read `.shaktra/memory/principles.yml` (if exists)
-- Read `.shaktra/memory/anti-patterns.yml` (if exists)
-- Read `.shaktra/memory/procedures.yml` (if exists)
+- Read `.shaktra/memory/` files: `principles.yml`, `anti-patterns.yml`, `procedures.yml` (if they exist)
 - Determine memory retrieval tier:
   ```bash
   python3 ${CLAUDE_PLUGIN_ROOT}/scripts/memory_retrieval.py <story_dir> <settings_path>
@@ -45,7 +60,7 @@ Before any review:
   - **Tier 1:** Generate inline following the retrieval algorithm
   - **Tier 2:** Spawn memory-retriever (briefing mode) using dispatch template
   - **Tier 3:** Spawn parallel chunk retrievers + consolidation retriever using dispatch templates
-- Create empty `.shaktra/stories/<story_id>/.observations.yml`
+- Initialize `.shaktra/stories/<story_id>/.observations.yml` — if file exists and `handoff.memory_captured` is `false`, append to preserve unconsumed observations; otherwise overwrite with empty.
 
 ### 2. Load Change Context & Build Behavior Contract
 
@@ -54,116 +69,96 @@ Before any review:
 - Read all files in `handoff.code_summary.files_modified`
 - Read all files in `handoff.test_summary.test_files`
 
-From the loaded context, build a behavior contract identifying:
-- **Changed functions/methods** — the mutation targets (file, function name, line range)
-- **Acceptance criteria** — the behavior hypotheses to test (from story YAML)
-- **Invariants** — behavior that must NOT change (existing tests that should still pass)
-- **Dependencies** — external systems/modules called by changed code (mock targets for fault injection)
-- **Test files** — existing test suite to run against mutations
-- **Test command** — from `settings.project.test_framework` or detected from project structure
+**Extract changed functions:** For each modified file, identify functions/methods that were added or changed by comparing against the diff or handoff. Record function name and line range.
 
-### 3. Dispatch Adversary Agents in Parallel
+Build a structured behavior contract:
 
-Spawn 3 `shaktra-adversary` agent instances, one per probe group:
-
-**Group 1 — Mutation Probes:**
-```
-You are the shaktra-adversary agent. Execute adversarial probes against the code changes.
-
-Probe group: mutation — arithmetic, relational, logical, conditional, return_value, exception, boundary, deletion
-Changed functions: {function_list_with_files_and_lines}
-Test files: {test_file_paths}
-Test command: {test_command}
-Behavior contract: {behavior_contract}
-Briefing: {briefing_path}
-Settings path: {settings_path}
-
-Follow mutation-strategy.md for mutation operators and safety protocol.
-Return structured findings with evidence from execution.
+```yaml
+behavior_contract:
+  changed_functions:
+    - file: "src/auth/login.py"
+      function: "validate_credentials"
+      lines: [42, 78]       # [start_line, end_line] of the function body
+      type: "modified"       # modified | added | deleted
+  acceptance_criteria:
+    - id: "AC-1"
+      description: "Login rejects invalid credentials with 401"
+  invariants:
+    - description: "Existing users can still log in with valid credentials"
+      verified_by: "test_valid_login (test_auth.py:15)"
+  dependencies:
+    - type: "database"       # database | external_api | file_io | message_queue | cache
+      module: "db.users"
+      functions: ["find_user", "verify_password"]
+  test_files: ["tests/test_auth.py"]
+  test_command: "pytest tests/test_auth.py -v"
 ```
 
-**Group 2 — Input & Boundary Probes:**
-```
-You are the shaktra-adversary agent. Execute adversarial probes against the code changes.
+**Constructing `test_command`:** Read `settings.project.test_framework` for the framework name. Build a runnable command scoped to the relevant test files — e.g., `pytest {test_files} -v` for pytest, `npx jest --testPathPattern='{pattern}'` for jest, `go test {packages}` for Go.
 
-Probe group: input_boundary — null_empty, type_mismatch, boundary_values, injection, format
-Changed functions: {function_list_with_files_and_lines}
-Test files: {test_file_paths}
-Test command: {test_command}
-Behavior contract: {behavior_contract}
-Briefing: {briefing_path}
-Settings path: {settings_path}
+**No test files:** If `test_files` is empty, set mutation score to N/A, skip Agent 1. Agents 2+3 can still run. Report: "No existing tests — mutation analysis skipped."
 
-Follow probe-strategies.md Group 2 section for input and boundary probes.
-Return structured findings with evidence from execution.
-```
+**No code changes (config-only, docs-only):** If `changed_functions` AND `dependencies` are both empty, skip steps 3-5, proceed to step 6 with verdict PASS.
 
-**Group 3 — Fault & Resilience Probes:**
-```
-You are the shaktra-adversary agent. Execute adversarial probes against the code changes.
+### 3. Dispatch Adversary Agents
 
-Probe group: fault_resilience — timeout, error_response, partial_response, connection_refused, slow_response, race_condition, idempotency
-Changed functions: {function_list_with_files_and_lines}
-Test files: {test_file_paths}
-Test command: {test_command}
-Behavior contract: {behavior_contract}
-Briefing: {briefing_path}
-Settings path: {settings_path}
+Read `adversarial-dispatch.md` in this skill's directory and follow it. Dispatch runs in two phases:
+- **Phase A:** Agent 1 (mutation) runs alone — it modifies source files during mutation cycles
+- **Verification:** Git diff check ensures source files are restored before Phase B
+- **Phase B:** Agents 2+3 (input/boundary + fault/resilience) run in parallel
 
-Follow probe-strategies.md Group 3 section for fault and resilience probes.
-Return structured findings with evidence from execution.
-```
+### 4. Validate & Aggregate Results
 
-### 4. Aggregate Results
+Validate each agent's output per the checklist in `adversarial-dispatch.md`. On failure, re-dispatch once. If it fails again, note the gap in the report.
 
-Collect findings from all 3 adversary agents. Deduplicate:
-- If two agents flag the same function for the same issue, keep the higher severity
-- Order findings: P0 first, then P1, P2, P3
+**Deduplication:** Two findings target the same issue if they reference the same function AND describe the same behavioral gap (e.g., "return value mutation survived" and "null input returns wrong value" both indicate missing return value validation). Keep the higher severity.
 
-Assign final severity per `severity-taxonomy.md`.
+**Severity validation:** Validate against `severity-taxonomy.md` and strategy file classifications. Only correct if clearly wrong (e.g., injection marked P2), with justification.
 
 ### 5. Compute Mutation Score
 
-From Group 1 results:
+From Agent 1 (mutation) results:
 ```
 mutation_score = killed / total * 100
 mutation_threshold = settings.adversarial_review.mutation_kill_threshold
 ```
 
-If Group 1 produced no mutations (e.g., no changed functions amenable to mutation), record mutation score as N/A.
+Record as N/A (excluded from verdict) when: no amenable functions, Agent 1 failed validation, or `mutation_results.total == 0`.
 
 ### 6. Apply Verdict
 
-Read thresholds from settings. Apply gate logic:
-
 ```
+total_probes = sum of probes_executed across all valid agents
 p0_count = count findings where severity == P0
 p1_count = count findings where severity == P1
-p1_max   = settings.quality.p1_threshold
-mutation_score = killed / total * 100
-mutation_threshold = settings.adversarial_review.mutation_kill_threshold
+p1_max   = settings.quality.p1_threshold (default: 3)
+mutation_ok = (mutation_score >= mutation_threshold) or (mutation_score == N/A)
 
-if p0_count > 0:
+if total_probes == 0:
+    verdict = CONCERN  # no data — cannot confirm safety
+elif p0_count > 0:
     verdict = BLOCKED
 elif p1_count > p1_max:
     verdict = CONCERN
-elif mutation_score < mutation_threshold:
+elif not mutation_ok:
     verdict = CONCERN
 else:
     verdict = PASS
 ```
 
-Emit the corresponding guard token: `ADVERSARIAL_PASS`, `ADVERSARIAL_CONCERN`, or `ADVERSARIAL_BLOCKED`.
+Emit guard token: `ADVERSARIAL_PASS`, `ADVERSARIAL_CONCERN`, or `ADVERSARIAL_BLOCKED`.
 
 ### 7. Report & Memory Capture
 
 Output the structured report using the output template below.
 
-**Test persistence** — Read `settings.adversarial_review.test_persistence`:
+**Test persistence** applies to Agents 2 and 3 only (Agent 1 modifies/restores source, does not create test files). Read `settings.adversarial_review.test_persistence` (default: `auto`):
 - `auto`: persist adversarial tests that found bugs, discard passing probes
 - `always`: persist all generated adversarial tests to the project's test suite
 - `never`: discard all adversarial tests after review (findings still reported)
 - `ask`: present test results and ask user whether to persist each set
+
+**Write observations** — Collect `observations` arrays from all valid agent outputs. Merge into a single list, assign sequential IDs (OB-001, ...), set `agent: adversary` and `phase: adversarial-review`. Write to `.observations.yml`. The orchestrator writes this — not agents — to prevent concurrent write conflicts.
 
 **Memory capture** — Mandatory final step. Spawn **shaktra-memory-curator**:
 ```
@@ -186,37 +181,44 @@ Set memory_captured: true in handoff.
 
 ### 1. Read Project Context
 
-Same as story adversarial review step 1.
+Same as story workflow step 1, with these adaptations based on whether the PR links to a story (detected in step 2 but check PR title/body early):
+
+**PR links to a story:** Use the story directory for memory retrieval, briefing, and observations — identical to story workflow step 1.
+**PR has no story link:** Skip memory retrieval and briefing (no story context). Create `.shaktra/observations/adversarial-pr-{pr_number}.yml` for observations.
 
 ### 2. Load Change Context & Build Behavior Contract
 
-- Run `gh pr view {pr_number} --json title,body,files,baseRefName,headRefName` to get PR metadata
+- Run `gh pr view {pr_number} --json title,body,files,baseRefName,headRefName`
 - Run `gh pr diff {pr_number}` to get the full diff
-- If the PR references a story ID (in title or body), load the story YAML
+- If the PR references a story ID (in title or body), load the story YAML and use its acceptance criteria
 - Read all changed files in full (not just diff)
-- Identify test files related to changed code
+- Identify test files related to changed code (import analysis or naming convention)
 
-Build the same behavior contract as story mode, using PR metadata and diff as the source instead of handoff.
+Build the same behavior contract structure. For PRs without a linked story, derive `acceptance_criteria` from the PR title/body and diff intent (less precise than story ACs — compensate with more comprehensive `invariants` from existing test coverage).
 
-### 3. Dispatch Adversary Agents in Parallel
+### 3-6. Dispatch, Validate, Score, Verdict
 
-Same parallel dispatch as story adversarial review step 3.
-
-### 4. Aggregate Results
-
-Same as story adversarial review step 4.
-
-### 5. Compute Mutation Score
-
-Same as story adversarial review step 5.
-
-### 6. Apply Verdict
-
-Same gate logic as story adversarial review step 6.
+Same as story workflow steps 3-6.
 
 ### 7. Report & Memory Capture
 
-Same as story adversarial review step 7 (artifacts path = `.shaktra/stories/<story_id>` if a story is linked, otherwise skip memory capture for non-story PRs).
+Output the structured report. Test persistence same as story mode.
+
+**Write observations** — Same as story step 7: merge agent observations, assign IDs, write to the observations file created in step 1 (story dir if PR links to a story, `.shaktra/observations/adversarial-pr-{pr_number}.yml` otherwise).
+
+**Memory capture:**
+- If the PR links to a story: spawn memory-curator with `story_path: {story_dir}`
+- If no story link: spawn memory-curator with `observations_path: .shaktra/observations/adversarial-pr-{pr_number}.yml` and `workflow_type: adversarial-review`
+
+---
+
+## Sub-Files
+
+| File | Purpose |
+|---|---|
+| `adversarial-dispatch.md` | Two-phase agent dispatch, prompt templates, output validation |
+| `mutation-strategy.md` | Mutation operators, safety protocol, finding classification |
+| `probe-strategies.md` | Input/boundary and fault/resilience probe definitions |
 
 ---
 
@@ -261,6 +263,9 @@ Same as story adversarial review step 7 (artifacts path = `.shaktra/stories/<sto
 #### P2 — Moderate
 {findings with evidence or "None"}
 
+#### P3 — Minor
+{findings with evidence or "None"}
+
 ### Risk Assessment
 - **Untested areas:** {list of code paths with no mutation kills}
 - **Brittle areas:** {list of code that broke under adversarial probes}
@@ -278,20 +283,10 @@ Same as story adversarial review step 7 (artifacts path = `.shaktra/stories/<sto
 - Memory captured: {yes/no}
 ```
 
-## Verdicts
+## Verdicts & Guard Tokens
 
-| Verdict | Condition | Meaning |
-|---|---|---|
-| `PASS` | 0 P0, P1 within threshold, mutation score above threshold | Ship with confidence |
-| `CONCERN` | 0 P0, but P1 exceeds threshold or mutation score below threshold | Review blind spots — merge with awareness |
-| `BLOCKED` | P0 > 0 | Critical issues from adversarial testing — fix before merge |
-
----
-
-## Guard Tokens
-
-| Token | When |
-|---|---|
-| `ADVERSARIAL_PASS` | Verdict is PASS |
-| `ADVERSARIAL_CONCERN` | Verdict is CONCERN |
-| `ADVERSARIAL_BLOCKED` | Verdict is BLOCKED |
+| Verdict | Guard Token | Condition | Meaning |
+|---|---|---|---|
+| `PASS` | `ADVERSARIAL_PASS` | 0 P0, P1 within threshold, mutation score above threshold | Ship with confidence |
+| `CONCERN` | `ADVERSARIAL_CONCERN` | 0 P0, but P1 exceeds threshold or mutation score below threshold | Review blind spots — merge with awareness |
+| `BLOCKED` | `ADVERSARIAL_BLOCKED` | P0 > 0 | Critical issues — fix before merge |

@@ -941,7 +941,7 @@ A: Split it:
 
 See GitHub releases for changelog and version history.
 
-Current version: **0.4.1**
+Current version: **0.4.2**
 
 ---
 

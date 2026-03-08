@@ -11,6 +11,7 @@ Dimensions that answer "What IS this codebase?" — its structure, domain model,
 ## D1: Architecture & Structure → `structure.yml`
 
 **Scope:** How the codebase is organized, what each module does, and how modules relate.
+**Downstream impact:** The architect agent uses this to design solutions that fit existing boundaries. The developer agent uses module relationships to place new code correctly. Boundary violations found here become refactoring candidates for the TPM.
 
 **What to analyze:**
 1. **Module inventory** — every top-level directory and significant sub-module. For each: name, purpose (why it exists), responsibilities, public interface, key files.
@@ -28,7 +29,7 @@ Dimensions that answer "What IS this codebase?" — its structure, domain model,
 **Output structure:**
 ```yaml
 summary: |
-  {Self-contained 400-token overview: module count, architectural style,
+  {Self-contained 450-token overview: module count, architectural style,
    key boundary violations, overall structural health}
 details:
   modules:
@@ -63,11 +64,17 @@ details:
       severity: minor | moderate | significant
 ```
 
+**Self-check before writing:**
+- Every module in the inventory has `why_exists` derived from actual code content, not just the directory name
+- Relationships verified against `static.yml` dependency graph — not guessed from directory proximity
+- Summary mentions module count, detected pattern(s), and any boundary violations found (or their absence)
+
 ---
 
 ## D2: Domain Model & Business Rules → `domain-model.yml`
 
 **Scope:** The business logic encoded in the codebase — entities, rules, state machines, invariants, and critically: edge cases and lessons learned discovered from code.
+**Downstream impact:** The scrummaster uses entities to scope stories precisely. The sw-engineer uses invariants to write correct validation. The bug diagnostician uses error propagation to trace issues. Missing entities here means downstream agents will miss domain constraints.
 
 **What to analyze:**
 1. **Entities & value objects** — core domain types, their attributes, relationships. Distinguish entities (identity-based) from value objects (attribute-based).
@@ -86,7 +93,7 @@ details:
 **Output structure:**
 ```yaml
 summary: |
-  {Self-contained 500-token overview: entity count, state machines found,
+  {Self-contained 550-token overview: entity count, state machines found,
    critical invariants, notable edge cases}
 details:
   entities:
@@ -125,6 +132,12 @@ details:
       swallowed: boolean
       user_visible: boolean
 ```
+
+**Self-check before writing:**
+- Every entity cites a file path with actual class/type definition — not inferred from usage
+- State machines trace to real code (enum values, state fields, transition methods) — not assumed from naming
+- Error propagation paths are traced through actual throw/catch/return chains — each step verified in code
+- Summary covers entity count, state machine count, and at least one notable edge case or invariant
 
 ---
 
@@ -186,11 +199,21 @@ details:
       consumers: [string]
 ```
 
+**Self-check before writing:**
+- Every entry point cites a specific handler file and function — not just a route path
+- Auth requirements verified by checking actual middleware/decorator presence in the handler file
+- Summary includes endpoint counts by type and auth coverage percentage
+
 ---
 
 ## D4: Coding Practices & Conventions → `practices.yml`
 
-**Scope:** How code is written in this project — the 14 practice areas, naming conventions, and canonical examples per detected pattern. This is what developer and sw-engineer agents need to generate code that matches the existing codebase.
+**Scope:** How code is written in this project — the 14 practice areas, naming conventions, and canonical examples per detected pattern.
+**Downstream impact:** This is arguably the most-consumed artifact. The developer agent reads canonical examples to write code that matches the existing codebase's style. The sw-engineer reads practices to set up test scaffolding correctly. The CR analyzer reads the violation catalog to catch deviations in code reviews. If canonical examples are wrong or fabricated, every downstream agent will produce code that doesn't match the project.
+
+**File scope:** Analyze ALL source files in the project — production code, test code, scripts, utilities. Use `static.yml` file inventory as the complete list. Do not limit analysis to a single directory. Different parts of the codebase may follow different conventions — detect and report these differences rather than ignoring code outside the "main" directory.
+
+**Project-specific patterns:** Beyond language-standard conventions, detect patterns unique to THIS project. Examples: lazy dependency loading, fail-closed validation, parameter-based dependency injection, shared utility functions. These project-specific patterns are often the most valuable findings because they represent decisions the team has made that new code must follow.
 
 **14 Practice Areas to Analyze:**
 
@@ -232,7 +255,7 @@ details:
 **Output structure:**
 ```yaml
 summary: |
-  {Self-contained 600-token overview: dominant practices,
+  {Self-contained 650-token overview: dominant practices,
    naming conventions, notable deviations, consistency level}
 details:
   practices:
@@ -265,3 +288,12 @@ details:
       location: string
       impact: low | medium | high
 ```
+
+**Self-check before writing:**
+- You analyzed files from at least 2 different top-level directories (or documented why only one exists)
+- Every canonical example is 10-40 lines of real code copied verbatim from the codebase — not summarized, paraphrased, or generated
+- Each of the 14 practice areas has at least 3 evidence citations (or all available if fewer exist, with a note)
+- The violation_catalog has entries for every practice area with `consistency: mixed` or `consistency: low`
+- Summary uses a substantial portion of the 600-token budget — this artifact feeds the developer agent, CR analyzer, and sw-engineer, so thin summaries degrade all downstream workflows
+- Naming conventions are verified across at least 5 files — not inferred from 1-2 examples
+- Project-specific patterns are identified and documented (not just language-standard conventions)

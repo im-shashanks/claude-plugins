@@ -6,6 +6,17 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Version numbers 
 
 ---
 
+## [0.4.2] - 2026-03-08
+
+### Changed
+- **Adversarial review: observation safety** — `.observations.yml` initialization now checks `handoff.memory_captured` before overwriting, preserving unconsumed observations from prior workflow phases.
+- **Adversarial review: PR observation writing** — PR workflow step 7 now explicitly includes the observation merging/writing step, preventing silent data loss when running PR adversarial reviews without a linked story.
+- **Adversarial review: git verification safety** — Source file verification between Phase A and Phase B now documents the committed-code prerequisite, warning against running adversarial review on uncommitted work.
+- **Adversarial review: P3 findings in report** — Output template now includes a P3 severity section, matching the summary line that already counted P3 findings.
+- **Adversarial review: verdicts consolidated** — Verdicts and Guard Tokens merged into a single table for brevity.
+
+---
+
 ## [0.4.1] - 2026-02-22
 
 ### Changed
