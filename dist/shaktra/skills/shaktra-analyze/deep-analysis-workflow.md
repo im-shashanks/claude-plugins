@@ -32,7 +32,30 @@ Each artifact has exactly one writer. Zero conflicts.
 
 ## Stage 2: Spawn Team (4 Members)
 
-Use TeamCreate to spawn a team of 4 agents simultaneously. Each team member spawns up to 3 subagents for its dimensions. In every prompt below, replace `{project_root}` with the actual project root path and `{skill_directory}` with the absolute path to this skill's directory.
+Before constructing prompts, replace ALL `{variables}` with actual values:
+- `{project_root}` → the absolute path to the project root (e.g., `/Users/user/my-project`)
+- `{skill_directory}` → the absolute path to this skill's directory (the directory containing SKILL.md)
+
+Subagents cannot resolve variables — every path must be a concrete absolute path.
+
+### Team Setup Sequence
+
+1. **Create the team** — use TeamCreate (already discovered via ToolSearch in SKILL.md Step 4a):
+   ```
+   TeamCreate(team_name: "shaktra-analyze", description: "Deep codebase analysis — 4 team members analyzing 9 dimensions")
+   ```
+
+2. **Create 4 tasks** — one per team member, using TaskCreate with the team:
+   - Task 1: "TM-1: Analyze D1 Architecture, D5 Dependencies, D9 Git Intelligence"
+   - Task 2: "TM-2: Analyze D2 Domain Model, D3 Entry Points + error propagation correlation"
+   - Task 3: "TM-3: Analyze D6 Tech Debt, D8 Critical Paths + cross-cutting risk correlation"
+   - Task 4: "TM-4: Analyze D4 Practices, D7 Data Flows + test intelligence correlation"
+
+3. **Spawn 4 teammates** — use the Agent tool with `team_name: "shaktra-analyze"` for each. Spawn all 4 in the same message for parallel execution. Use the prompt templates below for each teammate's prompt. Each teammate spawns its own subagents for individual dimensions.
+
+4. **Assign tasks** — use TaskUpdate to assign each task to its corresponding teammate.
+
+5. **Wait for completion** — teammates send messages when done. After all 4 complete, proceed to Stage 3.
 
 ### TM-1: "structure" — D1, D5, D9
 

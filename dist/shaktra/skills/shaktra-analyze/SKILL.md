@@ -91,14 +91,24 @@ Update `manifest.yml` with Stage 1 completion state.
 
 ### Step 4: Stage 2 — Deep Analysis (Delegated)
 
-Stage 1 is now complete. Determine execution mode and delegate:
+Stage 1 is now complete. Agent teams are the primary execution mode — they produce richer artifacts through cross-cutting correlations between dimensions.
 
-**Check if agent teams are available** (TeamCreate tool accessible):
+**4a. Attempt agent teams (primary path):**
 
-- **IF TeamCreate IS available:** Read `deep-analysis-workflow.md` in this skill's directory and follow it completely. This spawns 4 team members with parallel subagents for richer cross-cutting analysis.
-- **IF TeamCreate IS NOT available:** Warn user: "Teams unavailable — running standard single-session analysis." Read `standard-analysis-workflow.md` in this skill's directory and follow it completely. This spawns 9 parallel CBA Analyzers.
+1. Use ToolSearch to discover the `TeamCreate` tool: `query: "select:TeamCreate"`
+2. If TeamCreate is found and available:
+   - Inform user: "Using agent teams for deep analysis (4 team members, parallel subagents)."
+   - Read `deep-analysis-workflow.md` in this skill's directory and follow it completely.
+   - After the workflow completes, continue with Step 5 below.
 
-Both workflow files handle Stages 2-3 (dimension analysis + finalization). After the chosen workflow completes, return here and continue with Step 5.
+**4b. Fall back to subagents (only if teams unavailable):**
+
+1. If ToolSearch does not find TeamCreate, or if TeamCreate fails when invoked:
+   - Warn user: "Agent teams unavailable — falling back to standard single-session analysis with parallel subagents."
+   - Read `standard-analysis-workflow.md` in this skill's directory and follow it completely.
+   - After the workflow completes, continue with Step 5 below.
+
+Both workflow files handle Stages 2-3 (dimension analysis + finalization).
 
 ### Step 5: Update Settings from Analysis
 
@@ -138,33 +148,7 @@ Promote significant findings to principles/anti-patterns/procedures.
 
 ### Step 7: Report Summary
 
-Display to user:
-
-```
-## Codebase Analysis Complete
-
-**Project:** {name} ({language})
-**Artifacts:** .shaktra/analysis/ (13 files)
-
-### Key Findings
-{Top 3-5 findings from across all dimensions, highest severity first}
-
-### Architecture Overview
-{Mermaid diagram from structure.yml}
-
-### Dimension Summary
-| Dimension | Status | Key Finding |
-|---|---|---|
-| D1: Architecture & Structure | complete | {one-line summary} |
-| ... | ... | ... |
-
-### Architecture
-- {project.architecture setting status — auto-populated, user action needed, or already set}
-
-### Next Steps
-- Run `/shaktra:tpm` to start planning — architect will consume analysis automatically
-- Run `/shaktra:analyze refresh` after code changes to update stale dimensions
-```
+Display to user: project name/language, artifact count, top 3-5 findings (highest severity first), Mermaid architecture diagram from structure.yml, dimension status table (dimension | status | key finding), architecture setting status, and next steps (`/shaktra:tpm` for planning, `/shaktra:analyze refresh` for updates).
 
 ---
 
