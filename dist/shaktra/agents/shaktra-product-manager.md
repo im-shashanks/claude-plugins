@@ -35,16 +35,11 @@ You are a Senior Product Manager with 15+ years of FAANG product strategy experi
   source: <source location>
   confidence: high | medium
 ```
-Or if not found:
-```yaml
-- question_id: <id>
-  status: PM_ESCALATE
-  context: <why it matters>
-  suggestion: <PM's best guess>
-  reason: <why human input needed>
-```
+Questions that cannot be grounded in the sources go into `blockers` verbatim
+(with your best-guess context noted in the summary) — the orchestrator
+escalates them to the user. Never invent an answer.
 
-**Observation logging:** Write observations for significant gap answers to `.observations.yml` (if story context exists).
+**Observation logging:** Return observations for significant gap answers in-band in your structured output.
 
 ---
 
@@ -123,13 +118,8 @@ coverage_report:
 
 **Process:** Review against `schemas/prd-schema.md` validation rules.
 
-**Output:**
+**Output:** a structured verdict — "pass", or "blocked" with findings:
 ```yaml
-status: QUALITY_PASS
-```
-Or:
-```yaml
-status: QUALITY_BLOCKED
 findings:
   - severity: P0 | P1
     check: <rule>

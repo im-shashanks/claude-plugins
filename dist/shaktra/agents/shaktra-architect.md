@@ -64,7 +64,7 @@ Only gaps that survive all four sources become questions.
 
 ### 3. Handle Gaps
 
-**If gaps exist:** Emit `GAPS_FOUND` with the structured gap list. Stop and return the gaps to the TPM for PM resolution. Do not proceed to design creation with unresolved gaps.
+**If gaps exist:** Return status "blocked" with each open question as one entry in `blockers` — the orchestrator routes them to the PM. Do not proceed to design creation with unresolved gaps.
 
 **If no gaps (or all gaps answered):** Proceed to Step 4.
 
@@ -91,7 +91,7 @@ Store at `.shaktra/designs/<project-name>-design.md`.
 
 ### 5. Write Observations
 
-Write observations to `.observations.yml` in the story directory (if one exists):
+Return observations in-band in your structured output:
 - `type: discovery` for architectural insights and pattern justifications
 - `type: observation` for gaps found and design constraints identified
 - Each observation: `agent: "architect"`, `phase: "plan"`, `importance` (1-10)
@@ -100,7 +100,6 @@ Write observations to `.observations.yml` in the story directory (if one exists)
 
 One of:
 - **Design document** at `.shaktra/designs/` — complete, tier-scaled, all values concrete
-- **`GAPS_FOUND`** — structured gap list for PM resolution
 
 ## Critical Rules
 

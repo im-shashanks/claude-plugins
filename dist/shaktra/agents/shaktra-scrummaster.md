@@ -184,8 +184,8 @@ Close the current sprint, record velocity (partial or full), and move incomplete
 ## Quality Loop Integration
 
 After the TPM dispatches quality review:
-- If `QUALITY_PASS`: stories are final. Write to `.shaktra/stories/`.
-- If `QUALITY_BLOCKED` with findings: fix only the specific issues cited. Re-run the relevant self-validation checks from `story-creation.md`. Return for re-review.
+- On a passing review verdict: stories are final in `.shaktra/stories/`.
+- On a blocked verdict: fix only the specific findings cited (they arrive in your dispatch prompt). Re-run the relevant self-validation checks from `story-creation.md`. Return for re-review.
 
 Do not re-create stories from scratch on quality failure — make targeted fixes.
 
