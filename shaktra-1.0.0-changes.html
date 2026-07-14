@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shaktra 1.0.0 — What Changed</title>
+<style>
+  :root { --ink:#1a1d23; --muted:#6b7280; --line:#e5e7eb; --accent:#2563eb; --accent-soft:#dbeafe;
+          --warn:#b45309; --ok:#15803d; --bg:#f8fafc; --card:#ffffff; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif; color:var(--ink); background:var(--bg); }
+  header { position:sticky; top:0; z-index:20; background:var(--card); border-bottom:1px solid var(--line);
+           padding:.7rem 1.2rem; display:flex; align-items:center; gap:1rem; }
+  header h1 { font-size:1.05rem; margin:0; flex:1; }
+  #ann-count { color:var(--muted); font-size:.85rem; }
+  #complete-btn { background:var(--ok); color:#fff; border:0; border-radius:6px; padding:.5rem 1rem;
+                  font-size:.9rem; cursor:pointer; }
+  #complete-btn:hover { filter:brightness(1.1); }
+  #layout { display:grid; grid-template-columns:minmax(0,1fr) 320px; gap:0; max-width:1400px; margin:0 auto; }
+  main { padding:2rem 2.5rem 6rem; min-width:0; }
+  aside { border-left:1px solid var(--line); background:var(--card); padding:1rem;
+          position:sticky; top:53px; height:calc(100vh - 53px); overflow-y:auto; }
+  aside h2 { font-size:.8rem; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin:.2rem 0 .8rem; }
+  section.rev-section { background:var(--card); border:1px solid var(--line); border-radius:10px;
+                        padding:1.4rem 1.8rem; margin-bottom:1.4rem; }
+  section.rev-section > h2 { margin-top:0; font-size:1.25rem; }
+  section.rev-section.has-ann { border-left:4px solid var(--accent); }
+  table { border-collapse:collapse; width:100%; margin:1rem 0; font-size:.92rem; display:block; overflow-x:auto; }
+  th,td { border:1px solid var(--line); padding:.4rem .7rem; text-align:left; }
+  th { background:var(--bg); }
+  code { background:var(--bg); border:1px solid var(--line); border-radius:4px; padding:.05rem .3rem; font-size:.85em; }
+  pre { background:#0f172a; color:#e2e8f0; border-radius:8px; padding:1rem; overflow-x:auto; font-size:.85rem; }
+  pre code { background:none; border:0; color:inherit; }
+  .rev-question { border:1px dashed var(--warn); background:#fffbeb; border-radius:8px; padding:.9rem 1.1rem; margin:1rem 0; }
+  .rev-question .q-label { font-weight:600; color:var(--warn); font-size:.8rem; text-transform:uppercase; letter-spacing:.05em; }
+  .rev-question textarea { width:100%; min-height:64px; margin-top:.5rem; border:1px solid var(--line);
+                           border-radius:6px; padding:.5rem; font:inherit; font-size:.9rem; }
+  .rev-question button { margin-top:.4rem; background:var(--warn); color:#fff; border:0; border-radius:6px;
+                         padding:.35rem .8rem; cursor:pointer; font-size:.85rem; }
+  .rev-question .q-saved { color:var(--ok); font-size:.85rem; margin-left:.6rem; }
+  #popover { position:absolute; z-index:30; background:var(--card); border:1px solid var(--line); border-radius:8px;
+             box-shadow:0 8px 24px rgba(0,0,0,.15); padding:.7rem; width:320px; display:none; }
+  #popover textarea { width:100%; min-height:70px; border:1px solid var(--line); border-radius:6px; padding:.45rem; font:inherit; font-size:.9rem; }
+  #popover .quote { font-size:.78rem; color:var(--muted); border-left:3px solid var(--accent); padding-left:.5rem;
+                    margin-bottom:.5rem; max-height:60px; overflow:hidden; }
+  #popover .row { display:flex; gap:.5rem; justify-content:flex-end; margin-top:.4rem; }
+  #popover button { border:0; border-radius:6px; padding:.35rem .8rem; cursor:pointer; font-size:.85rem; }
+  #popover .save { background:var(--accent); color:#fff; }
+  #popover .cancel { background:var(--line); }
+  .ann-card { border:1px solid var(--line); border-radius:8px; padding:.6rem .7rem; margin-bottom:.6rem; font-size:.85rem; background:var(--bg); }
+  .ann-card .quote { color:var(--muted); font-style:italic; display:block; margin-bottom:.25rem;
+                     overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .ann-card .meta { color:var(--muted); font-size:.75rem; display:flex; justify-content:space-between; margin-top:.3rem; }
+  .ann-card .del { color:#b91c1c; cursor:pointer; background:none; border:0; padding:0; font-size:.75rem; }
+  .empty { color:var(--muted); font-size:.85rem; }
+  mark.ann-hl { background:var(--accent-soft); }
+  #toast { position:fixed; bottom:1rem; left:50%; transform:translateX(-50%); background:var(--ink); color:#fff;
+           padding:.5rem 1rem; border-radius:8px; font-size:.85rem; display:none; z-index:40; }
+  @media (max-width:900px){ #layout{grid-template-columns:1fr;} aside{position:static;height:auto;border-left:0;border-top:1px solid var(--line);} }
+</style>
+</head>
+<body>
+<header>
+  <h1>Shaktra 1.0.0 — What Changed (v0.4.2 → v1.0.0)</h1>
+  <span id="ann-count"></span>
+  <button id="complete-btn" title="Finish the review and hand annotations back to Claude">Review Complete</button>
+</header>
+<div id="layout">
+<main id="doc">
+
+<section class="rev-section" data-section-id="summary">
+  <h2>Summary</h2>
+  <p>Shaktra 1.0.0 is a clean redesign for current Claude Code. Every pipeline now runs as a <strong>deterministic Workflow-tool script</strong> with schema-validated agent returns — replacing ~8,000 lines of orchestration prose, all 29 guard tokens, sidecar-file protocols, and the dual analyze implementation. The 15-command surface is unchanged; every agent persona and every quality checklist is intact.</p>
+  <table>
+    <tr><th>Layer</th><th>0.4.2</th><th>1.0.0</th></tr>
+    <tr><td>Orchestration</td><td>prose pseudocode + guard tokens + Task() templates</td><td>10 workflow scripts + 4 lib children (~1,900 lines JS)</td></tr>
+    <tr><td>Findings/observations/briefings</td><td>sidecar files (.quality.yml, .observations.yml, .briefing.yml, .chunks/)</td><td>in-band structured outputs, persisted to handoff.yml</td></tr>
+    <tr><td>Thresholds &amp; pre-flight</td><td>read ad-hoc by each orchestrator</td><td>one JSON blob from scripts/shaktra_context.py</td></tr>
+    <tr><td>State writes</td><td>hand-edited YAML by the orchestrator</td><td>deterministic: shaktra_handoff.py, shaktra_sprint.py</td></tr>
+    <tr><td>Analyze</td><td>teams path + subagent fallback (dual)</td><td>single analyze.js with a consolidation agent</td></tr>
+    <tr><td>Diagrams</td><td>35</td><td>13, regenerated around the new architecture</td></tr>
+  </table>
+</section>
+
+<section class="rev-section" data-section-id="new-capability">
+  <h2>New capability: annotatable HTML reviews</h2>
+  <p>This page is the feature: <code>scripts/review_server.py</code> serves an annotatable doc on localhost; you select text to comment, answer inline questions, and click <em>Review Complete</em> — Claude reads the annotations JSON and turns each one into an actionable item. Offered from <code>/shaktra:tpm</code> (design docs), <code>/shaktra:pm</code> (PRDs), and <code>/shaktra:analyze</code> (reports). HTML always accompanies the canonical markdown/YAML artifact, never replaces it.</p>
+</section>
+
+<section class="rev-section" data-section-id="kept">
+  <h2>Deliberately unchanged — the quality moat</h2>
+  <ul>
+    <li>All 15 agent personas in full; SW Quality ≠ Code Reviewer ≠ Adversary</li>
+    <li>All shaktra-tdd knowledge files and shaktra-quality checklists</li>
+    <li>severity-taxonomy.md as the single severity source; thresholds only from settings.yml</li>
+    <li>Story tiers, coverage 70/80/90/95, valid-RED rules, 3-attempt caps, consistency gate, sprint planning with velocity</li>
+    <li>All 4 blocking Python hooks (validate_schema gained checks for the new handoff fields)</li>
+  </ul>
+</section>
+
+<section class="rev-section" data-section-id="breaking">
+  <h2>Breaking / operational notes</h2>
+  <ul>
+    <li><strong>Requires a Claude Code version with the Workflow tool.</strong> Orchestrator commands fail with an upgrade message otherwise; utilities still work. No legacy fallback, per the 1.0.0 mandate.</li>
+    <li><code>handoff.yml</code> gains <code>observations</code>, <code>briefing</code>, <code>workflow_run</code>; in-flight stories from 0.4.x resume cleanly (missing fields are additive).</li>
+    <li><code>memory_retrieval.py</code> and <code>migrate_memory.py</code> retired; <code>/shaktra:init</code> offers manual legacy-memory conversion.</li>
+    <li>Mutation testing (adversarial review) temporarily modifies source files with git-verified restore — run it on a clean tree.</li>
+  </ul>
+  <div class="rev-question" data-question-id="q-release-gate">
+    <span class="q-label">Open question</span>
+    <p>The full 23-test E2E suite (tests/workflows) has been updated for the new architecture but needs a real run (hours of agentic sessions) before publishing the release branch. Run it locally, or let CI on the release branch be the gate?</p>
+    <textarea placeholder="Your answer…"></textarea>
+    <button>Save answer</button><span class="q-saved"></span>
+  </div>
+</section>
+
+</main>
+<aside>
+  <h2>Annotations</h2>
+  <div id="ann-list"><p class="empty">None yet. Select text in the document to annotate it.</p></div>
+</aside>
+</div>
+<div id="popover">
+  <div class="quote"></div>
+  <textarea placeholder="Your comment…"></textarea>
+  <div class="row"><button class="cancel">Cancel</button><button class="save">Save</button></div>
+</div>
+<div id="toast"></div>
+<script>
+(function () {
+  "use strict";
+  var API = "api/annotations";
+  var popover = document.getElementById("popover");
+  var pending = null; // {section_id, quote}
+
+  function toast(msg) {
+    var t = document.getElementById("toast");
+    t.textContent = msg; t.style.display = "block";
+    setTimeout(function () { t.style.display = "none"; }, 2200);
+  }
+
+  function api(method, path, body) {
+    return fetch(path || API, {
+      method: method,
+      headers: body ? { "Content-Type": "application/json" } : undefined,
+      body: body ? JSON.stringify(body) : undefined
+    }).then(function (r) {
+      if (!r.ok) { throw new Error("HTTP " + r.status); }
+      return r.json();
+    });
+  }
+
+  function render(data) {
+    var list = document.getElementById("ann-list");
+    var anns = data.annotations || [];
+    document.getElementById("ann-count").textContent =
+      anns.length ? anns.length + " annotation" + (anns.length > 1 ? "s" : "") : "";
+    document.querySelectorAll("section.rev-section").forEach(function (s) { s.classList.remove("has-ann"); });
+    if (!anns.length) {
+      list.innerHTML = '<p class="empty">None yet. Select text in the document to annotate it.</p>';
+      return;
+    }
+    list.innerHTML = "";
+    anns.forEach(function (a) {
+      var sec = document.querySelector('[data-section-id="' + a.section_id + '"]');
+      if (sec) { sec.classList.add("has-ann"); }
+      var card = document.createElement("div");
+      card.className = "ann-card";
+      var quote = a.quote ? '<span class="quote">“' + esc(a.quote) + '”</span>' : "";
+      var label = a.type === "question_response" ? "answer: " + esc(a.question_id || "") : esc(a.section_id || "");
+      card.innerHTML = quote + esc(a.text) +
+        '<div class="meta"><span>' + label + '</span><button class="del">delete</button></div>';
+      card.querySelector(".del").addEventListener("click", function () {
+        api("DELETE", API + "/" + a.id).then(refresh).catch(function () { toast("Delete failed"); });
+      });
+      list.appendChild(card);
+    });
+  }
+
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  function refresh() { return api("GET").then(render).catch(function () {}); }
+
+  document.addEventListener("mouseup", function (e) {
+    if (popover.contains(e.target)) { return; }
+    var sel = window.getSelection();
+    var text = sel ? String(sel).trim() : "";
+    if (!text || text.length < 2) { popover.style.display = "none"; return; }
+    var node = sel.anchorNode && sel.anchorNode.parentElement;
+    var section = node && node.closest("section.rev-section");
+    if (!section) { popover.style.display = "none"; return; }
+    pending = { section_id: section.getAttribute("data-section-id"), quote: text.slice(0, 300) };
+    popover.querySelector(".quote").textContent = "“" + pending.quote + "”";
+    popover.querySelector("textarea").value = "";
+    var rect = sel.getRangeAt(0).getBoundingClientRect();
+    popover.style.left = Math.max(8, Math.min(window.innerWidth - 340, rect.left + window.scrollX)) + "px";
+    popover.style.top = (rect.bottom + window.scrollY + 8) + "px";
+    popover.style.display = "block";
+    popover.querySelector("textarea").focus();
+  });
+
+  popover.querySelector(".cancel").addEventListener("click", function () { popover.style.display = "none"; });
+  popover.querySelector(".save").addEventListener("click", function () {
+    var text = popover.querySelector("textarea").value.trim();
+    if (!text || !pending) { return; }
+    api("POST", API, { type: "annotation", section_id: pending.section_id, quote: pending.quote, text: text })
+      .then(function () { popover.style.display = "none"; refresh(); })
+      .catch(function () { toast("Save failed"); });
+  });
+
+  document.querySelectorAll(".rev-question").forEach(function (q) {
+    var btn = q.querySelector("button");
+    if (!btn) { return; }
+    btn.addEventListener("click", function () {
+      var text = q.querySelector("textarea").value.trim();
+      if (!text) { return; }
+      var section = q.closest("section.rev-section");
+      api("POST", API, {
+        type: "question_response",
+        question_id: q.getAttribute("data-question-id"),
+        section_id: section ? section.getAttribute("data-section-id") : null,
+        quote: null,
+        text: text
+      }).then(function () {
+        q.querySelector(".q-saved").textContent = "Saved ✓";
+        refresh();
+      }).catch(function () { toast("Save failed"); });
+    });
+  });
+
+  document.getElementById("complete-btn").addEventListener("click", function () {
+    var unanswered = [];
+    document.querySelectorAll(".rev-question").forEach(function (q) {
+      if (!q.querySelector(".q-saved").textContent) { unanswered.push(q.getAttribute("data-question-id")); }
+    });
+    var msg = unanswered.length
+      ? unanswered.length + " question(s) are unanswered. Finish the review anyway?"
+      : "Finish the review? The server will stop and Claude will read your annotations.";
+    if (!window.confirm(msg)) { return; }
+    api("POST", "api/complete", {}).then(function () {
+      document.body.innerHTML = '<div style="padding:4rem;text-align:center;font:18px system-ui">' +
+        "✅ Review complete. You can close this tab — Claude is reading your annotations.</div>";
+    }).catch(function () { toast("Complete failed — is the server still running?"); });
+  });
+
+  refresh();
+})();
+</script>
+</body>
+</html>

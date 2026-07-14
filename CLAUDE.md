@@ -12,10 +12,11 @@ dist/shaktra/                    # THE PLUGIN — all plugin code lives here
   .claude-plugin/plugin.json     # Plugin manifest (required)
   agents/                        # Sub-agent definitions
   commands/                      # Slash commands (non-namespaced)
-  skills/                        # Skill definitions
+  skills/                        # Skill definitions (thin orchestrators + knowledge skills)
+  workflows/                     # Deterministic Workflow-tool scripts (JS) + lib/ children
   hooks/hooks.json               # Hook configurations
-  scripts/                       # Hook implementation scripts (Python)
-  templates/                     # State file templates for /shaktra:init
+  scripts/                       # Hook + helper scripts (Python)
+  templates/                     # State file templates for /shaktra:init + review-doc template
   docs/                          # User-facing documentation (ships with plugin)
   diagrams/                      # Workflow diagrams (ships with plugin)
   README.md                      # User-facing README (ships with plugin)
@@ -70,6 +71,7 @@ These were explicitly chosen and must not be overridden:
 - **Full sprint planning** with velocity tracking and capacity planning
 - **SW Quality and Code Reviewer are separate** — SW Quality checks story-level during TDD, Code Reviewer checks app-level after completion and reviews PRs
 - **Plugin distribution** via `/plugin install shaktra` (marketplace.json at `.claude-plugin/marketplace.json`)
+- **Deterministic orchestration (v1.0.0):** pipelines are Workflow-tool JS scripts with schema-validated agent returns — no guard tokens, no sidecar files, no prose pseudocode loops. Requires a Claude Code version with the Workflow tool; no legacy fallback.
 - **dist/shaktra/ is the plugin** — Claude Code has no include/exclude mechanism for plugin installs, so all plugin code lives directly in `dist/shaktra/`. Marketplace.json uses `"source": "./dist/shaktra"` to scope what gets installed. Dev files stay at repo root and are never shipped.
 - **Multi-plugin marketplace** — The repo is structured as a marketplace where Shaktra is one plugin. Future plugins can be added as sibling directories.
 
@@ -112,9 +114,11 @@ Do **not** touch `dist/shaktra/skills/shaktra-status-dash/SKILL.md` — the vers
 
 ## Component Overview
 
-**9 Main Agent Skills:** `/shaktra:tpm`, `/shaktra:dev`, `/shaktra:review`, `/shaktra:adversarial-review`, `/shaktra:analyze`, `/shaktra:general`, `/shaktra:bugfix`, `/shaktra:pm`, `/shaktra:incident`
-**6 Utility Skills:** `/shaktra:init`, `/shaktra:doctor`, `/shaktra:workflow`, `/shaktra:help`, `/shaktra:status-dash`, `/shaktra:memory-stats`
+**9 Main Agent Skills** (thin orchestrators over workflow scripts): `/shaktra:tpm`, `/shaktra:dev`, `/shaktra:review`, `/shaktra:adversarial-review`, `/shaktra:analyze`, `/shaktra:general`, `/shaktra:bugfix`, `/shaktra:pm`, `/shaktra:incident`
+**7 Utility Skills:** `/shaktra:init`, `/shaktra:doctor`, `/shaktra:workflow`, `/shaktra:help`, `/shaktra:status-dash`, `/shaktra:memory-stats`, `/shaktra:html-review`
 **5 Internal Skills:** shaktra-quality, shaktra-tdd, shaktra-reference, shaktra-stories, shaktra-memory
+**10 Workflow Scripts + 4 lib children:** dev-tdd, refactor, review, adversarial, tpm-design, tpm-stories, analyze, bugfix-diagnose, incident, pm-artifacts; lib/ = schemas, quality-loop, memory, report (see `dist/shaktra/workflows/README.md` for the runtime constraints)
 **15 Sub-Agents:** architect, tpm-quality, scrummaster, product-manager, sw-engineer, test-agent, developer, sw-quality, cba-analyzer, cr-analyzer, memory-curator, bug-diagnostician, memory-retriever, adversary, incident-analyst
 **1 Command:** `/shaktra-update`
 **4 Hooks:** block-main-branch, check-p0, validate-story-scope, validate-schema
+**10 Scripts:** 4 hook scripts + check_version, update_plugin, review_server, shaktra_context, shaktra_handoff, shaktra_sprint
