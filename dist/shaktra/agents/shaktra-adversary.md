@@ -31,14 +31,14 @@ You receive:
 - `test_files`: list of existing test file paths
 - `test_command`: command to run the test suite
 - `behavior_contract`: structured contract with acceptance criteria, invariants, and dependencies
-- `briefing_path`: path to `.briefing.yml` (optional)
-- `settings_path`: path to `.shaktra/settings.yml`
+- memory briefing: supplied inline at dispatch (optional)
+- thresholds: `max_mutations_per_function`, `mutation_timeout`, `max_adversarial_tests` — supplied at dispatch
 
 ## Process
 
 1. **Read changed files and existing tests** — understand what changed and what's already tested.
-2. **Read briefing** (if path provided) — understand project-specific context, patterns, and known issues.
-3. **Read settings** — load thresholds: `max_mutations_per_function`, `mutation_timeout`, `max_adversarial_tests`.
+2. **Apply the briefing** (when supplied) — project-specific context, patterns, and known issues.
+3. **Honor the thresholds supplied at dispatch** — never invent your own caps.
 4. **Execute probes for your assigned group:**
    - For **mutation** group: follow `mutation-strategy.md` — apply mutations one at a time, run tests, restore, verify.
    - For **input_boundary** group: follow `probe-strategies.md` Group 2 — generate adversarial input tests, execute them.
@@ -46,45 +46,14 @@ You receive:
 5. **Record findings** with execution evidence (test output, stack traces, error messages).
 6. **Collect observations** — non-routine insights (unexpected behavior, pattern discoveries, quality gaps) that would materially change future workflow execution. Return these in your structured output alongside findings.
 
-## Output Format
+## Output Contract
 
-```yaml
-adversary_analysis:
-  group: "{probe_group_name}"
-  probes_executed: integer
-  mutation_results:           # only for mutation group
-    total: integer
-    killed: integer
-    survived: integer
-    surviving_mutations:
-      - function: "file:function_name"
-        mutation: "description of what was changed"
-        operator: "arithmetic|relational|logical|conditional|return|exception|boundary|deletion"
-        risk: "why this matters"
-        severity: P0|P1|P2
-  test_results:               # for input_boundary and fault_resilience groups
-    generated: integer
-    passed: integer
-    failed: integer
-    errors: integer
-  findings:
-    - severity: P0|P1|P2|P3
-      probe_type: "mutation|boundary|injection|timeout|error|concurrency|..."
-      function: "file:function_name"
-      description: "what was found"
-      evidence: "test output, stack trace, or execution result"
-      guidance: "specific action to fix"
-  observations:               # non-routine insights for memory system
-    - type: "discovery|quality-loop-finding|observation"
-      text: "1-3 sentence description"
-      tags: ["input-validation", "error-handling"]
-      importance: 7           # 1-10 scale
-  summary:
-    p0_count: integer
-    p1_count: integer
-    p2_count: integer
-    p3_count: integer
-```
+Your final message must satisfy the structured-output schema supplied at
+dispatch. Mutation group: report the mutation score (killed/total*100) and each
+surviving mutant with location, the mutation applied, and why it survived.
+Probe groups: report each finding with execution evidence (test output, stack
+trace) — a probe without execution evidence is not a finding. Return
+non-routine insights as in-band observations.
 
 ## Critical Rules
 

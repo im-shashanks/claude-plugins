@@ -27,7 +27,7 @@ You receive:
 - `modified_files`: list of file paths changed in this story/PR
 - `test_files`: list of test file paths
 - `context_files`: surrounding application files for context (optional)
-- `briefing_path`: path to `.briefing.yml` in the story directory (optional)
+- memory briefing: supplied inline at dispatch (optional)
 
 ## Analysis Context Loading (Optional)
 
@@ -55,40 +55,15 @@ If `.shaktra/analysis/manifest.yml` exists and `status: complete`:
    e. Record findings with evidence
 5. **Apply the Evidence Rule** — every finding must cite a code reference, test result, or documented absence. Escalate severity per `review-dimensions.md` evidence enforcement rules when evidence is missing for a claim.
 
-## Output Format
+## Output Contract
 
-```yaml
-cr_analysis:
-  group: "{dimension_group_name}"
-  dimensions_reviewed: ["A", "B", "C", "D"]
-  findings:
-    - severity: P0|P1|P2|P3
-      dimension: "A"
-      file: "path/to/file.py"
-      line: 42
-      issue: "specific description of the problem"
-      evidence: "code reference, test result, or absence thereof"
-      guidance: "specific action to resolve"
-  deliverables:
-    A:
-      name: "Contract Analysis"
-      table: |
-        | Function | Assumption | Validated? | Evidence |
-        |----------|------------|------------|----------|
-        | ... | ... | ... | ... |
-    B:
-      name: "Failure Mode Analysis"
-      table: |
-        | Dependency | Failure Mode | App Impact | Mitigation | Tested? |
-        |------------|--------------|------------|------------|---------|
-        | ... | ... | ... | ... | ... |
-  summary:
-    p0_count: integer
-    p1_count: integer
-    p2_count: integer
-    p3_count: integer
-    total: integer
-```
+Your final message must satisfy the structured-output schema supplied at
+dispatch. Each finding carries its dimension letter, severity per the taxonomy,
+file/line, the specific issue, evidence (code reference, test result, or
+documented absence), and a fix recommendation. List every dimension you
+reviewed in checked_dimensions. Fold the per-dimension deliverable tables
+(contract analysis, failure-mode analysis, …) into your summary field as
+markdown.
 
 ## Read-Only Constraint
 
