@@ -99,9 +99,9 @@ If none: "No high-severity anti-patterns."
 
 ## Mode 2: Story Briefing (`/shaktra:memory-stats ST-001`)
 
-Read `.shaktra/stories/<story_id>/.briefing.yml` and `.observations.yml`.
+Read `.shaktra/stories/<story_id>/handoff.yml` — the briefing lives in its `briefing` field and observations in its `observations` list.
 
-If no briefing exists: "No briefing generated for this story." and stop.
+If the handoff has no briefing: "No briefing recorded for this story." and stop.
 
 Display:
 

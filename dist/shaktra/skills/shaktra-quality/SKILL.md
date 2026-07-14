@@ -55,14 +55,14 @@ p1_count = count findings where severity == P1
 p1_max   = read settings.quality.p1_threshold
 
 if p0_count > 0:
-    emit CHECK_BLOCKED
+    verdict = blocked
 else if p1_count > p1_max:
-    emit CHECK_BLOCKED
+    verdict = blocked
 else:
-    emit CHECK_PASSED
+    verdict = pass
 ```
 
-Max fix loops: 3 per gate. After 3 failed attempts, emit `MAX_LOOPS_REACHED` and escalate to user with all unresolved findings.
+Max fix loops: 3 per gate (implemented once in `workflows/lib/quality-loop.js`). After the attempts are exhausted, the loop escalates to the user with all unresolved findings.
 
 ## Sub-Files
 
@@ -79,5 +79,4 @@ Max fix loops: 3 per gate. After 3 failed attempts, emit `MAX_LOOPS_REACHED` and
 - `shaktra-reference/severity-taxonomy.md` — P0-P3 definitions and merge gate logic
 - `shaktra-reference/quality-dimensions.md` — 13 dimensions (A-M) framework
 - `shaktra-reference/quality-principles.md` — 10 core principles
-- `shaktra-reference/guard-tokens.md` — tokens emitted during reviews
 - `shaktra-stories/story-tiers.md` — tier-based check depth behavior

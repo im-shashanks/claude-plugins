@@ -132,7 +132,6 @@ Create directory if needed: `.shaktra/personas/`
 3. If evidence is thin, gather more research: `/shaktra:pm research`
 ```
 
-EMIT `PERSONAS_COMPLETE`
 
 ---
 

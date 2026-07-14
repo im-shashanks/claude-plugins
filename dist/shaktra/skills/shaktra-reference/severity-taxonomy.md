@@ -49,13 +49,13 @@ p1_count = count findings where severity == P1
 p1_max   = read settings.quality.p1_threshold
 
 if p0_count > 0:
-    emit QUALITY_BLOCKED
+    verdict = blocked
     reason: "{p0_count} P0 finding(s) must be resolved"
 else if p1_count > p1_max:
-    emit QUALITY_BLOCKED
+    verdict = blocked
     reason: "{p1_count} P1 findings exceed threshold of {p1_max}"
 else:
-    emit QUALITY_PASS
+    verdict = pass
 ```
 
 ## Evidence Rule

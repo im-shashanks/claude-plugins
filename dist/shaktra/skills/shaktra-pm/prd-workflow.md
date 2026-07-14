@@ -97,35 +97,9 @@ PM generates the PRD following the template structure.
 
 ### Step 5 — Quality Review
 
-Run quality loop:
-
-```
-attempt = 0
-max_attempts = 3
-
-WHILE attempt < max_attempts:
-  attempt += 1
-
-  # Review against schema rules
-  findings = review_against_prd_schema()
-
-  IF no findings:
-    EMIT QUALITY_PASS
-    BREAK
-
-  # Fix findings
-  FOR each finding:
-    IF fixable by PM:
-      auto_fix(finding)
-    ELSE:
-      collect_user_input(finding)
-
-  CONTINUE
-
-IF attempt == max_attempts AND findings remain:
-  EMIT MAX_LOOPS_REACHED
-  present_findings_to_user()
-```
+The PRD passes through the standard quality gate loop (review → fix →
+re-review, capped attempts) against the schema rules below. Findings that
+require product decisions rather than edits are escalated to the user.
 
 **Schema validation rules:**
 | Rule | Severity |
@@ -145,14 +119,13 @@ If a PRD already exists:
 - If replace: overwrite
 - If new version: increment version in frontmatter, archive old version
 
-EMIT `PRD_COMPLETE`
 
 ### Step 7 — Present for Approval (Full Workflow Only)
 
 If running as part of full workflow:
 - Present PRD summary to user
 - Wait for explicit approval
-- EMIT `PRD_APPROVED` on approval
+- Record the approval before continuing
 
 If standalone:
 - Present PRD summary

@@ -81,11 +81,11 @@ If `quality_findings` is empty, skip this step (first-time review with no prior 
 
 ### 6. Observation Capture
 
-Write observations about the review findings:
+Return observations about the review findings in-band in your structured output:
 
-1. For each P0 or P1 finding: write a `quality-loop-finding` observation
-2. For each fix applied: write a `fix-rationale` observation
-3. For **every** principle and anti-pattern in `.briefing.yml`: write a `consistency-check` observation recording whether it was reinforced, weakened, or contradicted by this implementation. Include `principle_id` and `relationship`. This is mandatory — every briefing entry must have a corresponding consistency-check
+1. For each P0 or P1 finding: a `quality-loop-finding` observation
+2. For each fix applied: a `fix-rationale` observation
+3. For **every** principle and anti-pattern in the briefing supplied at dispatch: a `consistency-check` observation recording whether it was reinforced, weakened, or contradicted by this implementation. Include `principle_id` and `relationship`. This is mandatory — every briefing entry must have a corresponding consistency-check
 4. Do NOT promote decisions to `decisions.yml` — the memory-curator handles all consolidation
 
 ### 7. Cross-Story Consistency
@@ -154,6 +154,6 @@ Every finding must include evidence — a test result, log line, command output,
 ## Gate Logic
 
 After completing the review, apply the merge gate from `severity-taxonomy.md`:
-- P0 > 0 → emit `QUALITY_BLOCKED`
-- P1 > `settings.quality.p1_threshold` → emit `QUALITY_BLOCKED`
-- Otherwise → emit `QUALITY_PASS`
+- P0 > 0 → verdict "blocked"
+- P1 over the threshold supplied at dispatch → verdict "blocked"
+- Otherwise → verdict "pass"

@@ -57,13 +57,23 @@ code_summary:
       justification: string # why the deviation was necessary
 ```
 
-## Observations Path
+## Observations, Briefing, and Workflow Run
 
 ```yaml
-observations_path: string  # optional — path to .observations.yml in the story directory
+observations:              # in-band observations accumulated during the run
+  - type: string           # pattern | risk | decision | consistency-check | lesson | ...
+    text: string
+    principle_id: string   # consistency-check only — the briefing entry verified
+briefing: {}               # the memory briefing used for this story (relevant_principles, relevant_anti_patterns, relevant_procedures)
+workflow_run:              # written by the orchestrator when a Workflow run returns
+  script: string           # e.g. "dev-tdd.js"
+  status: string           # running | complete | blocked | needs_clarification | failed
+  blocked_at: string       # phase name when status is blocked
 ```
 
-Agents write observations during workflow execution. The memory-curator reads observations from this path during the MEMORY phase.
+Observations travel in-band through agent structured outputs; the orchestrator
+persists them here via `scripts/shaktra_handoff.py`. The memory-curator receives
+them in its dispatch prompt during the MEMORY phase.
 
 ## Quality Findings
 

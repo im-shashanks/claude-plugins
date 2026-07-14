@@ -70,3 +70,11 @@ memory:
   retrieval_tier2_max: 500
   max_briefing_entries: 15
   retrieval_chunk_size: 150
+
+# test_mode: automated-test overrides consumed via shaktra_context.py.
+# Omit this section entirely in normal use — its presence switches skills
+# into non-interactive testing behavior.
+# test_mode:
+#   max_quality_loops: 1     # cap quality-gate fix loops
+#   max_stories: 2           # cap story generation
+#   auto_answer: true        # never AskUserQuestion; log AUTO-ANSWER lines

@@ -70,21 +70,11 @@ Use the output template below. Adapt section depth to the complexity of the ques
 
 ### 6. Memory Capture (Conditional)
 
-Spawn memory-curator **only** when a specialist was loaded (not for `none` domain):
-
-```
-You are the shaktra-memory-curator agent. Consolidate observations from the completed workflow.
-
-Story path: .shaktra/memory/
-Workflow type: general-{domain}
-Settings: {settings_path}
-
-Read .observations.yml from the story directory. Follow consolidation-guide.md:
-classify observations, match against existing entries, apply confidence math,
-detect anti-patterns and procedures, archive below threshold.
-Write updated principles.yml, anti-patterns.yml, procedures.yml.
-Set memory_captured: true in handoff.
-```
+Spawn memory-curator **only** when a specialist was loaded (not for `none`
+domain). Dispatch it with `workflow_type: general-{domain}` and pass any
+capture-worthy insights from the session in-band in the prompt (there are no
+observation files). The curator applies its capture bar — zero promotions is a
+valid outcome.
 
 Skip memory capture entirely for `none` domain (trivial/general questions).
 
@@ -133,12 +123,3 @@ This request is best handled by the {workflow} workflow.
 
 For simple questions, collapse to just the Response section — do not force the full template on a one-line answer.
 
----
-
-## Guard Tokens
-
-| Token | When |
-|---|---|
-| `DOMAIN_DETECTED` | Domain classified, specialist loaded |
-| `DOMAIN_NONE` | No specialist match, answering generally |
-| `ESCALATION_RECOMMENDED` | Request better served by another workflow |

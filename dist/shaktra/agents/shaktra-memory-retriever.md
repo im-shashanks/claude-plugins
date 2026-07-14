@@ -44,11 +44,11 @@ Follow the retrieval algorithm in `retrieval-guide.md` from the `shaktra-memory`
 3. Relevance scoring (semantic relevance × confidence)
 4. Ranking and capping
 5. Relevance explanation and role assignment
-6. Briefing output per `briefing-schema.md`
+6. Briefing output per the structured-output schema supplied at dispatch (persisted into `handoff.briefing` — see `handoff-schema.md`)
 
 ## Critical Rules
 
 - **Semantic over keyword.** Score by meaning, not string matching. A principle about "graceful degradation" is relevant to a story about "error handling" even if no keywords overlap.
-- **Respect thresholds.** Read `briefing_confidence_threshold` and `max_briefing_entries` from settings — never hardcode.
+- **Respect thresholds.** The confidence threshold and entry cap arrive in your dispatch prompt — never invent your own.
 - **One sentence per relevance.** Keep `relevance` explanations concise — agents will read many entries.
 - **No memory writes.** You read memory stores and write briefings. Never modify `principles.yml`, `anti-patterns.yml`, or `procedures.yml`.

@@ -128,10 +128,8 @@ This template is a generic project documentation wireframe — no Shaktra-specif
 
 If `.shaktra/memory/decisions.yml` or `.shaktra/memory/lessons.yml` already exist (upgrading from a previous Shaktra version):
 
-1. Inform the user: "Legacy memory files detected (decisions.yml, lessons.yml). These have been replaced by the new principles-based memory system."
-2. Offer to run migration: "Run the migration script to convert existing decisions and lessons into principles? (recommended)"
-3. If yes: execute `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/migrate_memory.py <project_root>`
-4. If no: inform user they can run it later manually
+1. Inform the user: "Legacy memory files detected (decisions.yml, lessons.yml). These were replaced by the principles-based memory system in Shaktra 0.3; the automated migration script was retired in 1.0.0."
+2. Offer to convert the highest-value entries by hand: read both files, propose which entries become principles/anti-patterns/procedures, and write them via the standard schemas on approval; suggest archiving the legacy files afterwards.
 
 ### Step 6: Report Results
 

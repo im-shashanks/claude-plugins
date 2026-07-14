@@ -86,10 +86,10 @@ memory:
 | `review.min_verification_tests` | code-reviewer |
 | `analysis.summary_token_budget` | cba-analyzer (via analysis-output-schemas.md budgets), analyze skill (validation) |
 | `analysis.incremental_refresh` | analyze skill (refresh workflow) |
-| `refactoring.safety_threshold` | refactoring-pipeline (orchestrator), test-agent (characterization mode) |
-| `refactoring.structural_safety_threshold` | refactoring-pipeline (orchestrator), test-agent (characterization mode) |
+| `refactoring.safety_threshold` | workflows/refactor.js, test-agent (characterization mode) |
+| `refactoring.structural_safety_threshold` | workflows/refactor.js, test-agent (characterization mode) |
 | `refactoring.max_characterization_tests` | test-agent (characterization mode) |
-| `sprints.enabled` | scrummaster, tdd-pipeline (orchestrator), workflow-template (orchestrator) |
+| `sprints.enabled` | scrummaster, scripts/shaktra_sprint.py, workflows/tpm-stories.js |
 | `sprints.velocity_tracking` | scrummaster |
 | `sprints.sprint_duration_weeks` | scrummaster |
 | `sprints.default_velocity` | scrummaster (fallback when no velocity history) |
@@ -108,10 +108,10 @@ memory:
 | `memory.max_procedures` | memory-curator (rotation limit) |
 | `memory.max_observations_per_story` | all observation-writing agents (cap check) |
 | `memory.briefing_confidence_threshold` | orchestrators (inline briefing), memory-retriever |
-| `memory.retrieval_tier1_max` | orchestrators via `memory_retrieval.py` |
-| `memory.retrieval_tier2_max` | orchestrators via `memory_retrieval.py` |
+| `memory.retrieval_tier1_max` | `shaktra_context.py` (memory sizing) |
+| `test_mode.*` | all orchestrator skills via `shaktra_context.py` — automated-test overrides (max_quality_loops, max_stories, auto_answer); absent in normal use |
+| `memory.retrieval_tier2_max` | `shaktra_context.py` (memory sizing) |
 | `memory.max_briefing_entries` | orchestrators (inline briefing), memory-retriever |
-| `memory.retrieval_chunk_size` | `memory_retrieval.py` (Tier 3 splitting) |
 
 ## Environment Variable Overrides
 

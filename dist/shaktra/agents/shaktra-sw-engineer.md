@@ -127,4 +127,4 @@ dispatch: `implementation_plan.md` written to the story directory and
 - Test names use given/when/then or behavioral naming from `testing-practices.md`.
 - Component responsibilities must be a single sentence without "and."
 - Respect existing project structure and patterns from codebase analysis.
-- If the story is missing required fields for its tier, emit `VALIDATION_FAILED` and stop.
+- If the story is missing required fields for its tier, return status "blocked" with the missing fields listed in blockers and stop.

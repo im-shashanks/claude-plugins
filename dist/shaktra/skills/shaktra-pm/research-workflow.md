@@ -191,7 +191,6 @@ gaps:
 3. Update PRD with validated insights: `/shaktra:pm prd`
 ```
 
-EMIT `RESEARCH_SYNTHESIZED`
 
 ---
 

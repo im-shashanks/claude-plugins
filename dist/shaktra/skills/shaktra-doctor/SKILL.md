@@ -8,7 +8,7 @@ user-invocable: true
 
 # /shaktra:doctor — Framework Health Check
 
-Read-only diagnostic. Runs 10 checks across 3 categories. Never creates, modifies, or deletes any file.
+Read-only diagnostic. Runs 12 checks across 3 categories. Never creates, modifies, or deletes any file.
 
 Use `${CLAUDE_PLUGIN_ROOT}` to locate the installed plugin directory for all plugin structure checks.
 
@@ -30,12 +30,12 @@ FAIL: List missing files or files with invalid frontmatter.
 
 ### Check 2 — Skill Directories
 
-Glob `${CLAUDE_PLUGIN_ROOT}/skills/*/SKILL.md`. Verify all 20 skill directories exist and each SKILL.md has valid YAML frontmatter (opening and closing `---` with at least `name` and `description` fields).
+Glob `${CLAUDE_PLUGIN_ROOT}/skills/*/SKILL.md`. Verify all 21 skill directories exist and each SKILL.md has valid YAML frontmatter (opening and closing `---` with at least `name` and `description` fields).
 
 **Expected skills:**
-shaktra-adversarial-review, shaktra-analyze, shaktra-bugfix, shaktra-dev, shaktra-doctor, shaktra-general, shaktra-help, shaktra-incident, shaktra-init, shaktra-memory, shaktra-memory-stats, shaktra-pm, shaktra-quality, shaktra-reference, shaktra-review, shaktra-status-dash, shaktra-stories, shaktra-tdd, shaktra-tpm, shaktra-workflow
+shaktra-adversarial-review, shaktra-analyze, shaktra-bugfix, shaktra-dev, shaktra-doctor, shaktra-general, shaktra-help, shaktra-html-review, shaktra-incident, shaktra-init, shaktra-memory, shaktra-memory-stats, shaktra-pm, shaktra-quality, shaktra-reference, shaktra-review, shaktra-status-dash, shaktra-stories, shaktra-tdd, shaktra-tpm, shaktra-workflow
 
-PASS: All 20 skill SKILL.md files exist with valid frontmatter.
+PASS: All 21 skill SKILL.md files exist with valid frontmatter.
 FAIL: List missing skills or invalid frontmatter.
 
 ### Check 3 — Python Scripts
@@ -46,9 +46,9 @@ Glob `${CLAUDE_PLUGIN_ROOT}/scripts/*.py`. Verify all expected scripts exist. Fo
 block_main_branch.py, check_p0_findings.py, validate_schema.py, validate_story_scope.py
 
 **Expected utility scripts:**
-check_version.py, memory_retrieval.py, migrate_memory.py, update_plugin.py
+check_version.py, update_plugin.py, review_server.py, shaktra_context.py, shaktra_handoff.py, shaktra_sprint.py
 
-PASS: All 8 scripts exist, all hook scripts executable.
+PASS: All 10 scripts exist, all hook scripts executable.
 FAIL: List missing or non-executable scripts.
 
 ### Check 4 — Sub-File References
@@ -64,6 +64,30 @@ Run `python3 -c "import yaml"` via Bash. Check the return code.
 
 PASS: PyYAML is installed and importable.
 FAIL: PyYAML is not installed → run: pip install pyyaml
+
+### Check 11 — Workflow Scripts
+
+Glob `${CLAUDE_PLUGIN_ROOT}/workflows/*.js` and `${CLAUDE_PLUGIN_ROOT}/workflows/lib/*.js`.
+
+**Expected pipeline scripts:**
+dev-tdd.js, refactor.js, review.js, adversarial.js, tpm-design.js, tpm-stories.js, analyze.js, bugfix-diagnose.js, incident.js, pm-artifacts.js
+
+**Expected lib children:**
+schemas.js, quality-loop.js, memory.js, report.js
+
+Each file must start with `export const meta = {`.
+
+PASS: All 14 workflow files exist with meta blocks.
+FAIL: List missing files or files without a meta block.
+
+### Check 12 — Workflow Tool Availability
+
+Shaktra 1.x orchestrates through Claude Code's Workflow tool. Confirm the
+Workflow tool is available in this session (it is part of your toolset or
+discoverable via ToolSearch).
+
+PASS: Workflow tool available.
+FAIL: "This Claude Code version lacks the Workflow tool — upgrade Claude Code to use Shaktra 1.x orchestrator commands. Utility commands still work." 
 
 ---
 
@@ -141,10 +165,12 @@ Present results as a structured report:
 
 ### Category 1: Plugin Structure
 - [PASS] Check 1 — Agent Files: 15/15 agents found with valid frontmatter
-- [PASS] Check 2 — Skill Directories: 20/20 skills found with valid frontmatter
-- [PASS] Check 3 — Python Scripts: 8/8 scripts found, hooks executable
+- [PASS] Check 2 — Skill Directories: 21/21 skills found with valid frontmatter
+- [PASS] Check 3 — Python Scripts: 10/10 scripts found, hooks executable
 - [PASS] Check 4 — Sub-File References: All references resolve
 - [PASS] Check 10 — Python Dependencies: PyYAML installed
+- [PASS] Check 11 — Workflow Scripts: 14/14 workflow files with meta blocks
+- [PASS] Check 12 — Workflow Tool: available
 
 ### Category 2: Project Health
 - [PASS] Check 5 — Settings File: All required sections and fields present
@@ -155,7 +181,7 @@ Present results as a structured report:
 - [PASS] Check 8 — Severity Taxonomy: Defined in exactly 1 file
 - [PASS] Check 9 — No Orphaned Files: All sub-files referenced
 
-Summary: 10/10 checks passed
+Summary: 12/12 checks passed
 ```
 
 For any FAIL result, include actionable detail immediately after the check line:

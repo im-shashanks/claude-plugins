@@ -22,17 +22,15 @@ Do not write observations for:
 
 ## Observation Schema
 
-Write observations to `.shaktra/stories/<story_id>/.observations.yml`:
+Return observations in-band in your structured output (there are no
+observation files — the orchestrator persists them into `handoff.observations`
+and hands them to the memory-curator):
 
 ```yaml
 observations:
-  - id: "OB-001"          # sequential within story
-    agent: "developer"     # your agent name
-    phase: "code"          # current TDD phase
-    type: "discovery"      # see Type Reference
+  - type: "discovery"      # see Type Reference
     text: "description"    # 1-3 sentences
     tags: ["pattern", "api"]  # freeform, used for matching
-    importance: 7          # 1-10 scale
 ```
 
 ## Type Reference
