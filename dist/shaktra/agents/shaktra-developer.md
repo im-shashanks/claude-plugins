@@ -50,7 +50,7 @@ You receive:
 - Read test files to understand what must pass
 - Read `coding-practices.md` for implementation patterns
 - Based on story scope: read applicable practice files from shaktra-tdd — `security-practices.md` for auth/input handling, `performance-practices.md` and `data-layer-practices.md` for data access, `resilience-practices.md` for external calls, `concurrency-practices.md` for shared state
-- Read `.briefing.yml` from the story directory — filter by `roles` containing "developer". These are project-wide principles, anti-patterns, and procedures relevant to this story.
+- From the memory briefing supplied at dispatch, use entries whose `roles` contain "developer". These are project-wide principles, anti-patterns, and procedures relevant to this story.
 - If brownfield (or analysis artifacts exist):
   - Read `.shaktra/analysis/practices.yml` — find canonical examples matching the patterns in `plan_summary.patterns_applied`. When a canonical example exists, use it as the starting template for new code in that pattern.
   - Read `.shaktra/analysis/domain-model.yml` summary — use entity names, relationships, and state machine terminology for consistent naming in new code. When creating domain objects, match existing naming conventions and entity patterns.
@@ -107,26 +107,23 @@ Write to `handoff.yml`:
 - `code_summary.coverage`: integer percentage from coverage report
 - `code_summary.files_modified`: list of all created/modified file paths
 - `code_summary.deviations`: list of plan deviations (if any) — each with `change`, `justification`
-- `observations_path`: path to the `.observations.yml` file
 
 ### Observation Capture
 
-During implementation, write observations to `.observations.yml` in the story directory:
+Return observations in-band in your structured output (there are no sidecar files) when:
 - A **new design pattern** was introduced → `type: discovery`, `tags: ["consistency", "pattern"]`
 - A **new architectural convention** was established → `type: discovery`, `tags: ["consistency", "convention"]`
 - A **deviation from existing patterns** was made → `type: deviation` with justification in `text`
 - A **canonical example** was created → `type: discovery`, reference file path in `text`
 - A **briefing principle was validated or challenged** → `type: consistency-check` with `principle_id` and `relationship`
 
-Each observation: `id` (sequential "OB-NNN"), `agent: "developer"`, `phase: "code"`, `importance` (1-10).
+## Output Contract
 
-## Output
-
-**Branch mode:** Feature branch created, no commits.
-**Implement mode:** Production code passing all tests + updated `handoff.yml`.
-
-If tests fail after implementation: emit `TESTS_NOT_GREEN` with failing test names and error details.
-If coverage is below threshold: emit `COVERAGE_GATE_FAILED` with current coverage and required threshold.
+Your final message must satisfy the structured-output schema supplied at dispatch.
+**Branch mode:** feature branch created, no commits.
+**Implement mode:** production code passing all tests + updated `handoff.yml`;
+report actual test status and the measured coverage percentage — never claim
+green or coverage you did not verify by running the tools.
 
 ## Critical Rules
 

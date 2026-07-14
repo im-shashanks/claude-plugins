@@ -83,7 +83,7 @@ Process:
 - Full tier (Medium): standard severity enforcement
 - Thorough tier (Large): standard enforcement (expanded review in COMPREHENSIVE)
 
-Gate logic: Apply the merge gate from `severity-taxonomy.md` — P0 always blocks, P1 blocks if count exceeds `settings.quality.p1_threshold`. Emit `CHECK_BLOCKED` or `CHECK_PASSED`.
+Gate logic: Apply the merge gate from `severity-taxonomy.md` — P0 always blocks, P1 blocks if count exceeds the threshold supplied at dispatch.
 
 ### REFACTOR_VERIFY
 
@@ -98,7 +98,7 @@ Process:
 5. For structural tier: check architecture boundaries, circular dependencies, naming consistency
 6. Load `performance-data-checks.md` and `security-checks.md` for applicable checks on changed code
 
-Gate logic: same as QUICK_CHECK. Emit `REFACTOR_PASS` or `REFACTOR_BLOCKED`.
+Gate logic: same as QUICK_CHECK. A behavior regression or coverage decrease is a P0 finding.
 
 ### COMPREHENSIVE
 
@@ -116,44 +116,13 @@ Process:
 
 Gate logic: same as QUICK_CHECK, applied to comprehensive findings.
 
-## Output Format
+## Output Contract
 
-```yaml
-review_result:
-  mode: PLAN_REVIEW|QUICK_CHECK|COMPREHENSIVE
-  gate: plan|test|code|quality
-  findings:
-    - severity: P0|P1|P2|P3
-      check_id: "PL-01|TQ-01|CQ-01|N.1"  # QUICK_CHECK and COMPREHENSIVE only
-      dimension: "A|B|...|N"               # COMPREHENSIVE only
-      file: "path/to/file"
-      line: 42
-      issue: "specific description"
-      evidence: "code reference, test result, or log line"
-      guidance: "specific fix action"
-  summary:
-    p0_count: integer
-    p1_count: integer
-    p2_count: integer
-    total: integer
-  gate_result: CHECK_PASSED|CHECK_BLOCKED|QUALITY_PASS|QUALITY_BLOCKED|REFACTOR_PASS|REFACTOR_BLOCKED
-  gate_reason: "human-readable reason for the gate result"
-```
-
-## Guard Tokens Emitted
-
-| Token | When |
-|---|---|
-| `CHECK_PASSED` | Quick-check gate passed |
-| `CHECK_BLOCKED` | Quick-check gate failed (P0 exists or P1 > threshold) |
-| `QUALITY_PASS` | Comprehensive review passed |
-| `QUALITY_BLOCKED` | Comprehensive review failed |
-| `PHASE_GATE_FAILED` | Phase transition guard failed |
-| `COVERAGE_GATE_FAILED` | Coverage below tier threshold |
-| `REFACTOR_PASS` | Refactoring verification passed — behavior preserved, metrics improved |
-| `REFACTOR_BLOCKED` | Refactoring verification failed — tests broken, coverage decreased, or P0/P1 found |
-| `CONSISTENCY_GATE_FAILED` | Briefing entries missing consistency-check observations |
-| `MAX_LOOPS_REACHED` | Fix loop exhausted (emitted by orchestrator, not directly) |
+Your final message must satisfy the structured-output schema supplied at
+dispatch. Every finding carries severity (per the taxonomy), the check id or
+dimension, file/line, the specific issue, evidence, and a fix recommendation.
+The verdict is "pass" only when the merge gate passes (0 unresolved P0,
+unresolved P1 within the threshold supplied at dispatch).
 
 ## Critical Rules
 
@@ -167,24 +136,19 @@ review_result:
 
 ## Observation Capture
 
-During quality gates, write observations to `.observations.yml` in the story directory:
-- `type: quality-loop-finding` for findings that blocked a gate — include `severity`, `resolved`, `iterations`
+Return observations in-band as part of your structured output (there are no
+sidecar files):
+- `type: quality-loop-finding` for findings that blocked a gate — include `severity`, `resolved`
 - `type: fix-rationale` after fixes are applied — explain why the fix approach was chosen
-- `type: consistency-check` when validating principles from the briefing — include `principle_id`, `relationship` ("reinforce", "weaken", or "contradict")
-- Each observation: `agent: "sw-quality"`, `phase` matches current gate, `importance` based on severity (P0=10, P1=8, P2=5, P3=3)
+- `type: consistency-check` when validating briefing entries — include `principle_id`, `relationship` ("reinforce", "weaken", or "contradict")
 
 ### Briefing Consistency Evaluation
 
-**When:** COMPREHENSIVE mode only (QUALITY phase, Medium+ tiers).
+**When:** COMPREHENSIVE mode, whenever a memory briefing is supplied at dispatch.
 
-After completing the review dimensions, evaluate every principle and anti-pattern from the briefing:
-
-1. Read `.briefing.yml` from the story directory (`.shaktra/stories/<story_id>/.briefing.yml`)
-2. If the briefing does not exist or has no `relevant_principles` and no `relevant_anti_patterns`, skip this step
-3. For **every** entry in `relevant_principles` and `relevant_anti_patterns`:
-   - Write a `consistency-check` observation with:
-     - `principle_id`: the entry's ID (e.g., PR-001 or AP-003)
-     - `relationship`: "reinforce", "weaken", or "contradict" — based on actual code evidence
-     - `text`: 1-2 sentences explaining the evidence from the implementation
-   - Determine `importance` from the relationship: reinforce=5, weaken=8, contradict=10
-4. Every briefing entry must have a corresponding consistency-check — this is mandatory, not optional
+After completing the review dimensions, evaluate every principle and
+anti-pattern in the supplied briefing against actual code evidence. For
+**every** entry return one `consistency-check` observation: `principle_id` (the
+entry's ID, e.g. PR-001 or AP-003), `relationship` based on evidence, and 1-2
+sentences of `text` explaining it. Every briefing entry must have a
+corresponding consistency-check — mandatory, not optional.

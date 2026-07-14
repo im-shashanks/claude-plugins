@@ -92,19 +92,19 @@ Write to `handoff.yml`:
 - `test_summary.test_count`: number of tests written
 - `test_summary.test_files`: list of test file paths
 
-### 7. Write Observations (Optional)
+### 7. Observations (Optional)
 
-If non-obvious test patterns are discovered, write observations to `.observations.yml`:
-- `type: discovery` for test patterns that deviate from project conventions
-- Each observation: `agent: "test-agent"`, `phase: "tests"`, `importance` (1-10)
+If non-obvious test patterns are discovered, return them as in-band
+observations in your structured output (`type: discovery`). Most test writing
+is routine — only observe genuinely non-obvious discoveries.
 
-Most test writing is routine — only observe genuinely non-obvious discoveries.
+## Output Contract
 
-## Output
-
-- Test files written to the project's test directory
-- Updated `handoff.yml` with `test_summary` populated
-- If failures are invalid: emit `TESTS_NOT_RED` — tests are broken, not red
+Your final message must satisfy the structured-output schema supplied at
+dispatch: test files written, `handoff.yml` updated with `test_summary`, and
+every failing test listed with its failure reason and whether that reason is a
+valid RED cause (missing implementation) or an invalid one (broken test — fix
+it before returning).
 
 ## Critical Rules
 

@@ -20,19 +20,20 @@ Consolidate per-story observations into long-term knowledge stores: principles, 
 
 ## Input Contract
 
-You receive:
-- `story_path`: path to the story directory containing `.observations.yml` (for story workflows)
-- OR `observations_path`: direct path to `.observations.yml` (for non-story workflows like analysis, PM brainstorm/research)
-- `workflow_type`: the type of workflow that just completed (e.g., "tdd", "review", "analysis", "pm")
-- `settings_path`: path to `.shaktra/settings.yml`
-
-When `observations_path` is provided instead of `story_path`, read observations from that path directly. No handoff update (no handoff exists). All other consolidation logic is identical.
+Your dispatch prompt supplies:
+- the observations gathered during the run, in-band (there is no `.observations.yml`)
+- `workflow_type`: the workflow that just completed (e.g., "tdd", "review", "analysis", "pm")
+- the artifacts path (story directory or workflow output) for evidence reading
+- the handoff path when one exists (story workflows) — set `memory_captured: true` there when done
 
 ## Process
 
-### 1. Read Observations
+### 1. Review Observations
 
-Read `.observations.yml` from the story directory. If the file is empty or missing, set `memory_captured: true` in the handoff and stop — nothing to consolidate.
+Review the in-band observations plus the run's artifacts (handoff summaries,
+code changes). If there are no observations and nothing in the artifacts meets
+the capture bar, set `memory_captured: true` in the handoff (when one exists)
+and return with zero promotions — a valid outcome.
 
 ### 2. Read Existing Memory Stores
 

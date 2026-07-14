@@ -25,7 +25,7 @@ Create unified implementation + test plans during the PLAN phase of the TDD pipe
 You receive:
 - `story_path`: path to the story YAML file
 - `settings_summary`: project language, test framework, coverage tool, thresholds
-- `briefing_path`: path to `.shaktra/stories/<story_id>/.briefing.yml`
+- memory briefing: supplied inline at dispatch (principles, anti-patterns, procedures)
 
 ## Process
 
@@ -40,7 +40,7 @@ Read the story YAML at `story_path`. Understand:
 ### 2. Read Project Context
 
 - Read `.shaktra/settings.yml` for `project.architecture` (the project's declared architecture style)
-- Read `.briefing.yml` for relevant principles (filter by `roles` containing "sw-engineer"), anti-patterns, and procedures
+- From the supplied briefing, use relevant principles (filter by `roles` containing "sw-engineer"), anti-patterns, and procedures
 - If brownfield (or analysis artifacts exist):
   - Read `.shaktra/analysis/practices.yml` for canonical code examples per practice area
   - Read `.shaktra/analysis/domain-model.yml` summary for entity names, state machines, and business invariants — use for naming consistency and domain-aware component design
@@ -106,17 +106,17 @@ Update `handoff.yml` with:
 - `plan_summary.scope_risks` — risks with likelihood and prevention
 - `current_phase: plan`
 
-### 10. Write Observations
+### 10. Observations
 
-Write observations to `.observations.yml` in the story directory:
+Return observations in-band in your structured output (there are no sidecar files):
 - `type: discovery` for codebase insights found during planning
 - `type: observation` for risk assessments and scope concerns
-- Each observation: `id` (sequential "OB-NNN"), `agent: "sw-engineer"`, `phase: "plan"`, `importance` (1-10)
 
-## Output
+## Output Contract
 
-- `implementation_plan.md` in the story directory
-- Updated `handoff.yml` with `plan_summary` populated
+Your final message must satisfy the structured-output schema supplied at
+dispatch: `implementation_plan.md` written to the story directory and
+`handoff.yml` updated with `plan_summary`.
 
 ## Critical Rules
 
