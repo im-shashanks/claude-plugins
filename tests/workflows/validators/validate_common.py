@@ -304,3 +304,23 @@ if __name__ == "__main__":
     passed = r.results[0].passed and not r.results[1].passed
     print(f"  Self-test: {'OK' if passed else 'BROKEN'}")
     sys.exit(0 if passed else 1)
+
+
+def check_no_sidecars(report: ValidationReport, root: str) -> None:
+    """Assert the retired sidecar protocols left no files behind (v1.0.0)."""
+    import glob as _glob
+
+    patterns = [
+        "**/.observations.yml",
+        "**/.briefing.yml",
+        "**/*.quality.yml",
+        "**/.chunks",
+    ]
+    leftovers: list[str] = []
+    for pattern in patterns:
+        leftovers.extend(_glob.glob(os.path.join(root, pattern), recursive=True))
+    report.add(
+        "no retired sidecar files created",
+        not leftovers,
+        f"found: {leftovers}" if leftovers else "",
+    )

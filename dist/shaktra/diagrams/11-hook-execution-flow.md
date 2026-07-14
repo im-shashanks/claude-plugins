@@ -1,4 +1,4 @@
-# 21. Hook Execution Flow
+# 11. Hook Execution Flow
 
 Shaktra enforces four blocking hooks at different points in the development lifecycle. Hooks are all-or-nothing: they block or they do not exist. There is no warn-only mode. Each hook is a Python script triggered by Claude Code's hook system.
 

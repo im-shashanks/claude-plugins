@@ -15,7 +15,8 @@ synthesis, personas, journeys, PRD, prioritization) runs deterministically in
 `${CLAUDE_PLUGIN_ROOT}/workflows/pm-artifacts.js`. Methodology lives in this
 skill directory: `guided-entry.md`, `brainstorm-workflow.md`,
 `research-workflow.md`, `persona-workflow.md`, `journey-workflow.md`,
-`prd-workflow.md`, `prioritization-workflow.md`, `templates/prd-*.md`.
+`prd-workflow.md`, `prioritization-workflow.md`, and the PRD templates
+(`templates/prd-standard.md`, `templates/prd-one-page.md`).
 
 ## Intent
 

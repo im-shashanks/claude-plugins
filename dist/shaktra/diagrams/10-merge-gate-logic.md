@@ -1,6 +1,6 @@
-# 20. Merge Gate Logic
+# 10. Merge Gate Logic
 
-The merge gate evaluates all findings from quality reviews and produces one of four verdicts. P0 findings always block. P1 findings block when they exceed the configurable threshold. The same logic is used by both SW Quality (during TDD) and Code Review (after completion).
+The merge gate evaluates all findings from quality reviews and produces one of four verdicts. P0 findings always block. P1 findings block when they exceed the configurable threshold. The logic is implemented once, in `workflows/lib/quality-loop.js` (pass/blocked) and `workflows/review.js` (the four-verdict ladder).
 
 ```mermaid
 flowchart TD
@@ -22,4 +22,4 @@ flowchart TD
     style START fill:#337ab7,stroke:#2e6da4,color:#fff
 ```
 
-**Source:** `dist/shaktra/skills/shaktra-reference/severity-taxonomy.md` (Merge Gate Logic), `dist/shaktra/skills/shaktra-review/SKILL.md` (Verdicts section)
+**Source:** `dist/shaktra/skills/shaktra-reference/severity-taxonomy.md` (Merge Gate Logic), `dist/shaktra/workflows/review.js`

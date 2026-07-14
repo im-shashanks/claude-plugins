@@ -70,11 +70,28 @@ Events to log:
 # ---------------------------------------------------------------------------
 # Setup functions — prepare test_dir before each test
 # ---------------------------------------------------------------------------
+_TEST_MODE_SETTINGS = {
+    "test_mode": {
+        "max_quality_loops": 1,
+        "max_stories": 2,
+        "auto_answer": True,
+    }
+}
+
+
 def _append_test_overrides(claude_md_path: Path) -> None:
-    """Append testing overrides to CLAUDE.md in the test directory."""
+    """Apply testing overrides: CLAUDE.md prose for the main loop, plus the
+    test_mode settings block consumed by shaktra_context.py (v1.0.0)."""
     if claude_md_path.exists():
         with open(claude_md_path, "a") as f:
             f.write(_TEST_OVERRIDES)
+    settings_path = claude_md_path.parent / ".shaktra" / "settings.yml"
+    if settings_path.exists():
+        with open(settings_path) as f:
+            data = yaml.safe_load(f) or {}
+        _deep_merge(data, dict(_TEST_MODE_SETTINGS))
+        with open(settings_path, "w") as f:
+            yaml.dump(data, f, default_flow_style=False, sort_keys=False)
 
 
 def setup_git_init(test_dir: Path) -> None:

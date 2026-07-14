@@ -13,6 +13,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from validate_common import (
+    check_no_sidecars,
     ValidationReport,
     check_field_equals,
     check_field_exists,
@@ -118,70 +119,52 @@ def validate_dev(project_dir: str, story_id: str) -> ValidationReport:
                     "no files_modified or files_created in code_summary"
                     if not has_files else "")
 
-    # --- Observations (written during workflow) ---
-    obs_path = os.path.join(story_dir, ".observations.yml")
-    obs_exists = os.path.isfile(obs_path)
-    report.add("observations file created", obs_exists,
-               "no .observations.yml in story dir" if not obs_exists else "")
-    if obs_exists:
-        obs_data = check_valid_yaml(report, obs_path, ".observations.yml valid YAML")
-        if obs_data:
-            obs_list = obs_data.get("observations", [])
+    # --- Observations (in-band, persisted to handoff) ---
+    obs_list = data.get("observations", [])
+    report.add(
+        "observations persisted to handoff",
+        isinstance(obs_list, list) and len(obs_list) > 0,
+        f"found {len(obs_list) if isinstance(obs_list, list) else 0} observations in handoff",
+    )
+    if isinstance(obs_list, list) and obs_list:
+        entry = obs_list[0]
+        for field in ["type", "text"]:
+            has = isinstance(entry, dict) and field in entry
             report.add(
-                "observations written by agents",
-                isinstance(obs_list, list) and len(obs_list) > 0,
-                f"found {len(obs_list) if isinstance(obs_list, list) else 0} observations",
+                f"observation has '{field}' field",
+                has,
+                "missing from observation entry" if not has else "",
             )
-            # Validate observation entry structure
-            if isinstance(obs_list, list) and obs_list:
-                entry = obs_list[0]
-                for field in ["id", "agent", "phase", "type", "text"]:
-                    has = isinstance(entry, dict) and field in entry
-                    report.add(
-                        f"observation has '{field}' field",
-                        has,
-                        "missing from observation entry" if not has else "",
-                    )
 
-    # --- Briefing (generated at workflow start) ---
-    briefing_path = os.path.join(story_dir, ".briefing.yml")
-    briefing_exists = os.path.isfile(briefing_path)
-    report.add("briefing file generated", briefing_exists,
-               "no .briefing.yml in story dir" if not briefing_exists else "")
-    if briefing_exists:
-        br_data = check_valid_yaml(report, briefing_path, ".briefing.yml valid YAML")
-        if br_data:
-            # Verify seeded principles surfaced in briefing
-            br_principles = br_data.get("relevant_principles", [])
-            if isinstance(br_principles, list):
-                seeded_ids = {p.get("id") for p in br_principles
-                              if isinstance(p, dict)}
-                has_pr001 = "PR-001" in seeded_ids
-                has_pr002 = "PR-002" in seeded_ids
-                report.add(
-                    "briefing includes seeded PR-001 (email validation)",
-                    has_pr001,
-                    f"PR-001 not in briefing (found: {seeded_ids})"
-                    if not has_pr001 else "",
-                )
-                report.add(
-                    "briefing includes seeded PR-002 (domain exceptions)",
-                    has_pr002,
-                    f"PR-002 not in briefing (found: {seeded_ids})"
-                    if not has_pr002 else "",
-                )
+    # --- Briefing (persisted to handoff.briefing) ---
+    br_data = data.get("briefing") or {}
+    report.add("briefing persisted to handoff", bool(br_data),
+               "handoff.briefing is empty or missing" if not br_data else "")
+    if br_data:
+        br_principles = br_data.get("relevant_principles", [])
+        if isinstance(br_principles, list):
+            seeded_ids = {p.get("id") for p in br_principles if isinstance(p, dict)}
+            report.add(
+                "briefing includes seeded PR-001 (email validation)",
+                "PR-001" in seeded_ids,
+                f"PR-001 not in briefing (found: {seeded_ids})" if "PR-001" not in seeded_ids else "",
+            )
+            report.add(
+                "briefing includes seeded PR-002 (domain exceptions)",
+                "PR-002" in seeded_ids,
+                f"PR-002 not in briefing (found: {seeded_ids})" if "PR-002" not in seeded_ids else "",
+            )
+        br_aps = br_data.get("relevant_anti_patterns", [])
+        if isinstance(br_aps, list):
+            ap_ids = {a.get("id") for a in br_aps if isinstance(a, dict)}
+            report.add(
+                "briefing includes seeded AP-001 (raw db errors)",
+                "AP-001" in ap_ids,
+                f"AP-001 not in briefing (found: {ap_ids})" if "AP-001" not in ap_ids else "",
+            )
 
-            # Verify seeded anti-pattern surfaced in briefing
-            br_aps = br_data.get("relevant_anti_patterns", [])
-            if isinstance(br_aps, list):
-                ap_ids = {a.get("id") for a in br_aps if isinstance(a, dict)}
-                has_ap001 = "AP-001" in ap_ids
-                report.add(
-                    "briefing includes seeded AP-001 (raw db errors)",
-                    has_ap001,
-                    f"AP-001 not in briefing (found: {ap_ids})"
-                    if not has_ap001 else "",
-                )
+    # --- No retired sidecar mechanisms ---
+    check_no_sidecars(report, project_dir)
 
     # --- Completion checks ---
     if current == "complete":

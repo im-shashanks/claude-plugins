@@ -31,7 +31,6 @@ from test_runner import (
     LOG_FILE,
     TestResult,
     check_expected_reads,
-    cleanup_orphan_teams,
     run_test,
     _shorten_read_path,
 )
@@ -52,8 +51,6 @@ def main() -> int:
     print(f"Shaktra Workflow Tests — {datetime.now().strftime('%Y-%m-%d %H:%M')}")
     print("=" * 60, file=sys.stderr)
 
-    # Cleanup any orphan test teams from prior runs
-    cleanup_orphan_teams("test-")
 
     # Get test definitions (test_dir placeholder — resolved per test)
     all_tests = get_test_definitions("{TEST_DIR}")
@@ -73,7 +70,6 @@ def main() -> int:
         results = _run_selected_tests(selected, temp_dirs, model=args.model)
     finally:
         # Cleanup
-        cleanup_orphan_teams("test-")
         if not args.keep_dirs:
             for td in temp_dirs:
                 if td.exists():

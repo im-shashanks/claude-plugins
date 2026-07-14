@@ -62,17 +62,15 @@ def validate_review(project_dir: str, story_id: str) -> ValidationReport:
         report.add("review artifact created", True)
     # Not required — review may only update handoff.yml
 
-    # --- Observations (written during review) ---
-    obs_path = os.path.join(story_dir, ".observations.yml")
-    obs_exists = os.path.isfile(obs_path)
-    report.add("observations file exists", obs_exists,
-               "no .observations.yml in story dir" if not obs_exists else "")
+    # --- Findings persisted to handoff (in-band model) ---
+    h_data, _ = load_yaml_safe(os.path.join(story_dir, "handoff.yml"))
+    findings = (h_data or {}).get("quality_findings", [])
+    report.add("review findings persisted to handoff",
+               isinstance(findings, list) and len(findings) >= 0 and h_data is not None,
+               "handoff.yml unreadable" if h_data is None else "")
 
-    # --- Briefing (generated at review start) ---
-    briefing_path = os.path.join(story_dir, ".briefing.yml")
-    briefing_exists = os.path.isfile(briefing_path)
-    report.add("briefing file generated", briefing_exists,
-               "no .briefing.yml in story dir" if not briefing_exists else "")
+    # --- No retired sidecar mechanisms ---
+    check_no_sidecars(report, project_dir)
 
     # --- Memory capture: principles ---
     pr_data = None

@@ -74,7 +74,7 @@ The Test Agent reads the approved plan and writes tests that will define the imp
 - All tests fail for valid reasons only
 - Trivial tier: RED is skipped entirely (no tests required before code)
 
-**Guard token:** If the test suite unexpectedly passes (no failures), `TESTS_NOT_RED` is emitted and GREEN is blocked. Tests must fail before implementation begins.
+**Gate:** if the test suite unexpectedly passes (no failures) or fails for invalid reasons, the pipeline blocks before GREEN. Tests must fail for valid reasons before implementation begins.
 
 ### GREEN (Implement Code)
 
@@ -93,12 +93,12 @@ Implementation follows coding practices: single responsibility, dependency injec
 - `code_summary.coverage >= tier_threshold`
 
 **Guard tokens:**
-- `TESTS_NOT_GREEN` -- tests still failing after implementation, Developer must fix
+- Tests still failing after implementation -- the Developer is re-dispatched to fix (capped attempts)
 - `COVERAGE_GATE_FAILED` -- coverage below threshold, Developer must add coverage
 
 ### QUALITY (Comprehensive Review)
 
-**Agent:** SW Quality (Sonnet) | **Output:** `QUALITY_PASS` or `QUALITY_BLOCKED`
+**Agent:** SW Quality (Sonnet) | **Output:** structured verdict (pass/blocked) with findings
 
 The final quality gate runs a comprehensive review across 14 dimensions (A-M from quality dimensions plus N: Plan Adherence). SW Quality independently executes the test suite (not trusting self-reported results), verifies coverage, checks cross-story consistency against `principles.yml`, and captures observations for consolidation via memory-curator.
 
@@ -114,8 +114,8 @@ The final quality gate runs a comprehensive review across 14 dimensions (A-M fro
 - Missing plan components or unmitigated scope risks (Dimension N)
 
 **Exit conditions:**
-- `QUALITY_PASS` emitted after all dimensions reviewed
-- Developer fixes any `QUALITY_BLOCKED` findings (up to 3 iterations)
+- A pass verdict is returned after all dimensions are reviewed
+- The Developer fixes blocking findings (up to 3 iterations)
 
 ### MEMORY (Capture Lessons)
 
@@ -203,7 +203,7 @@ All 36 checks are loaded regardless of tier. What changes is how findings are tr
 
 Every gate uses the same fix loop pattern:
 
-1. SW Quality reviews artifacts and emits `CHECK_PASSED` or `CHECK_BLOCKED`
+1. SW Quality reviews artifacts and returns a structured pass/blocked verdict
 2. If blocked: findings are sent to the responsible agent (SW Engineer, Test Agent, or Developer)
 3. The agent fixes findings and re-submits
 4. SW Quality re-reviews (with prior findings as context to check for regressions)

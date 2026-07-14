@@ -48,9 +48,9 @@ Shaktra orchestrates 15 specialized sub-agents, each with a defined role, strict
 
 **Invoked by:** `/shaktra:tpm` after architect produces a design or scrum master produces stories.
 
-**Produces:** One-line verdict (`QUALITY_PASS: <id>` or `QUALITY_BLOCKED: <id>`). When blocked, writes structured findings (severity, check ID, issue, guidance) to a `.quality.yml` file alongside the reviewed artifact — findings are never returned to the TPM orchestrator.
+**Produces:** A structured verdict (pass/blocked) with every finding in-band — severity, check ID, issue, and fix guidance per the schema supplied at dispatch.
 
-**Key behaviors:** Applies different checklists for design review (12 checks) vs story review (10 checks). Gates on severity -- any P0 blocks, P1 count checked against threshold. Never modifies reviewed artifacts. Writes findings to `.shaktra/stories/ST-NNN.quality.yml` or `.shaktra/designs/{name}-design.quality.yml` for fix agents to consume.
+**Key behaviors:** Applies different checklists for design review (12 checks) vs story review (10 checks). Gates on severity -- any P0 blocks, P1 count checked against the threshold supplied at dispatch. Never modifies reviewed artifacts.
 
 ## Implementation Agents (TDD Pipeline)
 
@@ -70,7 +70,7 @@ Shaktra orchestrates 15 specialized sub-agents, each with a defined role, strict
 
 **Invoked by:** `/shaktra:dev` at the RED phase of the TDD pipeline.
 
-**Produces:** Test files in the project's test directory. Updated `handoff.yml` with test summary. Emits `TESTS_NOT_RED` if tests are broken rather than properly red.
+**Produces:** Test files in the project's test directory. Updated `handoff.yml` with test summary. Reports each failing test with its reason and whether that reason is a valid RED cause.
 
 **Key behaviors:** Uses exact test names from the plan. Follows AAA pattern with behavioral assertions. Mocks only at boundaries. Ensures at least 30% negative tests. Validates failure reasons -- distinguishes valid failures (ImportError, ModuleNotFoundError) from invalid ones (SyntaxError, TypeError).
 
@@ -80,7 +80,7 @@ Shaktra orchestrates 15 specialized sub-agents, each with a defined role, strict
 
 **Invoked by:** `/shaktra:dev` at the GREEN phase (and for branch creation at the start of implementation).
 
-**Produces:** Production code passing all tests, coverage report, staged files (never commits). Updated `handoff.yml` with code summary. Emits `TESTS_NOT_GREEN` or `COVERAGE_GATE_FAILED` on failure.
+**Produces:** Production code passing all tests, coverage report, staged files (never commits). Updated `handoff.yml` with code summary. Reports actual test status and measured coverage — the workflow blocks on red tests or a missed threshold.
 
 **Key behaviors:** Follows implementation order from the plan exactly. Applies all patterns from `patterns_applied`. Checks coverage against tier-specific thresholds from settings. Captures observations for consolidation via memory-curator.
 
@@ -90,7 +90,7 @@ Shaktra orchestrates 15 specialized sub-agents, each with a defined role, strict
 
 **Invoked by:** `/shaktra:dev` after each TDD phase (plan, test, code) and during comprehensive review. Also invoked by the refactoring pipeline.
 
-**Produces:** Structured findings with evidence, gate results (`CHECK_PASSED`, `CHECK_BLOCKED`, `QUALITY_PASS`, `QUALITY_BLOCKED`, `REFACTOR_PASS`, `REFACTOR_BLOCKED`).
+**Produces:** Structured findings with evidence and a pass/blocked verdict per the schema supplied at dispatch (quick-check, comprehensive, and refactor-verify modes).
 
 **Key behaviors:** Applies 36+ checks from quick-check plus specialized checks (performance, security, architecture). Enforces check depth by tier -- Trivial/Small get lighter enforcement than Medium/Large. Every finding requires evidence; opinions without evidence are dropped.
 
@@ -144,7 +144,7 @@ Shaktra orchestrates 15 specialized sub-agents, each with a defined role, strict
 
 **Invoked by:** `/shaktra:dev`, `/shaktra:review`, `/shaktra:adversarial-review`, `/shaktra:bugfix` for Tier 2 and Tier 3 memory retrieval.
 
-**Produces:** `.briefing.yml` in the story directory with filtered, relevance-scored memory entries.
+**Produces:** An in-band briefing of filtered, relevance-scored memory entries (persisted to `handoff.briefing` by the orchestrator).
 
 **Key behaviors:** Operates in 3 modes — briefing (full retrieval), chunk (process a subset of entries), and consolidate (merge chunk results). Scores entries by role relevance, keyword match, and recency. Respects `settings.memory.max_briefing_entries` cap.
 
@@ -176,10 +176,10 @@ Most workflows follow a produce-review-fix loop:
 
 1. A **producing agent** creates an artifact (design doc, stories, code)
 2. A **reviewing agent** inspects it (tpm-quality, sw-quality)
-3. If blocked: the reviewer writes findings to a `.quality.yml` file; the producer reads and fixes from that file
+3. If blocked: the quality loop dispatches the producer with the findings in its prompt
 4. Loop repeats until the gate passes or max iterations are reached
 
-TPM quality reviews use **parallel batch processing** for stories — all reviews spawn in parallel per round, then all fixes spawn in parallel. File-based findings handoff (`.quality.yml`) keeps the TPM orchestrator's context lean (one-line verdicts only).
+TPM quality reviews run **per-story quality loops in parallel** inside `workflows/tpm-stories.js` — separate story files mean no write conflicts, and findings stay in-band.
 
 ### TDD Pipeline Handoff
 

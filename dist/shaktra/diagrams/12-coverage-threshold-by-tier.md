@@ -1,4 +1,4 @@
-# 22. Coverage Threshold by Tier
+# 12. Coverage Threshold by Tier
 
 Each story tier has a minimum test coverage threshold enforced at the GREEN phase quality gate. Larger stories require higher coverage because they carry more risk. All thresholds are configurable in `.shaktra/settings.yml`.
 
@@ -26,4 +26,4 @@ graph LR
 - **L (95%):** Large stories with architectural impact. Near-complete coverage required due to higher blast radius.
 - Thresholds are read from `settings.tdd` at runtime; the values above are defaults set by `/shaktra:init`.
 
-**Source:** `dist/shaktra/README.md` (Coverage thresholds by tier), `dist/shaktra/skills/shaktra-dev/tdd-pipeline.md` (Tier-Aware Gate Matrix)
+**Source:** `dist/shaktra/README.md` (Coverage thresholds by tier), `dist/shaktra/skills/shaktra-stories/story-tiers.md` (Gate Behavior Matrix)

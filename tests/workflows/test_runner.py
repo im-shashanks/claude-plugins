@@ -393,16 +393,3 @@ def write_read_manifest(test_dir: Path, result: TestResult) -> None:
         pass
 
 
-def cleanup_orphan_teams(prefix: str = "test-") -> None:
-    """Remove any leftover test teams from ~/.claude/teams/."""
-    teams_dir = Path.home() / ".claude" / "teams"
-    if teams_dir.exists():
-        for entry in teams_dir.iterdir():
-            if entry.is_dir() and entry.name.startswith(prefix):
-                shutil.rmtree(entry, ignore_errors=True)
-
-    tasks_dir = Path.home() / ".claude" / "tasks"
-    if tasks_dir.exists():
-        for entry in tasks_dir.iterdir():
-            if entry.is_dir() and entry.name.startswith(prefix):
-                shutil.rmtree(entry, ignore_errors=True)

@@ -1,10 +1,10 @@
-# 32. Memory Capture Decision Tree
+# 13. Memory Capture Decision Tree
 
-Shaktra maintains three long-term memory files: `principles.yml` for project patterns and constraints, `anti-patterns.yml` for failure patterns, and `procedures.yml` for workflow adaptations. During workflows, agents write observations to per-story `.observations.yml` files. After each workflow, the memory-curator consolidates observations into the long-term stores using confidence-based math.
+Shaktra maintains three long-term memory files: `principles.yml` for project patterns and constraints, `anti-patterns.yml` for failure patterns, and `procedures.yml` for workflow adaptations. During workflows, agents return observations in-band in their structured outputs; the orchestrator persists them into `handoff.observations`. After each workflow, `workflows/lib/memory.js` dispatches the memory-curator with the accumulated observations, which it consolidates into the long-term stores using confidence-based math.
 
 ```mermaid
 flowchart TD
-    START([Workflow Complete]) --> READ["Read<br/>.observations.yml"]
+    START([Workflow Complete]) --> READ["Receive in-band<br/>observations"]
 
     READ --> EMPTY{Observations<br/>exist?}
     EMPTY -->|No| DONE_SKIP["Set memory_captured:<br/>true in handoff"]

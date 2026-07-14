@@ -49,4 +49,4 @@ All 9 workflows, agent roster, and configuration guide on the [plugin page](./di
 /plugin install shaktra@cc-plugins
 ```
 
-`v0.4.2` · MIT License
+`v1.0.0` · MIT License

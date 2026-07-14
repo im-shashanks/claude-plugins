@@ -41,17 +41,14 @@ def validate_adversarial_review(project_dir: str, story_id: str) -> ValidationRe
     if not data:
         return report
 
-    # --- Observations (written during adversarial review) ---
-    obs_path = os.path.join(story_dir, ".observations.yml")
-    obs_exists = os.path.isfile(obs_path)
-    report.add("observations file exists", obs_exists,
-               "no .observations.yml in story dir" if not obs_exists else "")
+    # --- Findings/observations persisted to handoff (in-band model) ---
+    wf_findings = data.get("quality_findings", [])
+    report.add("adversarial findings persisted to handoff",
+               isinstance(wf_findings, list),
+               "quality_findings is not a list" if not isinstance(wf_findings, list) else "")
 
-    # --- Briefing (generated at review start) ---
-    briefing_path = os.path.join(story_dir, ".briefing.yml")
-    briefing_exists = os.path.isfile(briefing_path)
-    report.add("briefing file generated", briefing_exists,
-               "no .briefing.yml in story dir" if not briefing_exists else "")
+    # --- No retired sidecar mechanisms ---
+    check_no_sidecars(report, project_dir)
 
     # --- Adversarial review artifacts ---
     # Look for adversarial-related output files in the story dir

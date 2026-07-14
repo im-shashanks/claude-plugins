@@ -65,4 +65,4 @@ stateDiagram-v2
 | QUALITY | Skip | Skip | Comprehensive | Comprehensive + expanded |
 | MEMORY | Required | Required | Required | Required |
 
-**Source:** `dist/shaktra/skills/shaktra-dev/tdd-pipeline.md`
+**Source:** `dist/shaktra/workflows/dev-tdd.js`, `dist/shaktra/skills/shaktra-stories/story-tiers.md`

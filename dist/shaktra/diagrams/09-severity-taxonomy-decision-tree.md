@@ -1,4 +1,4 @@
-# 19. Severity Taxonomy Decision Tree
+# 9. Severity Taxonomy Decision Tree
 
 Every quality finding in Shaktra is classified into one of four severity levels (P0-P3). This decision tree shows how to classify a finding based on its impact. The severity taxonomy is defined in exactly one file and referenced everywhere else.
 

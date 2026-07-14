@@ -111,14 +111,8 @@ def validate_incident(project_dir: str, bug_id: str) -> ValidationReport:
         if not runbook_exists else "",
     )
 
-    # --- 12. Observations file exists ---
-    obs_path = os.path.join(incident_dir, ".observations.yml")
-    obs_exists = os.path.isfile(obs_path)
-    report.add(
-        "observations file exists",
-        obs_exists,
-        "no .observations.yml in incident dir" if not obs_exists else "",
-    )
+    # --- 12. No retired sidecar mechanisms ---
+    check_no_sidecars(report, project_dir)
 
     # --- 13. Memory capture: principles ---
     principles_path = os.path.join(shaktra, "memory", "principles.yml")

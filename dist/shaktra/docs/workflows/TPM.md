@@ -57,7 +57,7 @@ The full workflow is the default path for new features. It proceeds through four
 
 1. Scrummaster receives the approved design doc
 2. Stories are created as YAML files in `.shaktra/stories/` following the story schema
-3. **Quality gate:** All stories are reviewed by TPM Quality in parallel (up to 3 rounds). Findings are written to `.quality.yml` files — the TPM only receives one-line verdicts to keep context lean. Fix agents read findings from disk.
+3. **Quality gate:** All stories are reviewed by TPM Quality in parallel (up to 3 rounds), each through the standard quality loop in `workflows/lib/quality-loop.js`. Findings travel in-band in structured outputs; fix agents receive them in their dispatch prompts.
 
 **Produces:** A set of quality-reviewed user stories with IDs, story points, acceptance criteria, and test specifications.
 
@@ -93,12 +93,12 @@ You ──► /shaktra:tpm
             │       │ (gaps)              │
             │   Product Manager           ▼
             │                      TPM Quality ──► PASS/BLOCKED
-            │                      (findings → .quality.yml)
+            │                      (findings in-band)
             │                             │
             ├─► Scrummaster ─────► Stories (all created)
             │                             │
             │                      TPM Quality ──► PARALLEL review
-            │                      (findings → .quality.yml per story)
+            │                      (findings in-band per story)
             │                      one-line verdicts back to TPM
             │                             │
             ├─► Product Manager ──► Coverage + RICE
@@ -114,7 +114,7 @@ Every artifact passes through TPM Quality review before proceeding:
 
 - **Design docs** are checked for completeness, consistency with the PRD, and technical soundness
 - **Stories** are reviewed in parallel batches -- all stories in one round, then all fixes in one round
-- Reviews run up to 3 rounds -- findings are written to `.quality.yml` files (not returned to TPM), and fix agents read from those files
+- Reviews run up to 3 rounds -- the quality loop passes findings straight to the fix agents in-band
 - P0 findings block progress unconditionally
 - If 3 iterations exhaust without passing, findings are escalated to you for manual resolution
 

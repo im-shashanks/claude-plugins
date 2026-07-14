@@ -6,6 +6,62 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Version numbers 
 
 ---
 
+## [1.0.0] - 2026-07-13
+
+Clean redesign for current Claude Code — deterministic orchestration replaces
+prose pipelines. Same 15-command surface; quality content untouched.
+
+### Added
+- **Workflow scripts** (`workflows/*.js`): every pipeline (dev TDD, refactor,
+  review, adversarial, TPM design/stories, analyze, bugfix diagnosis, incident,
+  PM artifacts) now runs as a deterministic Workflow-tool script with real
+  loops, `parallel()` fan-out, schema-validated agent returns, and resume.
+- **Shared workflow children** (`workflows/lib/`): `schemas.js` (all
+  structured-output schemas), `quality-loop.js` (the ONE review→fix→re-review
+  gate implementation), `memory.js` (briefing + capture), `report.js` (the ONE
+  completion-report builder).
+- **HTML review system**: `scripts/review_server.py` (localhost annotation
+  server), `templates/review-doc.html` + spec, and the `shaktra-html-review`
+  skill — annotatable review docs for plans, designs, PRDs, and analysis
+  reports, offered from tpm/pm/analyze.
+- **Deterministic state helpers**: `scripts/shaktra_context.py` (single
+  threshold-read point: settings, tier detection, story-quality guard,
+  dependency check, memory sizing), `scripts/shaktra_handoff.py` (atomic
+  handoff merges), `scripts/shaktra_sprint.py` (sprint completion + velocity).
+- `handoff.yml` gains `observations`, `briefing`, and `workflow_run` fields;
+  `settings.yml` gains an optional `test_mode` block for automated tests.
+- Doctor checks 11-12: workflow-script inventory and Workflow-tool availability.
+
+### Changed
+- All 8 orchestrator SKILLs rewritten as thin wrappers: pre-flight → Workflow
+  invocation → AskUserQuestion escalation handling → result persistence.
+- Agent output contracts are schema-based ("your final message must satisfy the
+  schema supplied at dispatch"); personas unchanged.
+- Memory plumbing is fully in-band: briefings and observations travel through
+  structured outputs and persist in `handoff.yml`; tier-3 retrieval fans out
+  one retriever per store file.
+- Analyze is a single implementation (`workflows/analyze.js`) with a
+  consolidation agent for cross-dimension correlation — the agent-teams path
+  and the standard/deep dual implementation are gone.
+- Diagrams pruned 35 → 13, regenerated around the new architecture.
+- Requires a Claude Code version with the Workflow tool; orchestrator commands
+  fail with a clear upgrade message otherwise (utility commands still work).
+
+### Removed
+- All 29 guard tokens and `guard-tokens.md` — replaced by structured outputs.
+- Sidecar file protocols: `.quality.yml`, `.briefing.yml`, `.observations.yml`,
+  `.chunks/` (folded into handoff and in-band returns).
+- Pseudocode pipeline docs: `tdd-pipeline.md`, `refactoring-pipeline.md`,
+  `workflow-template.md`, `adversarial-dispatch.md`,
+  `deep/standard-analysis-workflow.md`, PM full-workflow trio, `agent-prompts.md`.
+- `scripts/memory_retrieval.py` (superseded by `shaktra_context.py` +
+  per-store retrieval) and `scripts/migrate_memory.py` (init offers manual
+  legacy conversion instead).
+- `briefing-schema.md` and `observations-schema.md` (folded into
+  `handoff-schema.md`).
+
+---
+
 ## [0.4.2] - 2026-03-08
 
 ### Changed
