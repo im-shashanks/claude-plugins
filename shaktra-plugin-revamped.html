@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shaktra Revamp Plan (v0.4.2 → v1.0.0)</title>
+<style>
+  :root { --ink:#1a1d23; --muted:#6b7280; --line:#e5e7eb; --accent:#2563eb; --accent-soft:#dbeafe;
+          --warn:#b45309; --ok:#15803d; --bg:#f8fafc; --card:#ffffff; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif; color:var(--ink); background:var(--bg); }
+  header { position:sticky; top:0; z-index:20; background:var(--card); border-bottom:1px solid var(--line);
+           padding:.7rem 1.2rem; display:flex; align-items:center; gap:1rem; }
+  header h1 { font-size:1.05rem; margin:0; flex:1; }
+  #ann-count { color:var(--muted); font-size:.85rem; }
+  #complete-btn { background:var(--ok); color:#fff; border:0; border-radius:6px; padding:.5rem 1rem;
+                  font-size:.9rem; cursor:pointer; }
+  #complete-btn:hover { filter:brightness(1.1); }
+  #layout { display:grid; grid-template-columns:minmax(0,1fr) 320px; gap:0; max-width:1400px; margin:0 auto; }
+  main { padding:2rem 2.5rem 6rem; min-width:0; }
+  aside { border-left:1px solid var(--line); background:var(--card); padding:1rem;
+          position:sticky; top:53px; height:calc(100vh - 53px); overflow-y:auto; }
+  aside h2 { font-size:.8rem; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin:.2rem 0 .8rem; }
+  section.rev-section { background:var(--card); border:1px solid var(--line); border-radius:10px;
+                        padding:1.4rem 1.8rem; margin-bottom:1.4rem; }
+  section.rev-section > h2 { margin-top:0; font-size:1.25rem; }
+  section.rev-section.has-ann { border-left:4px solid var(--accent); }
+  table { border-collapse:collapse; width:100%; margin:1rem 0; font-size:.92rem; display:block; overflow-x:auto; }
+  th,td { border:1px solid var(--line); padding:.4rem .7rem; text-align:left; }
+  th { background:var(--bg); }
+  code { background:var(--bg); border:1px solid var(--line); border-radius:4px; padding:.05rem .3rem; font-size:.85em; }
+  pre { background:#0f172a; color:#e2e8f0; border-radius:8px; padding:1rem; overflow-x:auto; font-size:.85rem; }
+  pre code { background:none; border:0; color:inherit; }
+  .rev-question { border:1px dashed var(--warn); background:#fffbeb; border-radius:8px; padding:.9rem 1.1rem; margin:1rem 0; }
+  .rev-question .q-label { font-weight:600; color:var(--warn); font-size:.8rem; text-transform:uppercase; letter-spacing:.05em; }
+  .rev-question textarea { width:100%; min-height:64px; margin-top:.5rem; border:1px solid var(--line);
+                           border-radius:6px; padding:.5rem; font:inherit; font-size:.9rem; }
+  .rev-question button { margin-top:.4rem; background:var(--warn); color:#fff; border:0; border-radius:6px;
+                         padding:.35rem .8rem; cursor:pointer; font-size:.85rem; }
+  .rev-question .q-saved { color:var(--ok); font-size:.85rem; margin-left:.6rem; }
+  #popover { position:absolute; z-index:30; background:var(--card); border:1px solid var(--line); border-radius:8px;
+             box-shadow:0 8px 24px rgba(0,0,0,.15); padding:.7rem; width:320px; display:none; }
+  #popover textarea { width:100%; min-height:70px; border:1px solid var(--line); border-radius:6px; padding:.45rem; font:inherit; font-size:.9rem; }
+  #popover .quote { font-size:.78rem; color:var(--muted); border-left:3px solid var(--accent); padding-left:.5rem;
+                    margin-bottom:.5rem; max-height:60px; overflow:hidden; }
+  #popover .row { display:flex; gap:.5rem; justify-content:flex-end; margin-top:.4rem; }
+  #popover button { border:0; border-radius:6px; padding:.35rem .8rem; cursor:pointer; font-size:.85rem; }
+  #popover .save { background:var(--accent); color:#fff; }
+  #popover .cancel { background:var(--line); }
+  .ann-card { border:1px solid var(--line); border-radius:8px; padding:.6rem .7rem; margin-bottom:.6rem; font-size:.85rem; background:var(--bg); }
+  .ann-card .quote { color:var(--muted); font-style:italic; display:block; margin-bottom:.25rem;
+                     overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .ann-card .meta { color:var(--muted); font-size:.75rem; display:flex; justify-content:space-between; margin-top:.3rem; }
+  .ann-card .del { color:#b91c1c; cursor:pointer; background:none; border:0; padding:0; font-size:.75rem; }
+  .empty { color:var(--muted); font-size:.85rem; }
+  mark.ann-hl { background:var(--accent-soft); }
+  #toast { position:fixed; bottom:1rem; left:50%; transform:translateX(-50%); background:var(--ink); color:#fff;
+           padding:.5rem 1rem; border-radius:8px; font-size:.85rem; display:none; z-index:40; }
+  @media (max-width:900px){ #layout{grid-template-columns:1fr;} aside{position:static;height:auto;border-left:0;border-top:1px solid var(--line);} }
+</style>
+</head>
+<body>
+<header>
+  <h1>Shaktra Plugin Revamp — v0.4.2 → v1.0.0</h1>
+  <span id="ann-count"></span>
+  <button id="complete-btn" title="Finish the review and hand annotations back to Claude">Review Complete</button>
+</header>
+<div id="layout">
+<main id="doc">
+
+<section class="rev-section" data-section-id="context">
+  <h2>Context &amp; goal</h2>
+  <p>Shaktra is ~23,600 lines across 182 files. It was architected around limitations of older Claude Code, producing ~8,000 lines of <em>orchestration prose</em>: hand-written pseudocode loops (<code>quality_loop</code>, <code>consistency_gate</code> in <code>tdd-pipeline.md</code>), <strong>29 string guard tokens</strong> matched by prefix, verbatim Task() prompt templates duplicated across 6+ orchestrator skills, sidecar-file protocols (<code>.quality.yml</code>, <code>.briefing.yml</code>, <code>.observations.yml</code>, <code>.chunks/</code>), and a dual implementation of the analyze pipeline.</p>
+  <p>Current Claude Code makes that obsolete: the <strong>Workflow tool</strong> runs deterministic JS orchestration with schema-validated <code>agent()</code> returns, real loops, <code>parallel()</code>/<code>pipeline()</code> fan-out, and resume; <strong>AskUserQuestion</strong> replaces prose clarification blocks; <strong>agentType</strong> references the plugin's <code>agents/*.md</code> directly.</p>
+  <p><strong>Goal:</strong> clean redesign for current Claude Code only (no legacy fallbacks), same 15-command surface, quality depth preserved or improved, ~40% total size reduction (orchestration layer −65%). Plus one new shipped capability: annotatable HTML planning docs + local review server — the page you are reading is its first artifact.</p>
+  <ul>
+    <li>Version <strong>1.0.0</strong>; clean redesign, current Claude Code only</li>
+    <li>Analyze becomes a single Workflow-script implementation (supersedes the teams-first path)</li>
+    <li>HTML docs <strong>accompany</strong> canonical markdown/YAML artifacts — never replace</li>
+    <li>Diagrams pruned 35 → ~12</li>
+  </ul>
+</section>
+
+<section class="rev-section" data-section-id="target-architecture">
+  <h2>Target architecture</h2>
+<pre><code>SKILL.md   (thin: trigger + pre-flight + AskUserQuestion + Workflow invocation + result handling)
+   └─&gt; workflows/*.js   (deterministic pipelines; real loops; schema-validated agent returns)
+          └─&gt; agents/*.md   (personas + contracts — single source, referenced via agentType)
+                 └─&gt; knowledge skills   (shaktra-tdd, shaktra-quality — untouched; the quality moat)
+
+Escalation path (workflows cannot talk to the user):
+  script returns {status: "blocked" | "needs_clarification", phase, findings|question, attempts}
+  → thin SKILL presents via AskUserQuestion → re-invokes script
+  → same session: Workflow resume caches completed agents
+  → cross-session: handoff.completed_phases makes re-entry correct
+
+State rule: only sequential phase agents write handoff.yml;
+parallel fan-out agents are read-only — findings return in-band.</code></pre>
+</section>
+
+<section class="rev-section" data-section-id="workflows-layout">
+  <h2>New <code>dist/shaktra/workflows/</code> (~2,100 lines JS, every file ≤300)</h2>
+  <table>
+    <tr><th>File</th><th>Contents</th></tr>
+    <tr><td><code>lib/schemas.js</code></td><td>All structured-output JSON schemas + SCHEMA_VERSION (replaces all 29 guard tokens)</td></tr>
+    <tr><td><code>lib/gates.js</code></td><td><code>qualityLoop()</code> (3-attempt cap), <code>mergeGate()</code>, <code>coverageGate()</code>, <code>consistencyGate()</code> (2-attempt) — the ONE gate/loop implementation</td></tr>
+    <tr><td><code>lib/memory.js</code></td><td>Curator dispatch + briefing plumbing (kills 7 copy-pasted curator prompts + 4 retrieval boilerplates)</td></tr>
+    <tr><td><code>lib/report.js</code></td><td>One completion-report builder (kills 9 per-skill templates)</td></tr>
+    <tr><td><code>lib/tdd-phases.js</code></td><td>plan/red/green/quality phases as composable functions (shared by dev-tdd, refactor, bugfix); encodes the tier-aware gate matrix</td></tr>
+    <tr><td><code>dev-tdd.js</code></td><td>Full TDD pipeline incl. branch creation, sprint-state update, memory capture; skips phases already in <code>handoff.completed_phases</code></td></tr>
+    <tr><td>9 more pipeline scripts</td><td><code>refactor.js</code>, <code>review.js</code>, <code>adversarial.js</code>, <code>tpm-design.js</code>, <code>tpm-stories.js</code>, <code>analyze.js</code>, <code>bugfix-diagnose.js</code>, <code>incident.js</code>, <code>pm-artifacts.js</code></td></tr>
+  </table>
+  <p>Invoked from skills via <code>Workflow({scriptPath, args})</code>; args blob prepared in the main loop from <code>shaktra_context.py</code> output. Workflow scripts have no filesystem access — all file I/O happens inside agents.</p>
+</section>
+
+<section class="rev-section" data-section-id="schemas">
+  <h2>Schemas replacing guard tokens</h2>
+  <table>
+    <tr><th>Schema</th><th>Replaces tokens</th></tr>
+    <tr><td><code>QualityVerdict</code> {verdict, p0_count, p1_count, findings[], checked_dimensions[]}</td><td>QUALITY_PASS/BLOCKED, CHECK_PASSED/BLOCKED, GAPS_FOUND</td></tr>
+    <tr><td><code>PhaseResult</code> {phase, status, summary, artifacts[], clarification?, observations[]}</td><td>PHASE_GATE_FAILED, CLARIFICATION_NEEDED</td></tr>
+    <tr><td><code>TestRunResult</code> {status, failing_tests[{name, reason, valid_red}], coverage_pct, test_count}</td><td>TESTS_NOT_RED/GREEN (valid-RED rule enforced in <code>valid_red</code>)</td></tr>
+    <tr><td><code>GateResult</code> {gate, passed, reason, blocking_findings[], attempts}</td><td>COVERAGE_GATE_FAILED, REFACTOR_PASS/BLOCKED, CONSISTENCY_GATE_FAILED, MAX_LOOPS_REACHED</td></tr>
+    <tr><td><code>Finding</code> {id, severity P0–P3, dimension, file, line?, description, recommendation, resolved}</td><td>severity stays DEFINED only in severity-taxonomy.md; JS only counts</td></tr>
+    <tr><td>Plus</td><td><code>ReviewVerdict</code>, <code>AdversarialVerdict</code> (mutation_score, surviving_mutants, blind_spots), <code>AnalysisDimensionResult</code>, <code>DiagnosisResult</code>, <code>StoryBatch</code>, <code>MemoryCaptureResult</code>, <code>SpecialistResult</code>, <code>IncidentAnalysis</code></td></tr>
+  </table>
+  <p><code>VALIDATION_FAILED</code> stays a hook concern (<code>validate_schema.py</code>), not a schema.</p>
+</section>
+
+<section class="rev-section" data-section-id="command-mapping">
+  <h2>Per-command mapping (all 15 commands preserved)</h2>
+  <table>
+    <tr><th>Command</th><th>After the revamp</th></tr>
+    <tr><td><code>/shaktra:tpm</code></td><td>Main loop routes intent + clarifications + optional HTML design review; <code>tpm-design.js</code> (architect → tpm-quality loop), then <code>tpm-stories.js</code> (stories → quality loop → scrummaster sprint allocation w/ velocity)</td></tr>
+    <tr><td><code>/shaktra:dev</code></td><td>Pre-flight via <code>shaktra_context.py</code>; <code>dev-tdd.js</code> runs PLAN→BRANCH→RED→GREEN→QUALITY→consistency→memory→sprint-update; <code>refactor.js</code> for refactor mode</td></tr>
+    <tr><td><code>/shaktra:review</code></td><td><code>review.js</code> — parallel over 13 dimensions + plan-adherence + 6 verification tests → consolidation → mergeGate; findings in-band (<code>.quality.yml</code> dies)</td></tr>
+    <tr><td><code>/shaktra:adversarial-review</code></td><td><code>adversarial.js</code> — mutation / fault-injection / adversarial-input → mutation-score gate</td></tr>
+    <tr><td><code>/shaktra:analyze</code></td><td><code>analyze.js</code> — parallel over 9 dimensions (checksum-skip via manifest) → consolidator agent → report. Deletes both old workflow docs + teams path</td></tr>
+    <tr><td><code>/shaktra:bugfix</code></td><td><code>bugfix-diagnose.js</code> → synthesizes trivial-tier story → chains to <code>Skill(shaktra-dev)</code> (story-always-required preserved)</td></tr>
+    <tr><td><code>/shaktra:pm</code></td><td>Brainstorm/guided-entry via AskUserQuestion in main loop; <code>pm-artifacts.js</code> for batch persona/journey/PRD + quality loop; optional HTML PRD review</td></tr>
+    <tr><td><code>/shaktra:incident</code></td><td><code>incident.js</code> (analyst → postmortem → detection gaps)</td></tr>
+    <tr><td><code>/shaktra:general</code></td><td>Thin router, single Agent call with <code>SpecialistResult</code> schema — no workflow script</td></tr>
+    <tr><td>6 utilities</td><td>Main-loop only; doctor gains a Workflow-availability check; status-dash / memory-stats read state via <code>shaktra_context.py</code></td></tr>
+  </table>
+  <div class="rev-question" data-question-id="q-pm-trim">
+    <span class="q-label">Open question</span>
+    <p>PM has the largest prose corpus (2,118 lines across 12 sub-guides: brainstorm, guided-entry, persona, journey, PRD, prioritization, research, hypothesis…). How aggressively should Phase 6 trim it? Keep all workflows but compress each, or drop some entry modes entirely?</p>
+    <textarea placeholder="Your answer…"></textarea>
+    <button>Save answer</button><span class="q-saved"></span>
+  </div>
+</section>
+
+<section class="rev-section" data-section-id="quality-moat">
+  <h2>Kept deliberately — the quality moat</h2>
+  <ul>
+    <li>4 Python blocking hooks; <code>hooks.json</code> unchanged (scripts get field-list alignment only)</li>
+    <li><code>severity-taxonomy.md</code> (single severity source), quality-dimensions, quality-principles, state-file schema docs</li>
+    <li>All 14 <code>shaktra-tdd</code> knowledge files (2,566 lines); all <code>shaktra-quality</code> checklists (36 quick-checks, 13-dim comprehensive)</li>
+    <li>SW Quality ≠ Code Reviewer ≠ Adversary — three separate agents, nothing merges</li>
+    <li>Story tiers, coverage 70/80/90/95, valid-RED rules, 3-attempt caps, consistency gate, sprint planning w/ velocity</li>
+    <li>All 15 agent personas kept in full — only the token-emission "Output Contract" prose is replaced by "your final message must satisfy the schema supplied at dispatch"</li>
+  </ul>
+</section>
+
+<section class="rev-section" data-section-id="deleted">
+  <h2>Deleted</h2>
+  <ul>
+    <li><code>guard-tokens.md</code> + domain token sections in SKILLs (all 29 tokens → schemas)</li>
+    <li>All Task() prompt templates in SKILLs (<code>shaktra-pm/agent-prompts.md</code>, …)</li>
+    <li>Pseudocode pipeline docs: <code>tdd-pipeline.md</code>, <code>refactoring-pipeline.md</code>, <code>workflow-template.md</code>, <code>adversarial-dispatch.md</code>, both analyze workflow docs, pm workflow trio</li>
+    <li>Sidecar protocols: <code>.quality.yml</code>, <code>.briefing.yml</code>, <code>.observations.yml</code> (folded into handoff / in-band returns), <code>.chunks/</code></li>
+    <li>~23 diagrams (incl. guard-token flow and the 6 per-skill agent-dispatch diagrams); <code>migrate_memory.py</code></li>
+  </ul>
+  <div class="rev-question" data-question-id="q-diagram-set">
+    <span class="q-label">Open question</span>
+    <p>Proposed surviving diagram set (~12): quick-start decision tree, TDD state machine, layering architecture, one workflow-pipeline diagram per major command (dev/review/analyze/tpm/pm), severity decision tree, merge-gate logic, hook execution flow, HTML review lifecycle, memory capture. Anything you want kept that's on the kill list, or cut from this list?</p>
+    <textarea placeholder="Your answer…"></textarea>
+    <button>Save answer</button><span class="q-saved"></span>
+  </div>
+</section>
+
+<section class="rev-section" data-section-id="state-model">
+  <h2>State model after revamp</h2>
+  <ul>
+    <li><strong>Durable (unchanged role):</strong> <code>.shaktra/settings.yml</code> (single threshold source), sprints.yml, stories/*.yml, <code>stories/&lt;id&gt;/handoff.yml</code> (cross-session spine — Workflow owns in-session control flow, handoff owns cross-session truth), memory/*.yml, analysis/manifest.yml, designs/, prd.md, personas/, journeys/, incidents/</li>
+    <li><strong>handoff.yml new fields:</strong> <code>observations: []</code> (absorbs .observations.yml), <code>briefing: {}</code> (absorbs .briefing.yml), <code>workflow_run: {script, args_hash, status, blocked_at}</code></li>
+    <li><strong>New:</strong> <code>.shaktra/reviews/&lt;doc&gt;.annotations.json</code> + <code>&lt;doc&gt;.complete</code> flag; HTML docs beside their markdown twins</li>
+  </ul>
+</section>
+
+<section class="rev-section" data-section-id="new-scripts">
+  <h2>New scripts &amp; templates</h2>
+  <ul>
+    <li><code>scripts/review_server.py</code> (stdlib only): 127.0.0.1 + random URL token; GET doc, GET/POST/DELETE annotations (atomic writes), POST complete → flag + process exit (built &amp; verified in Phase 0 — it is serving this page)</li>
+    <li><code>scripts/shaktra_context.py</code>: emits one JSON context blob (settings thresholds + story + handoff + tier + memory sizing + plugin root + test_mode) — the single threshold-read point</li>
+    <li><code>templates/review-doc.html</code> + <code>templates/review-doc-spec.md</code>: self-contained annotatable-doc skeleton + generation spec</li>
+    <li><code>skills/shaktra-html-review/</code>: generate doc → background server → URL → read annotations on exit → one actionable item per annotation. Offered from tpm/pm/analyze via AskUserQuestion</li>
+  </ul>
+</section>
+
+<section class="rev-section" data-section-id="execution-phases">
+  <h2>Execution phases</h2>
+<pre><code>P0 HTML review tooling ──&gt; P1 Foundation (lib/, context script, hooks)
+                                │
+                                ▼
+                     P2 Dev vertical slice  (highest risk first)
+                     ┌──────────┼──────────────┐
+                     ▼          ▼              ▼
+              P3 Review     P4 TPM      P5 Analyze+bugfix+incident
+                     └──────────┼──────────────┘
+                                ▼
+                  P6 PM + general + utilities
+                                ▼
+                  P7 Sweep + release 1.0.0</code></pre>
+  <p>Each phase = one commit series; a phase is done only when its E2E tests validate the new artifacts AND assert absence of dead mechanisms (no guard tokens in output, no sidecar files created). Phase 2 carries the day-one risk spikes: <code>${CLAUDE_PLUGIN_ROOT}</code> resolution in scriptPath, schema-validated returns from custom agentTypes, blocked-escalation round-trip, handoff idempotency.</p>
+  <div class="rev-question" data-question-id="q-phase-gating">
+    <span class="q-label">Open question</span>
+    <p>Phases 3/4/5 are independent after the dev slice proves the pattern. Run them strictly sequentially (safer review cadence, slower) or allow them to land as parallel commit series on the same branch?</p>
+    <textarea placeholder="Your answer…"></textarea>
+    <button>Save answer</button><span class="q-saved"></span>
+  </div>
+</section>
+
+<section class="rev-section" data-section-id="size-estimate">
+  <h2>Size estimate</h2>
+  <table>
+    <tr><th>Layer</th><th>Before</th><th>After</th></tr>
+    <tr><td>Orchestration prose (SKILLs + pipeline docs)</td><td>~8,000</td><td>~1,450</td></tr>
+    <tr><td>Workflow JS (new)</td><td>0</td><td>~2,100</td></tr>
+    <tr><td>Agents</td><td>1,957</td><td>~1,650</td></tr>
+    <tr><td>Knowledge skills</td><td>~5,700</td><td>~5,250</td></tr>
+    <tr><td>Scripts</td><td>1,031</td><td>~1,450</td></tr>
+    <tr><td>Templates</td><td>433</td><td>~800</td></tr>
+    <tr><td>Diagrams</td><td>2,278</td><td>~700</td></tr>
+    <tr><td>Docs/README</td><td>~4,700</td><td>~2,600</td></tr>
+    <tr><td><strong>Total</strong></td><td><strong>~23,589</strong></td><td><strong>~14,000 (−40%)</strong></td></tr>
+  </table>
+</section>
+
+<section class="rev-section" data-section-id="risks">
+  <h2>Risks &amp; open questions</h2>
+  <ul>
+    <li><strong>Workflow tool availability:</strong> plugin states a minimum Claude Code version; doctor + skill pre-flights check via ToolSearch and fail with a clear "upgrade" message. Accepted per the no-fallback mandate.</li>
+    <li><strong><code>${CLAUDE_PLUGIN_ROOT}</code> in scriptPath:</strong> proven for hooks, unproven for Workflow args → verified Phase 2 day one; fallback: <code>shaktra_context.py</code> echoes the plugin root into the context blob.</li>
+    <li><strong>Parallel agents racing on handoff.yml:</strong> only sequential phase agents write handoff; fan-out agents are read-only, findings in-band.</li>
+    <li><strong>E2E runtime:</strong> raised timeouts for background workflows; assertions on structured results persisted into handoff/<code>workflow_run</code>, not log lines.</li>
+    <li><strong>Schema drift:</strong> SCHEMA_VERSION in schemas.js + repo-level CI check that <code>validate_schema.py</code> field lists match.</li>
+  </ul>
+  <div class="rev-question" data-question-id="q-min-version">
+    <span class="q-label">Open question</span>
+    <p>When the Workflow tool is missing (older Claude Code), should every orchestrator command hard-fail with the upgrade message (strict no-fallback), or should read-only commands (analyze, review) degrade to a best-effort single-agent mode?</p>
+    <textarea placeholder="Your answer…"></textarea>
+    <button>Save answer</button><span class="q-saved"></span>
+  </div>
+  <div class="rev-question" data-question-id="q-teams-removal">
+    <span class="q-label">Open question</span>
+    <p>Removing the teams path from analyze loses true inter-agent chat during deep analysis; the consolidator agent is the planned replacement for cross-dimension insight. OK to ship 1.0.0 without a teams mode and revisit only if E2E shows regressions?</p>
+    <textarea placeholder="Your answer…"></textarea>
+    <button>Save answer</button><span class="q-saved"></span>
+  </div>
+  <div class="rev-question" data-question-id="q-doc-writer">
+    <span class="q-label">Open question</span>
+    <p>The plan allows an optional 16th agent — a doc-writer persona for generating the HTML review docs and user docs. Add it, or keep doc generation in the main loop / existing agents?</p>
+    <textarea placeholder="Your answer…"></textarea>
+    <button>Save answer</button><span class="q-saved"></span>
+  </div>
+</section>
+
+</main>
+<aside>
+  <h2>Annotations</h2>
+  <div id="ann-list"><p class="empty">None yet. Select text in the document to annotate it.</p></div>
+</aside>
+</div>
+<div id="popover">
+  <div class="quote"></div>
+  <textarea placeholder="Your comment…"></textarea>
+  <div class="row"><button class="cancel">Cancel</button><button class="save">Save</button></div>
+</div>
+<div id="toast"></div>
+<script>
+(function () {
+  "use strict";
+  var API = "api/annotations";
+  var popover = document.getElementById("popover");
+  var pending = null; // {section_id, quote}
+
+  function toast(msg) {
+    var t = document.getElementById("toast");
+    t.textContent = msg; t.style.display = "block";
+    setTimeout(function () { t.style.display = "none"; }, 2200);
+  }
+
+  function api(method, path, body) {
+    return fetch(path || API, {
+      method: method,
+      headers: body ? { "Content-Type": "application/json" } : undefined,
+      body: body ? JSON.stringify(body) : undefined
+    }).then(function (r) {
+      if (!r.ok) { throw new Error("HTTP " + r.status); }
+      return r.json();
+    });
+  }
+
+  function render(data) {
+    var list = document.getElementById("ann-list");
+    var anns = data.annotations || [];
+    document.getElementById("ann-count").textContent =
+      anns.length ? anns.length + " annotation" + (anns.length > 1 ? "s" : "") : "";
+    document.querySelectorAll("section.rev-section").forEach(function (s) { s.classList.remove("has-ann"); });
+    if (!anns.length) {
+      list.innerHTML = '<p class="empty">None yet. Select text in the document to annotate it.</p>';
+      return;
+    }
+    list.innerHTML = "";
+    anns.forEach(function (a) {
+      var sec = document.querySelector('[data-section-id="' + a.section_id + '"]');
+      if (sec) { sec.classList.add("has-ann"); }
+      var card = document.createElement("div");
+      card.className = "ann-card";
+      var quote = a.quote ? '<span class="quote">“' + esc(a.quote) + '”</span>' : "";
+      var label = a.type === "question_response" ? "answer: " + esc(a.question_id || "") : esc(a.section_id || "");
+      card.innerHTML = quote + esc(a.text) +
+        '<div class="meta"><span>' + label + '</span><button class="del">delete</button></div>';
+      card.querySelector(".del").addEventListener("click", function () {
+        api("DELETE", API + "/" + a.id).then(refresh).catch(function () { toast("Delete failed"); });
+      });
+      list.appendChild(card);
+    });
+  }
+
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  function refresh() { return api("GET").then(render).catch(function () {}); }
+
+  document.addEventListener("mouseup", function (e) {
+    if (popover.contains(e.target)) { return; }
+    var sel = window.getSelection();
+    var text = sel ? String(sel).trim() : "";
+    if (!text || text.length < 2) { popover.style.display = "none"; return; }
+    var node = sel.anchorNode && sel.anchorNode.parentElement;
+    var section = node && node.closest("section.rev-section");
+    if (!section) { popover.style.display = "none"; return; }
+    pending = { section_id: section.getAttribute("data-section-id"), quote: text.slice(0, 300) };
+    popover.querySelector(".quote").textContent = "“" + pending.quote + "”";
+    popover.querySelector("textarea").value = "";
+    var rect = sel.getRangeAt(0).getBoundingClientRect();
+    popover.style.left = Math.max(8, Math.min(window.innerWidth - 340, rect.left + window.scrollX)) + "px";
+    popover.style.top = (rect.bottom + window.scrollY + 8) + "px";
+    popover.style.display = "block";
+    popover.querySelector("textarea").focus();
+  });
+
+  popover.querySelector(".cancel").addEventListener("click", function () { popover.style.display = "none"; });
+  popover.querySelector(".save").addEventListener("click", function () {
+    var text = popover.querySelector("textarea").value.trim();
+    if (!text || !pending) { return; }
+    api("POST", API, { type: "annotation", section_id: pending.section_id, quote: pending.quote, text: text })
+      .then(function () { popover.style.display = "none"; refresh(); })
+      .catch(function () { toast("Save failed"); });
+  });
+
+  document.querySelectorAll(".rev-question").forEach(function (q) {
+    var btn = q.querySelector("button");
+    if (!btn) { return; }
+    btn.addEventListener("click", function () {
+      var text = q.querySelector("textarea").value.trim();
+      if (!text) { return; }
+      var section = q.closest("section.rev-section");
+      api("POST", API, {
+        type: "question_response",
+        question_id: q.getAttribute("data-question-id"),
+        section_id: section ? section.getAttribute("data-section-id") : null,
+        quote: null,
+        text: text
+      }).then(function () {
+        q.querySelector(".q-saved").textContent = "Saved ✓";
+        refresh();
+      }).catch(function () { toast("Save failed"); });
+    });
+  });
+
+  document.getElementById("complete-btn").addEventListener("click", function () {
+    var unanswered = [];
+    document.querySelectorAll(".rev-question").forEach(function (q) {
+      if (!q.querySelector(".q-saved").textContent) { unanswered.push(q.getAttribute("data-question-id")); }
+    });
+    var msg = unanswered.length
+      ? unanswered.length + " question(s) are unanswered. Finish the review anyway?"
+      : "Finish the review? The server will stop and Claude will read your annotations.";
+    if (!window.confirm(msg)) { return; }
+    api("POST", "api/complete", {}).then(function () {
+      document.body.innerHTML = '<div style="padding:4rem;text-align:center;font:18px system-ui">' +
+        "✅ Review complete. You can close this tab — Claude is reading your annotations.</div>";
+    }).catch(function () { toast("Complete failed — is the server still running?"); });
+  });
+
+  refresh();
+})();
+</script>
+</body>
+</html>
