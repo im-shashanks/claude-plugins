@@ -26,7 +26,7 @@ You receive:
 - `bug_description`: what the user reported (symptom, context, reproduction steps if available)
 - `error_context`: (optional) error messages, stack traces, log snippets
 - `settings_path`: path to `.shaktra/settings.yml`
-- `briefing_path`: (optional) path to `.briefing.yml` in the story directory
+- memory briefing: supplied inline at dispatch (optional)
 
 ## Analysis Context Loading (Optional)
 
@@ -143,32 +143,26 @@ For each `similar_patterns` entry with `risk: medium+`, recommend a separate sto
 | 1 | path | description | high | "Fix [pattern] in [component]" |
 ```
 
-### 7. Write Observations
+### 7. Observations
 
-Write observations to `.observations.yml` in the story directory:
-- `type: discovery` for root cause categories and blast radius patterns
-- `type: observation` for diagnostic methodology insights
-- Each observation: `agent: "bug-diagnostician"`, `phase: "diagnosis"`, `importance` based on severity
+Return observations in-band in your structured output:
+- `type: discovery` for root cause categories, `type: blast-radius` for each
+  similar-pattern location found elsewhere (file + needed change),
+  `type: observation` for diagnostic methodology insights
 
-## Output
+## Output Contract
 
-- Diagnosis artifact at `.shaktra/stories/diagnosis-{bug_id}.yml`
-- Story YAML at `.shaktra/stories/{story_id}.yml` with `scope: bug_fix`
-- Blast radius summary with recommended additional stories
-- Guard token: `DIAGNOSIS_COMPLETE` on success, `DIAGNOSIS_BLOCKED` if reproduction failed
-
-## Guard Tokens Emitted
-
-| Token | When |
-|---|---|
-| `DIAGNOSIS_COMPLETE` | Root cause confirmed, story created |
-| `DIAGNOSIS_BLOCKED` | Cannot reproduce or insufficient evidence |
-| `BLAST_RADIUS_FOUND` | Similar patterns found elsewhere in codebase |
+Your final message must satisfy the structured-output schema supplied at
+dispatch: root cause with evidence, fix approach, affected files, the
+regression test, confidence (high/medium/low), and story_path. The artifacts
+on disk: diagnosis at `.shaktra/stories/diagnosis-{bug_id}.yml` and the story
+YAML with `scope: bug_fix`. Cannot reproduce or insufficient evidence →
+confidence "low" with what you attempted recorded in evidence.
 
 ## Critical Rules
 
 - Never fix the bug — you diagnose only. Fixes go through the TDD pipeline.
-- Never skip the reproduce step. If you can't reproduce, emit `DIAGNOSIS_BLOCKED`.
+- Never skip the reproduce step. If you can't reproduce, return confidence "low" — never invent a root cause.
 - Generate at least 2 hypotheses before gathering evidence. Premature narrowing misses root causes.
 - Eliminate hypotheses explicitly — record evidence for and against each one.
 - Every root cause claim must pass all 3 confirmation criteria (WHY, WHEN, PROOF).

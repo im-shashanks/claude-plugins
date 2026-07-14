@@ -2,174 +2,82 @@
 name: shaktra-bugfix
 description: >
   Bug Fix workflow — structured diagnosis followed by TDD remediation.
-  Investigates bugs through triage, root cause analysis, and blast radius assessment,
-  then routes to the standard TDD pipeline for the fix.
+  Investigates bugs through triage, root cause analysis, and blast radius
+  assessment via a deterministic workflow, then routes to the standard TDD
+  pipeline for the fix.
 user-invocable: true
 ---
 
 # /shaktra:bugfix — Bug Fix Workflow
 
-You orchestrate the bug fix lifecycle: **investigation** (new) followed by **remediation** (existing TDD pipeline). Investigation is detective work — bottom-up, evidence-driven. Remediation reuses the entire `/shaktra:dev` pipeline unchanged.
+You orchestrate the bug fix lifecycle: **investigation** (deterministic
+diagnosis workflow) followed by **remediation** (the unchanged `/shaktra:dev`
+TDD pipeline). Investigation is detective work — bottom-up, evidence-driven.
+A story is always created — even a hotfix runs through the pipeline.
+Diagnosis methodology lives in `diagnosis-methodology.md` in this skill
+directory (loaded by the bug-diagnostician persona).
 
-**INVESTIGATION** (this workflow): TRIAGE → DIAGNOSE → creates story → **REMEDIATION** (reuse `/shaktra:dev`): PLAN → RED → GREEN → QUALITY
+## Intent
 
----
-
-## Intent Classification
-
-| Intent | Trigger Patterns | Workflow |
-|---|---|---|
-| `bugfix` | "bug", "bugfix", "debug", "diagnose", bug description, error message, stack trace | Investigation → Remediation |
-| `diagnose_only` | "just diagnose", "investigate only", "root cause analysis" | Investigation only (no fix) |
-
----
-
-## Execution Flow
-
-### 1. Read Project Context
-
-Before any work:
-- Read `.shaktra/settings.yml` — if missing, inform user to run `/shaktra:init` and stop
-- Read `.shaktra/memory/principles.yml` — for project principles (if exists)
-- Read `.shaktra/memory/anti-patterns.yml` — for known failure patterns (if exists)
-- Read `.shaktra/memory/procedures.yml` — for workflow learnings (if exists)
-
-### 2. Classify Intent
-
-Parse the user's request. Extract:
-- **Bug description** — the symptom being reported
-- **Error context** — stack traces, error messages, log snippets (if provided)
-- **Scope hints** — file paths, function names, component references
-
-### 3. Dispatch Bug Diagnostician
-
-Spawn the bug-diagnostician agent for investigation:
-
-```
-You are the shaktra-bug-diagnostician agent. Investigate this bug.
-
-Bug description: {bug_description}
-Error context: {error_context or "None provided"}
-Settings: {settings_path}
-Briefing: {briefing_path}
-
-Follow the 5-step diagnosis methodology. Produce a diagnosis artifact and story draft.
-```
-
-### 4. Handle Diagnosis Result
-
-**On `DIAGNOSIS_COMPLETE`:**
-- Read the diagnosis artifact and story draft
-- Create empty `.shaktra/stories/<story_id>/.observations.yml` in the new story directory
-- Present the diagnosis summary to the user
-- If `diagnose_only` intent: stop here, present findings
-- If `bugfix` intent: proceed to remediation
-
-**On `DIAGNOSIS_BLOCKED`:**
-- Present what was attempted and why reproduction failed
-- Ask user for additional context, environment details, or reproduction steps
-- Do not proceed to remediation without confirmed root cause
-
-**On `BLAST_RADIUS_FOUND`:**
-- Present blast radius summary with recommended additional stories
-- Ask user which (if any) blast radius stories to create
-- These are separate stories — they do not block the current fix
-
-### 5. Route to Remediation (TDD Pipeline)
-
-The diagnosis creates a story with `scope: bug_fix`. Route to `/shaktra:dev` with that story:
-
-```
-Invoke Skill(skill: "shaktra-dev", args: "develop story {story_id}")
-```
-
-The entire TDD pipeline runs unchanged:
-- **PLAN** — sw-engineer plans the fix using diagnosis artifact as additional context
-- **RED** — test-agent writes tests (the reproduction test from diagnosis + regression tests)
-- **GREEN** — developer implements the fix
-- **QUALITY** — sw-quality reviews at every gate (quick-check + performance/data + security checks)
-
-### 6. Memory Enhancement
-
-After remediation completes, the memory-curator consolidates observations:
-
-```yaml
-# Observations from diagnosis and remediation are consolidated into:
-# - principles.yml (root cause patterns, fix approaches)
-# - anti-patterns.yml (repeated failure patterns)
-```
-
-Bug diagnosis observations are high-value for anti-pattern detection.
-
----
-
-## Agent Dispatch Reference
-
-| Agent | Phase | Purpose |
-|---|---|---|
-| shaktra-bug-diagnostician | Investigation | Triage + 5-step diagnosis + blast radius |
-| shaktra-sw-engineer | Remediation — PLAN | Plan the fix using diagnosis as context |
-| shaktra-test-agent | Remediation — RED | Write failing tests (reproduction + regression) |
-| shaktra-developer | Remediation — GREEN | Implement the fix |
-| shaktra-sw-quality | Remediation — All gates | Quality review at every transition |
-| shaktra-memory-curator | Remediation — Memory | Capture bug patterns as lessons |
-| shaktra-memory-retriever | Remediation — Briefing | Tiered briefing generation (spawned by `/shaktra:dev` during remediation) |
-
----
-
-## Completion Report
-
-After the full bugfix lifecycle:
-
-```
-## Bug Fix Complete
-
-**Bug:** {bug_id} — {symptom_summary}
-**Root Cause:** {category} — {one_sentence_explanation}
-**Story:** {story_id} — {story_title}
-**Branch:** {branch_name}
-
-### Diagnosis
-- Symptom: {symptom_type}
-- Root cause category: {RC-LOGIC|RC-DATA|...}
-- Location: {file:line}
-- Blast radius: {N similar patterns found, M recommended as stories}
-
-### TDD Results
-- Tests written: {count} (including reproduction test)
-- Tests pass: {all_green}
-- Coverage: {coverage}%
-
-### Quality Results
-- All gates: {PASS/BLOCKED}
-- Review iterations: {count}
-
-### Blast Radius Stories
-- {list of recommended stories, or "None"}
-
-### Next Step
-- {recommended action}
-- For production incidents, run `/shaktra:incident post-mortem {bug_id}` to generate a post-mortem and identify detection gaps
-```
-
----
-
-## Sub-Files
-
-| File | Purpose |
+| Intent | Triggers |
 |---|---|
-| `diagnosis-methodology.md` | 5-step root cause analysis process — triage, reproduce, hypothesize, gather evidence, isolate, blast radius |
+| `bugfix` | "bug", "debug", "diagnose", a bug description, error message, stack trace |
+| `diagnose_only` | "just diagnose", "investigate only", "root cause analysis" |
 
-## References
+Extract from the request: the symptom, any error context (stack traces, logs),
+and scope hints (files, functions).
 
-- `shaktra-reference/severity-taxonomy.md` — P0-P3 severity definitions
-- `shaktra-stories/story-schema.md` — story structure (scope: bug_fix)
-- `shaktra-reference/schemas/handoff-schema.md` — TDD state machine (reused for remediation)
+## Pre-flight
 
-## Guard Tokens
+Run `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/shaktra_context.py`; stop if
+`shaktra_initialized` is false (→ `/shaktra:init`).
 
-This workflow emits and responds to:
-- `DIAGNOSIS_COMPLETE` — root cause confirmed, story created → proceed to remediation
-- `DIAGNOSIS_BLOCKED` — cannot reproduce → stop, ask user for input
-- `BLAST_RADIUS_FOUND` — similar patterns found → present to user
-- All TDD pipeline tokens (from `/shaktra:dev`) apply during remediation
+## Invoke
+
+```
+Workflow({
+  scriptPath: "${CLAUDE_PLUGIN_ROOT}/workflows/bugfix-diagnose.js",
+  args: {
+    plugin_root: "${CLAUDE_PLUGIN_ROOT}", project_dir,
+    bug_description, error_context,        // error_context null if none given
+    stories_dir: "<project>/.shaktra/stories",
+    memory: { dir, retrieval_tier, max_briefing_entries, confidence_threshold }
+  }
+})
+```
+
+Wait for the background completion notification — no polling.
+
+## Handle the result
+
+**`blocked` with `reason: "diagnosis_inconclusive"`** — present what was
+attempted (`result.diagnosis.evidence`), then ask the user for additional
+context, environment details, or reproduction steps. Never proceed to
+remediation without a confirmed root cause. Re-invoke with the enriched
+`error_context` once provided.
+
+**`complete`** —
+1. Present `result.report_markdown` verbatim.
+2. Blast-radius observations (`type: "blast-radius"` in `result.observations`):
+   present the affected locations and ask via AskUserQuestion which (if any)
+   should become separate stories — create them via
+   `Skill(skill: "shaktra-tpm", args: "hotfix <description>")`. They never block
+   the current fix.
+3. `diagnose_only` intent: stop here with the findings.
+4. `bugfix` intent: chain to remediation —
+   `Skill(skill: "shaktra-dev", args: "develop story <id from result.story_path>")`.
+   The entire TDD pipeline runs unchanged; the diagnosis artifact serves as
+   planning context, and the reproduction test from the story's test_specs
+   becomes part of RED.
+
+Memory note: diagnosis observations are consolidated by the dev pipeline's
+memory capture once remediation completes (workflow_type tdd) — high-value for
+anti-pattern detection.
+
+If the Workflow tool is unavailable, stop: Shaktra 1.x requires a Claude Code
+version with the Workflow tool.
+
+## Testing mode
+
+When the context blob has `test_mode`: never call AskUserQuestion (skip
+blast-radius story creation; log `AUTO-ANSWER` lines to `.shaktra-test.log`).

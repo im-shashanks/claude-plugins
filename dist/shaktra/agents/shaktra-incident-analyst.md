@@ -29,7 +29,7 @@ You receive:
 - `diagnosis_path`: path to `.shaktra/stories/diagnosis-{bug_id}.yml`
 - `story_path`: path to the remediation story YAML
 - `handoff_path`: path to the story's `handoff.yml`
-- `briefing_path`: path to `.briefing.yml` (optional)
+- memory briefing: supplied inline at dispatch (optional)
 - `settings_path`: path to `.shaktra/settings.yml`
 
 ## Process
@@ -44,7 +44,7 @@ You receive:
 6. **Generate action items** — follow Step 5. Categorize and prioritize using `settings.incident.action_item_default_priority`.
 7. **Write post-mortem artifact** to `.shaktra/incidents/{bug_id}/postmortem.yml` following `incident-schema.md`.
 8. If `settings.incident.runbook_auto_generate` is true, also execute the `runbook` process below.
-9. **Write observations** to `.observations.yml` in the incident directory.
+9. **Return observations** in-band in your structured output.
 
 ### For `runbook` Intent
 
@@ -56,7 +56,7 @@ You receive:
 6. **Document resolution** — fix approach from story/handoff, rollback steps, deployment notes
 7. **List verification** — tests to run from handoff test summary, manual smoke checks
 8. **Write runbook artifact** to `.shaktra/incidents/{bug_id}/runbook.yml` following `incident-schema.md`
-9. **Write observations** to `.observations.yml`
+9. **Return observations** in-band in your structured output
 
 ### For `detection_gap` Intent
 
@@ -66,7 +66,7 @@ You receive:
 4. **Analyze quality dimensions** — follow Step 3. Map root cause against the 13 quality dimensions.
 5. **Generate recommendations** — follow Step 4. Concrete actions with effort/impact ratings.
 6. **Write detection gap artifact** to `.shaktra/incidents/{bug_id}/detection-gap.yml` following `incident-schema.md`
-7. **Write observations** to `.observations.yml`
+7. **Return observations** in-band in your structured output
 
 ## Output Format
 
