@@ -22,6 +22,9 @@ VALID_SCOPES = {
 }
 VALID_PHASES = {"pending", "plan", "tests", "code", "quality", "complete", "failed"}
 PHASE_ORDER = ["plan", "tests", "code", "quality"]
+VALID_SEVERITIES = {"P0", "P1", "P2", "P3"}
+# Must stay in sync with workflows/lib/schemas.js SCHEMA_VERSION field shapes.
+VALID_WORKFLOW_RUN_STATUS = {"running", "complete", "blocked", "needs_clarification", "failed"}
 
 
 def normalize(file_path: str, project: str) -> str:
@@ -68,6 +71,37 @@ def validate_handoff(data: dict) -> list[str]:
                         f"{PHASE_ORDER}, got {completed}"
                     )
                     break
+    findings = data.get("quality_findings")
+    if findings is not None:
+        if not isinstance(findings, list):
+            errors.append("'quality_findings' must be a list")
+        else:
+            for f in findings:
+                if isinstance(f, dict):
+                    sev = str(f.get("severity", "")).upper()
+                    if sev not in VALID_SEVERITIES:
+                        errors.append(
+                            f"Invalid finding severity '{f.get('severity')}' — "
+                            f"must be one of: {', '.join(sorted(VALID_SEVERITIES))}"
+                        )
+                        break
+    observations = data.get("observations")
+    if observations is not None and not isinstance(observations, list):
+        errors.append("'observations' must be a list")
+    briefing = data.get("briefing")
+    if briefing is not None and not isinstance(briefing, dict):
+        errors.append("'briefing' must be a mapping")
+    workflow_run = data.get("workflow_run")
+    if workflow_run is not None:
+        if not isinstance(workflow_run, dict):
+            errors.append("'workflow_run' must be a mapping")
+        else:
+            wr_status = workflow_run.get("status")
+            if wr_status is not None and str(wr_status) not in VALID_WORKFLOW_RUN_STATUS:
+                errors.append(
+                    f"Invalid workflow_run.status '{wr_status}' — must be one of: "
+                    f"{', '.join(sorted(VALID_WORKFLOW_RUN_STATUS))}"
+                )
     return errors
 
 
