@@ -118,7 +118,7 @@ Do **not** touch `dist/shaktra/skills/shaktra-status-dash/SKILL.md` — the vers
 **7 Utility Skills:** `/shaktra:init`, `/shaktra:doctor`, `/shaktra:workflow`, `/shaktra:help`, `/shaktra:status-dash`, `/shaktra:memory-stats`, `/shaktra:html-review`
 **5 Internal Skills:** shaktra-quality, shaktra-tdd, shaktra-reference, shaktra-stories, shaktra-memory
 **10 Workflow Scripts + 4 lib children:** dev-tdd, refactor, review, adversarial, tpm-design, tpm-stories, analyze, bugfix-diagnose, incident, pm-artifacts; lib/ = schemas, quality-loop, memory, report (see `dist/shaktra/workflows/README.md` for the runtime constraints)
-**15 Sub-Agents:** architect, tpm-quality, scrummaster, product-manager, sw-engineer, test-agent, developer, sw-quality, cba-analyzer, cr-analyzer, memory-curator, bug-diagnostician, memory-retriever, adversary, incident-analyst
+**16 Sub-Agents:** architect, tpm-quality, scrummaster, product-manager, sw-engineer, test-agent, developer, sw-quality, cba-analyzer, cr-analyzer, memory-curator, bug-diagnostician, memory-retriever, adversary, incident-analyst, doc-writer
 **1 Command:** `/shaktra-update`
 **4 Hooks:** block-main-branch, check-p0, validate-story-scope, validate-schema
 **10 Scripts:** 4 hook scripts + check_version, update_plugin, review_server, shaktra_context, shaktra_handoff, shaktra_sprint

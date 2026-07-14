@@ -7,7 +7,7 @@ Shaktra orchestrates 15 specialized sub-agents, each with a defined role, strict
 | Model | Agents | Rationale |
 |-------|--------|-----------|
 | Opus | architect, sw-engineer, test-agent, developer, cba-analyzer, cr-analyzer, bug-diagnostician, adversary, incident-analyst | Design, planning, code generation, deep analysis, adversarial probing, and incident analysis require highest capability |
-| Sonnet | tpm-quality, scrummaster, product-manager, sw-quality, memory-retriever | Structured review, story creation, checklist-driven work, and memory retrieval |
+| Sonnet | tpm-quality, scrummaster, product-manager, sw-quality, memory-retriever, doc-writer | Structured review, story creation, checklist-driven work, memory retrieval, and document generation |
 | Haiku | memory-curator | Lightweight extraction and append-only writes |
 
 ## Planning Agents
@@ -118,13 +118,23 @@ Shaktra orchestrates 15 specialized sub-agents, each with a defined role, strict
 
 ## Specialized Agents
 
+### Doc Writer
+
+**Role:** Generate documents from Shaktra artifacts — annotatable HTML review docs (from the review-doc template) and user-facing documentation. Compression without loss; never invents content.
+
+**Invoked by:** The `shaktra-html-review` skill (review-doc mode) and documentation tasks (user-doc mode).
+
+**Produces:** Self-contained HTML review documents with annotatable sections and inline question widgets, or updated user docs, per the schema supplied at dispatch.
+
+**Key behaviors:** Keeps the review template's style/script blocks byte-identical. Section and question ids stay meaningful when read back from annotations JSON. Flags source ambiguities instead of resolving them silently. Never edits the canonical artifact it renders.
+
 ### Bug Diagnostician
 
 **Role:** Investigate bugs using a structured 5-step methodology. Diagnoses only -- never fixes.
 
 **Invoked by:** `/shaktra:bugfix` during the investigation phase.
 
-**Produces:** Diagnosis artifact at `.shaktra/stories/diagnosis-{bug_id}.yml`, remediation story YAML, and blast radius summary with recommended additional stories. Emits `DIAGNOSIS_COMPLETE` or `DIAGNOSIS_BLOCKED`.
+**Produces:** Diagnosis artifact at `.shaktra/stories/diagnosis-{bug_id}.yml`, remediation story YAML, and blast-radius observations with recommended additional stories, returned per the schema supplied at dispatch (confidence high/medium/low gates remediation).
 
 **Key behaviors:** Classifies bugs by symptom type and reproducibility. Generates at least 2 hypotheses before gathering evidence. Confirms root cause with three criteria (WHY, WHEN, PROOF). Searches for similar patterns across the codebase for blast radius assessment.
 

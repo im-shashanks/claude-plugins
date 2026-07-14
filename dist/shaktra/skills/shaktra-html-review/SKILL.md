@@ -23,14 +23,12 @@ the HTML only if another review round is requested.
 
 ## Step 1 — Generate the review document
 
-1. Read the canonical artifact and `${CLAUDE_PLUGIN_ROOT}/templates/review-doc-spec.md`.
-2. Copy `${CLAUDE_PLUGIN_ROOT}/templates/review-doc.html` and replace the
-   `SHAKTRA:TITLE`, `SHAKTRA:HEADER`, and `SHAKTRA:CONTENT` marker blocks per the
-   spec. Keep the template's `<style>` and `<script>` blocks byte-identical.
-3. Every logical section becomes a `<section class="rev-section" data-section-id="…">`.
-   Every open question you want answered becomes an inline `.rev-question` widget
-   with a unique `data-question-id`.
-4. Write the HTML to `output`.
+Dispatch the **shaktra-doc-writer** agent in `review-doc` mode. Its prompt
+names: the canonical artifact path, the output path, the template and spec
+paths (`${CLAUDE_PLUGIN_ROOT}/templates/review-doc.html`,
+`${CLAUDE_PLUGIN_ROOT}/templates/review-doc-spec.md`), and every open question
+you want embedded as an inline widget (each with a unique id). The agent
+writes the HTML to `output`; verify the file exists before serving.
 
 ## Step 2 — Serve and hand off to the reviewer
 

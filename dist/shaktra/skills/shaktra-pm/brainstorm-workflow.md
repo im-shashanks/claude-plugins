@@ -1,197 +1,60 @@
 # Brainstorm Workflow
 
-Guided ideation process for exploring the problem space before committing to requirements. Can be used standalone or as Phase 1 of the full PM workflow.
-
-## Overview
-
-Brainstorming produces structured notes that feed into PRD creation. The goal is exploration, not commitment — surface options, identify constraints, and align on opportunity before writing formal requirements.
-
----
+Guided ideation for exploring the problem space before committing to
+requirements. Conversational — runs in the main loop. The goal is exploration,
+not commitment: surface options, identify constraints, align on the
+opportunity before formal requirements.
 
 ## Steps
 
-### Step 1 — Load Context
+**1 — Load context:** `.shaktra/settings.yml` (project type),
+`.shaktra/memory/principles.yml` and `anti-patterns.yml` (constraints from
+prior work, if they exist).
 
-Read:
-- `.shaktra/settings.yml` — project type, language, architecture
-- `.shaktra/memory/principles.yml` — prior principles that might constrain options
-- `.shaktra/memory/anti-patterns.yml` — past observations relevant to ideation
+**2 — Problem exploration.** What problem? Who has it (be specific — not
+"users" but "developers who deploy multiple times per day")? Impact of not
+solving it (cost, time, frustration, risk)? Why now (market, business, user
+demand)?
+→ Capture: `problem` {statement (1-2 sentences), affected_users[], impact[]
+{type: cost|time|frustration|risk|revenue, description}, urgency {driver,
+reasoning}}.
 
-### Step 2 — Problem Exploration
+**3 — User needs.** Primary and secondary users; how they solve it today
+(workarounds, competitors); what success looks like for them; their
+constraints.
+→ Capture: `users` {primary {description, current_solution,
+success_looks_like}, secondary[] {description, relationship}}.
 
-Guide the user through problem definition:
+**4 — Market context.** How competitors solve it and what they miss; trends
+that help or hinder; regulatory/technical/business constraints; adjacent
+opportunities.
+→ Capture: `market` {competitors[] {name, approach, gaps[]}, trends[] {trend,
+implication}, constraints[] {type, description}}.
 
-**Questions to explore:**
-- What problem are we solving?
-- Who has this problem? (Be specific — not "users" but "developers who deploy multiple times per day")
-- What's the impact of not solving it? (Cost, time, frustration, risk)
-- Why is this problem worth solving now? (Market timing, business driver, user demand)
+**5 — Opportunity definition.** The opportunity; our unique angle; target
+scope; explicit out-of-scope.
+→ Capture: `opportunity` {statement, unique_angle, target_scope,
+out_of_scope[]}.
 
-**Output format:**
-```yaml
-problem:
-  statement: "<1-2 sentence problem statement>"
-  affected_users: ["<specific user type>", "..."]
-  impact:
-    - type: "<cost | time | frustration | risk | revenue>"
-      description: "<specific impact>"
-  urgency:
-    driver: "<market | business | user | technical debt>"
-    reasoning: "<why now>"
-```
+**6 — Write notes** to `.shaktra/pm/brainstorm.md`: the four captured
+sections plus **Open Questions** (unresolved items surfaced) and **Next
+Steps** (create PRD via `/shaktra:pm prd`, validate assumptions with research,
+review with stakeholders).
 
-### Step 3 — User Needs
+**7 — Present summary:** 1-line problem, primary users, 1-line opportunity,
+top 3 insights, open questions, output path, next step.
 
-Identify and prioritize user needs:
+## Quality Checklist (iterate with the user until all pass)
 
-**Questions to explore:**
-- Who are the primary users? Secondary users?
-- What do they currently do to solve this problem? (Workarounds, competitors)
-- What would success look like for them?
-- What constraints do they operate under?
-
-**Output format:**
-```yaml
-users:
-  primary:
-    description: "<who they are>"
-    current_solution: "<how they solve it today>"
-    success_looks_like: "<desired outcome>"
-  secondary:
-    - description: "<who>"
-      relationship: "<to primary user>"
-```
-
-### Step 4 — Market Context
-
-Understand the competitive and market landscape:
-
-**Questions to explore:**
-- How do competitors solve this? What do they miss?
-- What trends make this easier or harder to solve?
-- Are there constraints (regulatory, technical, business) we must respect?
-- What adjacent opportunities might this open?
-
-**Output format:**
-```yaml
-market:
-  competitors:
-    - name: "<competitor>"
-      approach: "<how they solve it>"
-      gaps: ["<what they miss>"]
-  trends:
-    - trend: "<relevant trend>"
-      implication: "<how it affects our approach>"
-  constraints:
-    - type: "<regulatory | technical | business | resource>"
-      description: "<constraint>"
-```
-
-### Step 5 — Opportunity Definition
-
-Synthesize into a clear opportunity statement:
-
-**Questions to answer:**
-- What's the opportunity?
-- What's our unique angle or advantage?
-- What's the scope we should target?
-- What's explicitly out of scope?
-
-**Output format:**
-```yaml
-opportunity:
-  statement: "<1-2 sentence opportunity statement>"
-  unique_angle: "<what we can do that others can't or won't>"
-  target_scope: "<what we're aiming to build>"
-  out_of_scope: ["<what we're explicitly not doing>"]
-```
-
-### Step 6 — Write Brainstorm Notes
-
-Compile all sections into `.shaktra/pm/brainstorm.md`:
-
-```markdown
-# Brainstorm Notes
-
-Generated: {date}
-Project: {settings.project.name}
-
-## Problem
-
-{problem section}
-
-## Users
-
-{users section}
-
-## Market Context
-
-{market section}
-
-## Opportunity
-
-{opportunity section}
-
-## Open Questions
-
-{list of unresolved questions surfaced during brainstorm}
-
-## Next Steps
-
-- [ ] Create PRD from these notes: `/shaktra:pm prd`
-- [ ] Conduct user research to validate assumptions
-- [ ] Review with stakeholders
-```
-
-### Step 7 — Present Summary
-
-Present a concise summary to user:
-
-```
-## Brainstorm Complete
-
-**Problem:** {1-line problem statement}
-**Primary Users:** {primary user description}
-**Opportunity:** {1-line opportunity statement}
-
-**Key Insights:**
-- {top 3 insights from brainstorm}
-
-**Open Questions:**
-- {questions that need resolution}
-
-**Output:** .shaktra/pm/brainstorm.md
-
-**Next Step:** Run `/shaktra:pm prd` to create a PRD from these notes.
-```
-
----
-
-## Quality Checklist
-
-Before completing brainstorm, verify:
-
-| Check | Required |
-|---|---|
-| Problem statement is specific (not "improve X") | Yes |
-| At least one primary user identified | Yes |
-| Impact quantified or described concretely | Yes |
-| Current solutions/workarounds documented | Yes |
-| Opportunity statement is actionable | Yes |
-| Out-of-scope explicitly stated | Yes |
-
-If any check fails, iterate with user before finalizing.
-
----
+- Problem statement is specific (not "improve X")
+- At least one primary user identified
+- Impact quantified or described concretely
+- Current solutions/workarounds documented
+- Opportunity statement is actionable
+- Out-of-scope explicitly stated
 
 ## Standalone vs Full Workflow
 
-**Standalone (`/shaktra:pm brainstorm`):**
-- Produces brainstorm notes only
-- User decides next step
-- Good for early exploration before committing to PRD
-
-**Full workflow (Phase 1):**
-- Automatically flows to Phase 2 (PRD) after user confirmation
-- Brainstorm notes become PRD input
-- More structured handoff
+**Standalone** (`/shaktra:pm brainstorm`): produces the notes only; the user
+decides the next step. **Full workflow:** after user confirmation, the notes
+become the `context_summary` for the artifact workflow (hypothesis-first path).

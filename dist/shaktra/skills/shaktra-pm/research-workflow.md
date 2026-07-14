@@ -1,215 +1,56 @@
 # Research Analysis Workflow
 
-Analyze customer research inputs (interview transcripts, surveys, feedback) to extract insights that inform personas, validate requirements, and guide product decisions.
-
-## Overview
-
-Research analysis transforms raw qualitative data into structured insights:
-1. Extract findings from individual sources
-2. Identify patterns across sources
-3. Synthesize into themes with confidence levels
-4. Generate actionable recommendations
-
----
+Transform raw qualitative research (interview transcripts, surveys, feedback,
+observation notes — text/markdown files or pasted text) into structured
+insights that inform personas, validate requirements, and guide decisions.
+Executed by the product-manager agent (research target of
+`workflows/pm-artifacts.js`).
 
 ## Steps
 
-### Step 1 — Collect Research Inputs
+**1 — Load:** the research inputs named at dispatch, plus `.shaktra/prd.md`
+(if it exists, for validation) and `.shaktra/memory/principles.yml`.
 
-Ask user to provide research materials:
+**2 — Extract per-source findings** to `.shaktra/research/{source_id}.yml`:
 
-> "What research do you have to analyze?
-> - Interview transcripts (text files or paths)
-> - Survey responses
-> - Support tickets or feedback
-> - User observation notes"
+- `pain_points[]` {id PP-NN, description, severity: high|medium|low,
+  frequency: daily|weekly|monthly|rarely, quote (verbatim when available)}
+- `feature_requests[]` {id FR-NN, description, priority (their words), context}
+- `jobs_to_be_done[]` {situation, motivation, outcome, current_solution}
+- `competitor_mentions[]` {name, context, sentiment}
+- `key_quotes[]` {quote (verbatim), context, theme}
 
-Supported formats:
-- Plain text files
-- Markdown files
-- Pasted text
-- File paths to read
+**3 — Synthesize** to `.shaktra/research-synthesis.md`:
 
-### Step 2 — Load Context
+- **Themes:** cluster pain points across sources by similarity; name each
+  ("Slow Onboarding"); count evidence; confidence = high (3+ sources),
+  medium (2), low (1 or conflicting). Each theme lists its supporting
+  source/pain-point ids.
+- **Patterns:** {name, description, frequency: common|occasional|rare,
+  evidence[] {source_id, observation}}.
+- **Recommendations:** {id REC-NN, recommendation, rationale, priority,
+  supporting_themes[], confidence}.
 
-Read:
-- `.shaktra/settings.yml` — project context
-- `.shaktra/prd.md` — if exists, for requirement validation
-- `.shaktra/memory/principles.yml` — prior principles
+**4 — Validate against the PRD** (when one exists): map themes to
+requirements; report requirements validated by research, requirements resting
+on assumptions, and user needs missing from the PRD (potential gaps).
 
-### Step 3 — Extract Per-Source Findings
+**5 — Identify research gaps:** {area, reason, suggested_method:
+interview|survey|analytics|observation}.
 
-For each research input, spawn **product-manager** (mode: research-analyze) to extract:
-
-**Pain Points:**
-```yaml
-pain_points:
-  - id: PP-01
-    description: "<what hurts>"
-    severity: high | medium | low
-    frequency: daily | weekly | monthly | rarely
-    quote: "<verbatim if available>"
-```
-
-**Feature Requests:**
-```yaml
-feature_requests:
-  - id: FR-01
-    description: "<what they want>"
-    priority: "<their stated priority>"
-    context: "<why they want it>"
-```
-
-**Jobs-to-be-Done:**
-```yaml
-jobs_to_be_done:
-  - situation: "When I..."
-    motivation: "I want to..."
-    outcome: "So I can..."
-    current_solution: "<how they do it today>"
-```
-
-**Competitor Mentions:**
-```yaml
-competitor_mentions:
-  - name: "<competitor>"
-    context: "<what they said>"
-    sentiment: positive | negative | neutral
-```
-
-**Key Quotes:**
-```yaml
-key_quotes:
-  - quote: "<verbatim>"
-    context: "<when/why they said it>"
-    theme: "<which theme this supports>"
-```
-
-Write each analysis to `.shaktra/research/{interview_id}.yml`.
-
-### Step 4 — Synthesize Findings
-
-After all sources are analyzed, create synthesis:
-
-**Theme Clustering:**
-1. Collect all pain points across interviews
-2. Group by similarity
-3. Name each theme (e.g., "Slow Onboarding", "Confusing Permissions")
-4. Calculate evidence count per theme
-5. Assign confidence: high (3+ sources), medium (2), low (1 or conflicting)
-
-**Output format:**
-```yaml
-themes:
-  - id: TH-01
-    name: "<theme name>"
-    description: "<what this theme represents>"
-    evidence_count: 4
-    confidence: high
-    supporting_interviews:
-      - id: INT-001
-        pain_point_id: PP-01
-```
-
-**Pattern Identification:**
-```yaml
-patterns:
-  - name: "<behavioral pattern>"
-    description: "<observed behavior>"
-    frequency: common | occasional | rare
-    evidence:
-      - interview_id: INT-001
-        observation: "<specific observation>"
-```
-
-**Recommendations:**
-```yaml
-recommendations:
-  - id: REC-01
-    recommendation: "<actionable recommendation>"
-    rationale: "<why this matters>"
-    priority: high | medium | low
-    supporting_themes: [TH-01, TH-02]
-    confidence: high | medium | low
-```
-
-Write synthesis to `.shaktra/research/synthesis.yml`.
-
-### Step 5 — Validate Against PRD (If Exists)
-
-If `.shaktra/prd.md` exists:
-1. Map themes to PRD requirements
-2. Identify:
-   - Requirements validated by research (strong evidence)
-   - Requirements with no research support (assumptions)
-   - User needs not in PRD (potential gaps)
-3. Report findings to user
-
-### Step 6 — Identify Research Gaps
-
-```yaml
-gaps:
-  - area: "<topic needing more research>"
-    reason: "<why we need more data>"
-    suggested_method: interview | survey | analytics | observation
-```
-
-### Step 7 — Present Summary
-
-```
-## Research Analysis Complete
-
-**Sources Analyzed:** {count} interviews, {count} surveys, {count} other
-**Themes Identified:** {count}
-**Recommendations:** {count}
-
-### Top Pain Points (by frequency)
-1. {pain point} — {severity}, mentioned by {count} participants
-2. {pain point}
-3. {pain point}
-
-### Themes
-| Theme | Confidence | Evidence |
-|---|---|---|
-| {theme} | {confidence} | {count} sources |
-
-### Top Recommendations
-1. {recommendation} — {priority} priority
-2. {recommendation}
-3. {recommendation}
-
-### Research Gaps
-- {gap area} — suggested: {method}
-
-### Files Created
-- .shaktra/research/{id}.yml (x{count})
-- .shaktra/research/synthesis.yml
-
-### Next Steps
-1. Run `/shaktra:pm personas` to create personas from this research
-2. Review gaps and plan additional research if needed
-3. Update PRD with validated insights: `/shaktra:pm prd`
-```
-
-
----
+**6 — Summarize:** sources analyzed, top pain points by frequency, theme
+table with confidence, top recommendations, gaps, files created, next steps
+(personas → gap research → PRD update).
 
 ## Quality Checklist
 
-| Check | Required |
-|---|---|
-| Each interview has at least 1 pain point | Yes |
-| Each interview has at least 1 JTBD | Yes |
-| Synthesis has at least 2 themes | Yes |
-| Confidence levels match evidence criteria | Yes |
-| At least 1 recommendation generated | Yes |
-
----
+- Each source yields at least 1 pain point and 1 JTBD (or its absence is noted)
+- Synthesis has at least 2 themes
+- Confidence levels match the evidence criteria exactly
+- At least 1 actionable recommendation
 
 ## Integration Notes
 
-**Personas:** Research provides evidence for personas. Each persona's `evidence` section references interview IDs from this analysis.
-
-**PRD:** Research validates or challenges PRD requirements. High-confidence themes should map to "Must Have" requirements.
-
-**Journey Maps:** Pain points and JTBD from research inform journey stage details.
+- **Personas:** persona `evidence` entries reference these source ids.
+- **PRD:** high-confidence themes should map to Must Have requirements.
+- **Journeys:** pain points and JTBD inform journey stage details.

@@ -1,115 +1,39 @@
 # Journey Mapping Workflow
 
-Create customer journey maps that visualize the end-to-end experience for each persona, identifying pain points and improvement opportunities.
-
-## Overview
-
-Journey maps show:
-1. The stages a user goes through
-2. Touchpoints, actions, and emotions at each stage
-3. Pain points and moments of truth
-4. Opportunities for improvement
-
----
+Create customer journey maps that visualize the end-to-end experience for each
+persona: stages, touchpoints, emotions, pain points, moments of truth, and
+improvement opportunities. Executed by the product-manager agent (journeys
+target of `workflows/pm-artifacts.js`).
 
 ## Steps
 
-### Step 1 — Load Context
+**1 — Load context:** `.shaktra/personas/*.yml` (required — no personas means
+the orchestrator should have run the personas target first),
+`.shaktra/research-synthesis.md` (pain-point evidence, if present),
+`.shaktra/prd.md` (scope).
 
-Read:
-- `.shaktra/settings.yml` — project context
-- `.shaktra/personas/*.yml` — personas to map (required)
-- `.shaktra/research/synthesis.yml` — pain points and insights
-- `.shaktra/prd.md` — scope context
+**2 — Scope:** map the primary journey for each persona (the interaction the
+PRD implies — e.g. onboarding, daily workflow, purchase decision). Distinct
+journeys for one persona get separate files
+(`{persona_id}-onboarding-journey.yml`, `{persona_id}-daily-journey.yml`).
 
-If no personas exist:
-- Inform user: "Personas required for journey mapping. Run `/shaktra:pm personas` first."
-- Stop workflow
+**3 — Map through the 5 phases** — awareness → consideration → acquisition →
+service → loyalty — per `journey-schema.md`. Each stage:
 
-### Step 2 — Select Personas
+- `name`, `phase`
+- `touchpoints[]` {channel, description}
+- `actions[]`, `thoughts[]`
+- `emotions` {valence: positive|neutral|negative|frustrated, intensity, description}
+- `pain_points[]` {id JP-NN, description, evidence_id}
+- `opportunities[]` {id JO-NN, description, impact: high|medium|low, effort: high|medium|low}
 
-If multiple personas exist:
-- Ask user: "Which personas should have journey maps?"
-- Options: all, specific IDs, primary only
+Plus `moments_of_truth[]` {stage, description, success_criteria,
+failure_impact} — the critical decision points.
 
-Default: create journey for all personas.
+**4 — Link evidence:** pain points and opportunities cite research ids/quotes
+where available; mark assumptions explicitly where none exists.
 
-### Step 3 — Define Journey Scope
-
-For each persona, determine journey scope:
-
-> "What journey should we map for {persona.name}?
-> Examples: New user onboarding, Daily workflow, Purchase decision"
-
-If user doesn't specify, default to the primary interaction implied by PRD.
-
-### Step 4 — Generate Journey Map
-
-For each persona, spawn **product-manager** (mode: journey-create):
-
-**Map through 5 phases:**
-
-```yaml
-stages:
-  - name: "Problem Recognition"
-    phase: awareness
-    touchpoints:
-      - channel: "<where interaction happens>"
-        description: "<specific touchpoint>"
-    actions:
-      - "<what user does>"
-    thoughts:
-      - "<what user thinks>"
-    emotions:
-      valence: positive | neutral | negative | frustrated
-      intensity: high | medium | low
-      description: "<emotional state>"
-    pain_points:
-      - id: JP-01
-        description: "<pain at this stage>"
-        evidence_id: "<link to research>"
-    opportunities:
-      - id: JO-01
-        description: "<improvement idea>"
-        impact: high | medium | low
-        effort: high | medium | low
-
-  - name: "Solution Search"
-    phase: consideration
-    # ... same structure
-
-  - name: "Signup / Purchase"
-    phase: acquisition
-    # ...
-
-  - name: "Core Usage"
-    phase: service
-    # ...
-
-  - name: "Renewal / Expansion"
-    phase: loyalty
-    # ...
-```
-
-**Moments of Truth:**
-```yaml
-moments_of_truth:
-  - stage: "Signup / Purchase"
-    description: "<critical decision point>"
-    success_criteria: "<what must happen>"
-    failure_impact: "<consequence of failure>"
-```
-
-### Step 5 — Link Evidence
-
-For each pain point and opportunity:
-- Link to research evidence where available
-- Reference specific interview IDs, quotes
-- Note assumptions where no evidence exists
-
-### Step 6 — Prioritize Opportunities
-
-Aggregate opportunities across stages and classify:
+**5 — Prioritize opportunities** across stages:
 
 | Impact | Effort | Classification |
 |---|---|---|
@@ -118,74 +42,20 @@ Aggregate opportunities across stages and classify:
 | Low | Low | Fill-in — if time permits |
 | Low | High | Avoid — deprioritize |
 
-### Step 7 — Validate Journey
+**6 — Validate each journey:** persona ID exists in `.shaktra/personas/`;
+stages ≥ `pm.min_journey_stages`; at least 1 moment of truth; every stage has
+touchpoints and emotions; pain points reference evidence when research exists.
 
-| Check | Required |
-|---|---|
-| Persona ID exists in `.shaktra/personas/` | Yes |
-| At least 3 stages defined | Yes |
-| At least 1 moment of truth | Yes |
-| Each stage has touchpoints | Yes |
-| Each stage has emotions | Yes |
-| Pain points reference evidence (if research exists) | Recommended |
+**7 — Write** each journey to `.shaktra/journeys/{persona_id}-journey.yml`
+(create the directory if needed).
 
-### Step 8 — Write Journey Maps
-
-Write each journey to `.shaktra/journeys/{persona_id}-journey.yml`.
-
-Create directory if needed: `.shaktra/journeys/`
-
-### Step 9 — Present Summary
-
-```
-## Journey Maps Created
-
-**Personas Mapped:** {count}
-
-### Journeys
-| Persona | Journey | Stages | Opportunities |
-|---|---|---|---|
-| {persona.name} | {journey title} | {count} | {count} |
-
-### Moments of Truth
-1. {persona}: "{moment}" at {stage}
-2. {persona}: "{moment}" at {stage}
-
-### Top Opportunities
-| Opportunity | Persona | Stage | Impact | Effort | Class |
-|---|---|---|---|---|---|
-| {description} | {persona} | {stage} | High | Low | Quick Win |
-
-### Pain Points by Stage
-- **Awareness:** {count} pain points
-- **Consideration:** {count}
-- **Acquisition:** {count}
-- **Service:** {count}
-- **Loyalty:** {count}
-
-### Files Created
-- .shaktra/journeys/{persona_id}-journey.yml
-
-### Next Steps
-1. Address Quick Win opportunities in upcoming PRD/stories
-2. Plan Big Bets for future releases
-3. Use moments of truth to define acceptance criteria
-```
-
----
-
-## Multiple Journeys Per Persona
-
-If a persona has distinct journeys (e.g., onboarding vs daily use):
-- Create separate files: `{persona_id}-onboarding-journey.yml`, `{persona_id}-daily-journey.yml`
-- Each journey has its own scope and stages
-
----
+**8 — Summarize:** journeys table (persona, title, stage/opportunity counts),
+moments of truth, top opportunities with classification, pain points by phase,
+files created.
 
 ## Integration Notes
 
-**PRD:** Journey pain points validate or expand requirements. Moments of truth become acceptance criteria.
-
-**Stories:** Opportunities translate to story candidates. Quick Wins → early sprint stories.
-
-**TPM:** Journey maps inform design doc "Problem Statement" and "Goals" sections.
+- **PRD:** journey pain points validate or expand requirements; moments of
+  truth become acceptance criteria.
+- **Stories:** opportunities are story candidates — Quick Wins → early sprints.
+- **TPM:** journeys inform the design doc's problem statement and goals.
