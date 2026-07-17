@@ -13,6 +13,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from validate_common import (
+    check_no_sidecars,
     ValidationReport,
     check_field_equals,
     check_field_exists,
