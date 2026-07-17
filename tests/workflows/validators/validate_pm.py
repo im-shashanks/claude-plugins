@@ -91,9 +91,14 @@ def validate_pm(project_dir: str) -> ValidationReport:
         for yf in Path(pdir).glob("*.y*ml"):
             data = check_valid_yaml(report, str(yf), f"{yf.name} valid YAML")
             if isinstance(data, dict):
-                ok = "name" in data and "description" in data
-                report.add(f"{yf.name} has required fields (name, description)",
-                           ok, "missing name or description" if not ok else "")
+                # Required fields per shaktra-reference/schemas/persona-schema.md
+                required = ["id", "name", "role", "segment", "goals",
+                            "frustrations", "behaviors", "jobs_to_be_done",
+                            "evidence"]
+                missing = [f for f in required if not data.get(f)]
+                report.add(f"{yf.name} has persona-schema required fields",
+                           not missing,
+                           f"missing: {missing}" if missing else "")
                 persona_found = True
     if persona_found:
         report.add("persona files found with required fields", True)

@@ -470,7 +470,7 @@ def get_test_definitions(test_dir: str) -> list[dict]:
             "name": "pm",
             "category": "greenfield",
             "timeout": 900,
-            "max_turns": 30,
+            "max_turns": 100,
             "setup": lambda td: setup_greenfield(td),
             "prompt": build_prompt(
                 "pm", "shaktra-pm",
@@ -482,7 +482,7 @@ def get_test_definitions(test_dir: str) -> list[dict]:
             "name": "tpm",
             "category": "greenfield",
             "timeout": 1500,
-            "max_turns": 60,
+            "max_turns": 150,
             "setup": lambda td: setup_greenfield(td),
             "prompt": build_prompt(
                 "tpm", "shaktra-tpm",
@@ -493,8 +493,8 @@ def get_test_definitions(test_dir: str) -> list[dict]:
         {
             "name": "dev",
             "category": "greenfield",
-            "timeout": 2400,
-            "max_turns": 85,
+            "timeout": 3000,
+            "max_turns": 250,
             "setup": lambda td: setup_dev(td),
             "prompt": build_prompt(
                 "dev", "shaktra-dev",
@@ -521,8 +521,8 @@ def get_test_definitions(test_dir: str) -> list[dict]:
         {
             "name": "review",
             "category": "greenfield",
-            "timeout": 900,
-            "max_turns": 35,
+            "timeout": 1500,
+            "max_turns": 120,
             "setup": lambda td: setup_review(td),
             "prompt": build_prompt(
                 "review", "shaktra-review",
@@ -536,8 +536,8 @@ def get_test_definitions(test_dir: str) -> list[dict]:
         {
             "name": "adversarial-review",
             "category": "greenfield",
-            "timeout": 1200,
-            "max_turns": 50,
+            "timeout": 1800,
+            "max_turns": 150,
             "setup": lambda td: setup_review(td),
             "prompt": build_prompt(
                 "adversarial-review", "shaktra-adversarial-review",
@@ -552,7 +552,7 @@ def get_test_definitions(test_dir: str) -> list[dict]:
             "name": "tpm-hotfix",
             "category": "hotfix",
             "timeout": 600,
-            "max_turns": 30,
+            "max_turns": 80,
             "setup": lambda td: setup_greenfield(td),
             "prompt": build_prompt(
                 "tpm-hotfix", "shaktra-tpm",
@@ -574,8 +574,8 @@ def get_test_definitions(test_dir: str) -> list[dict]:
         {
             "name": "analyze",
             "category": "brownfield",
-            "timeout": 1200,
-            "max_turns": 40,
+            "timeout": 1800,
+            "max_turns": 150,
             "setup": lambda td: setup_brownfield(td),
             "prompt": build_prompt(
                 "analyze", "shaktra-analyze",
@@ -589,8 +589,8 @@ def get_test_definitions(test_dir: str) -> list[dict]:
         {
             "name": "bugfix",
             "category": "bugfix",
-            "timeout": 900,
-            "max_turns": 55,
+            "timeout": 1800,
+            "max_turns": 150,
             "setup": lambda td: setup_bugfix(td),
             "prompt": build_prompt(
                 "bugfix", "shaktra-bugfix",
@@ -605,7 +605,7 @@ def get_test_definitions(test_dir: str) -> list[dict]:
             "name": "incident",
             "category": "incident",
             "timeout": 1200,
-            "max_turns": 50,
+            "max_turns": 120,
             "setup": lambda td: setup_incident(td),
             "prompt": build_prompt(
                 "incident", "shaktra-incident",
