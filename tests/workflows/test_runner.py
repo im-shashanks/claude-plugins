@@ -219,6 +219,9 @@ def run_test(
 
     env = os.environ.copy()
     env.pop("CLAUDECODE", None)
+    # Workflows run as background tasks; --print kills them after 600s by
+    # default. 0 = wait indefinitely (the per-test timeout still bounds us).
+    env["CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS"] = "0"
 
     cmd = [
         "claude", "--print",
