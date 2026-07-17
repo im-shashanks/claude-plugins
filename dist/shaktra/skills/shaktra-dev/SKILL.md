@@ -72,8 +72,9 @@ poll or start other work on this story meanwhile.
 
 **`status: "complete"`** —
 1. Persist the run: write `{quality_findings: result.findings, observations:
-   result.observations, workflow_run: {script, status: "complete"}, current_phase:
-   "complete"}` as JSON and pipe it to
+   result.observations, briefing: result.briefing, completed_phases:
+   result.completed_phases, workflow_run: {script, status: "complete"},
+   current_phase: "complete"}` as JSON and pipe it to
    `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/shaktra_handoff.py <handoff_path> --merge-json -`
 2. Update sprint state:
    `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/shaktra_sprint.py --complete-story <ID>`

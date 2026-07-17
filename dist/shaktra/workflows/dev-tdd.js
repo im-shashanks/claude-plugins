@@ -38,6 +38,7 @@ function escalate(phase, extra) {
     status: extra.clarification ? 'needs_clarification' : 'blocked',
     phase, ...extra, phases, gates,
     findings: allFindings, observations,
+    briefing: typeof briefing === 'undefined' ? null : briefing,
   }
 }
 
@@ -194,7 +195,7 @@ if (heavyTier && !done.has('quality')) {
   const g = await gate('quality', {
     review_mode: 'COMPREHENSIVE',
     artifact_paths: [a.project_dir],
-    context: `Story ${a.story_id}. Review all code and test files from this story (see handoff summaries in ${a.handoff_path}). ${a.tier === 'large' ? 'Large tier: expanded review — architecture impact, performance, dependency audit, cross-cutting concerns.' : ''} After passing, update the handoff: set current_phase: quality, append "quality" to completed_phases.`,
+    context: `Story ${a.story_id}. Review all code and test files from this story (see handoff summaries in ${a.handoff_path}). ${a.tier === 'large' ? 'Large tier: expanded review — architecture impact, performance, dependency audit, cross-cutting concerns.' : ''}`,
     creator_type: 'shaktra:shaktra-developer',
     briefing,
     phase_label: 'QUALITY',
@@ -258,6 +259,8 @@ return {
   phases, gates,
   findings: allFindings,
   observations,
+  briefing,
+  completed_phases: ['plan'].concat(a.tier !== 'trivial' ? ['tests'] : [], ['code'], heavyTier ? ['quality'] : []),
   memory,
   metrics: { coverage_pct: codeRun?.coverage_pct, test_count: codeRun?.test_count ?? testRun?.test_count },
   report_markdown: report.markdown,
