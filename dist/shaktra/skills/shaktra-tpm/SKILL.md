@@ -25,7 +25,11 @@ to `${CLAUDE_PLUGIN_ROOT}/workflows/tpm-design.js` and/or
 | `sprint` | "plan sprint", "prioritize backlog" | tpm-stories.js (mode sprint) |
 | `close-sprint` | "close/end/finish sprint" | tpm-stories.js (mode close-sprint) |
 
-Ambiguous → ask. Prerequisites (stop with guidance when missing):
+Ambiguous → ask. **Prerequisites are hard stops** — when one is missing, report
+it with the guidance below and END; never fabricate the missing artifact,
+substitute assumptions, or modify workflow scripts to proceed (this applies in
+testing mode too — a prerequisite stop is a correct outcome, not a blocker to
+work around):
 full/design need `.shaktra/prd.md` (→ `/shaktra:pm prd`) and
 `.shaktra/architecture.md`; stories needs a design doc in `.shaktra/designs/`;
 enrich/sprint need stories in `.shaktra/stories/`; close-sprint needs an active

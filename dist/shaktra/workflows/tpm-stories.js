@@ -16,7 +16,7 @@ export const meta = {
 //   p1_threshold, max_attempts,
 //   memory: { dir, retrieval_tier, max_briefing_entries, confidence_threshold } }
 
-const a = args
+const a = typeof args === 'string' ? JSON.parse(args) : args
 const lib = (name) => ({ scriptPath: `${a.plugin_root}/workflows/lib/${name}.js` })
 const S = await workflow(lib('schemas'))
 let observations = []
@@ -29,8 +29,8 @@ async function storyGate(story) {
     gate: 'stories',
     review_mode: 'ARTIFACT_REVIEW',
     artifact_paths: [story.path],
-    reviewer_type: 'shaktra-tpm-quality',
-    creator_type: 'shaktra-scrummaster',
+    reviewer_type: 'shaktra:shaktra-tpm-quality',
+    creator_type: 'shaktra:shaktra-scrummaster',
     context: `Story ${story.id} (${story.tier} tier). Review against the story review checklist, story-schema.md required fields for the tier, and the single-scope rule.`,
     project_dir: a.project_dir,
     handoff_path: null,
@@ -56,7 +56,7 @@ if (a.mode === 'create' || a.mode === 'enrich' || a.mode === 'hotfix') {
       : `Hotfix mode: create ONE trivial-tier story (minimum viable: id, title, description + metadata) for this hotfix: "${a.hotfix_description}". Write it to ${a.stories_dir}/ST-<NNN>.yml (next sequential id). Note in the description that hotfix_coverage_threshold applies.`
   const batch = await agent(
     `${prompt}\nProject: ${a.project_dir}`,
-    { agentType: 'shaktra-scrummaster', schema: S.STORY_BATCH, label: a.mode, phase: 'Stories' },
+    { agentType: 'shaktra:shaktra-scrummaster', schema: S.STORY_BATCH, label: a.mode, phase: 'Stories' },
   )
   if (!batch || !batch.stories.length) {
     return { status: 'blocked', phase: 'stories', reason: 'no_stories_produced', observations }
@@ -87,11 +87,11 @@ if ((a.mode === 'create' || a.mode === 'sprint') && a.sprints_enabled) {
   const [rice, coverage] = await parallel([
     () => agent(
       `RICE prioritization mode: score every story in ${a.stories_dir} with RICE; classify Quick Win / Big Bet / Standard; suggest a sprint goal. Do NOT write sprints.yml — the scrummaster owns it. Return the ranked list in your summary.\nProject: ${a.project_dir}`,
-      { agentType: 'shaktra-product-manager', schema: S.PHASE_RESULT, label: 'rice', phase: 'Sprint' },
+      { agentType: 'shaktra:shaktra-product-manager', schema: S.PHASE_RESULT, label: 'rice', phase: 'Sprint' },
     ),
     a.mode === 'create' && a.prd_path ? () => agent(
       `Requirement coverage mode: map every requirement in ${a.prd_path} to covering stories in ${a.stories_dir}. Report coverage % and gaps in your summary.\nProject: ${a.project_dir}`,
-      { agentType: 'shaktra-product-manager', schema: S.PHASE_RESULT, label: 'coverage', phase: 'Sprint' },
+      { agentType: 'shaktra:shaktra-product-manager', schema: S.PHASE_RESULT, label: 'coverage', phase: 'Sprint' },
     ) : () => Promise.resolve(null),
   ])
   observations = observations.concat(rice?.observations || [], coverage?.observations || [])
@@ -99,7 +99,7 @@ if ((a.mode === 'create' || a.mode === 'sprint') && a.sprints_enabled) {
 
   const allocation = await agent(
     `Sprint allocation: read all stories in ${a.stories_dir} and these RICE results: ${rice?.summary || 'unavailable — order by priority field'}. Sort by dependencies (unblocked first) -> priority -> points, allocate to sprints respecting capacity (default velocity ${a.default_velocity} points, ${a.sprint_duration_weeks}-week sprints; use velocity.average from ${a.sprints_path} when history exists). Write ${a.sprints_path} per sprint-schema.md (migrate the init template shape on first allocation).\nProject: ${a.project_dir}`,
-    { agentType: 'shaktra-scrummaster', schema: S.PHASE_RESULT, label: 'allocate', phase: 'Sprint' },
+    { agentType: 'shaktra:shaktra-scrummaster', schema: S.PHASE_RESULT, label: 'allocate', phase: 'Sprint' },
   )
   observations = observations.concat(allocation?.observations || [])
   sprintSummary = allocation?.summary
@@ -110,7 +110,7 @@ if (a.mode === 'close-sprint') {
   phase('Sprint')
   const close = await agent(
     `Close the current sprint in ${a.sprints_path}: record partial velocity per sprint-schema.md formulas, move incomplete stories back to the backlog, advance to the next sprint if one is planned.\nProject: ${a.project_dir}\nStories: ${a.stories_dir}`,
-    { agentType: 'shaktra-scrummaster', schema: S.PHASE_RESULT, label: 'close-sprint', phase: 'Sprint' },
+    { agentType: 'shaktra:shaktra-scrummaster', schema: S.PHASE_RESULT, label: 'close-sprint', phase: 'Sprint' },
   )
   if (!close || close.status !== 'complete') {
     return { status: 'blocked', phase: 'close-sprint', blockers: close?.blockers, observations }

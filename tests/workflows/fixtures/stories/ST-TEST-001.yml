@@ -104,6 +104,12 @@ logging_rules:
     level: warn
     fields: [email, reason]
     condition: registration rejected
+observability_rules:
+  metrics:
+    - user_registrations_total (counter)
+    - registration_failures_total (counter)
+  traces:
+    - register_user
 metadata:
   story_points: 5
   priority: high

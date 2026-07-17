@@ -34,6 +34,13 @@ from `agents/*.md`; structured returns replace the old guard-token protocol.
    Claude Code expands the variable when the skill loads, so the Workflow call
    receives an absolute path. Child calls use `args.plugin_root` +
    `'/workflows/lib/….js'`.
+7. **Namespaced `agentType`.** Plugin agents register as
+   `shaktra:<frontmatter-name>` (e.g. `shaktra:shaktra-developer`) — the bare
+   frontmatter name does NOT resolve. Every `agentType` literal in these
+   scripts carries the `shaktra:` prefix.
+8. **Args coercion.** Every script binds
+   `const a = typeof args === 'string' ? JSON.parse(args) : args` — defensive
+   against callers passing a JSON-encoded string instead of an object.
 
 ## Conventions
 

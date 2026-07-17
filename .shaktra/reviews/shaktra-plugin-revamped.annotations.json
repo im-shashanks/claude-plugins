@@ -1,0 +1,51 @@
+{
+  "doc": "shaktra-plugin-revamped.html",
+  "complete": true,
+  "annotations": [
+    {
+      "id": "a1-1f2c60",
+      "created": "2026-07-14T02:32:59+00:00",
+      "type": "question_response",
+      "text": "Keep all and compress",
+      "question_id": "q-pm-trim",
+      "section_id": "command-mapping",
+      "quote": null
+    },
+    {
+      "id": "a2-67312f",
+      "created": "2026-07-14T02:34:02+00:00",
+      "type": "question_response",
+      "text": "ok",
+      "question_id": "q-phase-gating",
+      "section_id": "execution-phases",
+      "quote": null
+    },
+    {
+      "id": "a3-cc9d6f",
+      "created": "2026-07-14T02:34:28+00:00",
+      "type": "question_response",
+      "text": "strict no fallback",
+      "question_id": "q-min-version",
+      "section_id": "risks",
+      "quote": null
+    },
+    {
+      "id": "a4-934527",
+      "created": "2026-07-14T02:34:57+00:00",
+      "type": "question_response",
+      "text": "lets base it on E2E tests and real work tests.",
+      "question_id": "q-teams-removal",
+      "section_id": "risks",
+      "quote": null
+    },
+    {
+      "id": "a5-154cfd",
+      "created": "2026-07-14T02:35:07+00:00",
+      "type": "question_response",
+      "text": "add it",
+      "question_id": "q-doc-writer",
+      "section_id": "risks",
+      "quote": null
+    }
+  ]
+}

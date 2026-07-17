@@ -19,7 +19,7 @@ export const meta = {
 //   p1_threshold, max_attempts,
 //   memory: { dir, retrieval_tier, max_briefing_entries, confidence_threshold } }
 
-const a = args
+const a = typeof args === 'string' ? JSON.parse(args) : args
 const lib = (name) => ({ scriptPath: `${a.plugin_root}/workflows/lib/${name}.js` })
 const S = await workflow(lib('schemas'))
 const want = new Set(a.targets)
@@ -32,7 +32,7 @@ const base = `Project: ${a.project_dir}\nProduct context: ${a.context_summary ||
 async function pmStep(name, phaseTitle, prompt) {
   phase(phaseTitle)
   const r = await agent(`${prompt}\n${base}`, {
-    agentType: 'shaktra-product-manager', schema: S.PHASE_RESULT, label: name, phase: phaseTitle,
+    agentType: 'shaktra:shaktra-product-manager', schema: S.PHASE_RESULT, label: name, phase: phaseTitle,
   })
   if (!r || r.status !== 'complete') {
     return { failed: true, escalation: { status: r?.status === 'needs_clarification' ? 'needs_clarification' : 'blocked', phase: name, clarification: r?.clarification, blockers: r?.blockers, phases, gates, observations, artifacts } }
@@ -84,8 +84,8 @@ if (want.has('prd')) {
     gate: 'prd',
     review_mode: 'ARTIFACT_REVIEW',
     artifact_paths: ['.shaktra/prd.md'],
-    reviewer_type: 'shaktra-product-manager',
-    creator_type: 'shaktra-product-manager',
+    reviewer_type: 'shaktra:shaktra-product-manager',
+    creator_type: 'shaktra:shaktra-product-manager',
     context: 'Review the PRD against prd-schema.md validation rules: completeness, testable requirements, persona/journey traceability, scope discipline.',
     project_dir: a.project_dir,
     handoff_path: null,

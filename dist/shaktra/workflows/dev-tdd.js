@@ -18,7 +18,7 @@ export const meta = {
 //   clarifications: {phase: answer}|null,
 //   memory: { dir, retrieval_tier, max_briefing_entries, confidence_threshold } }
 
-const a = args
+const a = typeof args === 'string' ? JSON.parse(args) : args
 const lib = (name) => ({ scriptPath: `${a.plugin_root}/workflows/lib/${name}.js` })
 const S = await workflow(lib('schemas'))
 const done = new Set(a.completed_phases || [])
@@ -54,7 +54,7 @@ async function gate(name, opts) {
     max_attempts: a.max_attempts,
     p1_threshold: a.p1_threshold,
     tier: a.tier,
-    reviewer_type: 'shaktra-sw-quality',
+    reviewer_type: 'shaktra:shaktra-sw-quality',
     context: `Story ${a.story_id} (${a.story_path})`,
     ...opts,
   })
@@ -85,7 +85,7 @@ if (!done.has('plan')) {
   phase('PLAN')
   const plan = await agent(
     `Create the unified implementation + test plan for this story.\n${base}${briefingNote}\nWrite implementation_plan.md to ${a.story_dir}/implementation_plan.md. Update the handoff with plan_summary, set current_phase: plan, and append "plan" to completed_phases. Trivial-tier stories get a minimal plan.`,
-    { agentType: 'shaktra-sw-engineer', schema: S.PHASE_RESULT, label: 'plan', phase: 'PLAN' },
+    { agentType: 'shaktra:shaktra-sw-engineer', schema: S.PHASE_RESULT, label: 'plan', phase: 'PLAN' },
   )
   if (!plan || plan.status !== 'complete') {
     return escalate('plan', { clarification: plan?.clarification, blockers: plan?.blockers, attempts: 1 })
@@ -97,7 +97,7 @@ if (!done.has('plan')) {
     const g = await gate('plan', {
       review_mode: 'PLAN_REVIEW',
       artifact_paths: [`${a.story_dir}/implementation_plan.md`],
-      creator_type: 'shaktra-sw-engineer',
+      creator_type: 'shaktra:shaktra-sw-engineer',
       phase_label: 'PLAN',
     })
     if (!g.passed) return escalate('plan', { gate: g, attempts: g.attempts })
@@ -111,7 +111,7 @@ if (!a.branch_exists) {
   phase('PLAN')
   const branch = await agent(
     `Branch mode: create the feature branch for this story following the feat/fix/chore naming convention. Do not commit anything.\n${base}`,
-    { agentType: 'shaktra-developer', schema: S.PHASE_RESULT, label: 'branch', phase: 'PLAN' },
+    { agentType: 'shaktra:shaktra-developer', schema: S.PHASE_RESULT, label: 'branch', phase: 'PLAN' },
   )
   if (!branch || branch.status !== 'complete') {
     return escalate('branch', { clarification: branch?.clarification, blockers: branch?.blockers, attempts: 1 })
@@ -128,7 +128,7 @@ if (a.tier !== 'trivial' && !done.has('tests')) {
     attempt++
     testRun = await agent(
       `RED phase: write failing tests per the implementation plan (${a.story_dir}/implementation_plan.md).\n${base}\nRun the suite and verify every test fails for a VALID red reason (missing implementation: ImportError/AttributeError/NotImplementedError or equivalents). Invalid reasons (SyntaxError/TypeError/NameError or equivalents) mean the test itself is broken — fix and re-run before returning. Update the handoff with test_summary, set current_phase: tests, append "tests" to completed_phases.${attempt > 1 ? ' Previous attempt did not reach a valid RED state — fix that now: ' + JSON.stringify(testRun?.failing_tests || testRun) : ''}`,
-      { agentType: 'shaktra-test-agent', schema: S.TEST_RUN_RESULT, label: `red#${attempt}`, phase: 'RED' },
+      { agentType: 'shaktra:shaktra-test-agent', schema: S.TEST_RUN_RESULT, label: `red#${attempt}`, phase: 'RED' },
     )
     absorb(testRun)
     const validRed = testRun && testRun.status === 'red'
@@ -144,7 +144,7 @@ if (a.tier !== 'trivial' && !done.has('tests')) {
   const g = await gate('test', {
     review_mode: 'QUICK_CHECK',
     artifact_paths: testRun.test_files || [a.story_dir],
-    creator_type: 'shaktra-test-agent',
+    creator_type: 'shaktra:shaktra-test-agent',
     phase_label: 'RED',
   })
   if (!g.passed) return escalate('tests', { gate: g, attempts: g.attempts })
@@ -161,7 +161,7 @@ if (!done.has('code')) {
     attempt++
     codeRun = await agent(
       `GREEN phase (implement mode): make all tests pass following implementation_order from the plan (${a.story_dir}/implementation_plan.md).\n${base}${briefingNote}\nRun the full suite and the coverage tool. Coverage must reach ${a.coverage_threshold}% for this tier. Stage all changes — do not commit. Update the handoff with code_summary (all_tests_green, coverage, files_modified, deviations), set current_phase: code, append "code" to completed_phases.${attempt > 1 ? ' Previous attempt failed the green/coverage gate: ' + JSON.stringify({ status: codeRun?.status, coverage: codeRun?.coverage_pct }) : ''}`,
-      { agentType: 'shaktra-developer', schema: S.TEST_RUN_RESULT, label: `green#${attempt}`, phase: 'GREEN' },
+      { agentType: 'shaktra:shaktra-developer', schema: S.TEST_RUN_RESULT, label: `green#${attempt}`, phase: 'GREEN' },
     )
     absorb(codeRun)
     const green = codeRun && codeRun.status === 'green'
@@ -180,7 +180,7 @@ if (!done.has('code')) {
     review_mode: 'QUICK_CHECK',
     artifact_paths: codeRun.test_files && codeRun.test_files.length ? codeRun.test_files : [a.project_dir],
     context: `Story ${a.story_id}. Review the files listed in code_summary.files_modified in ${a.handoff_path}.`,
-    creator_type: 'shaktra-developer',
+    creator_type: 'shaktra:shaktra-developer',
     phase_label: 'GREEN',
   })
   if (!g.passed) return escalate('code', { gate: g, attempts: g.attempts })
@@ -195,7 +195,7 @@ if (heavyTier && !done.has('quality')) {
     review_mode: 'COMPREHENSIVE',
     artifact_paths: [a.project_dir],
     context: `Story ${a.story_id}. Review all code and test files from this story (see handoff summaries in ${a.handoff_path}). ${a.tier === 'large' ? 'Large tier: expanded review — architecture impact, performance, dependency audit, cross-cutting concerns.' : ''} After passing, update the handoff: set current_phase: quality, append "quality" to completed_phases.`,
-    creator_type: 'shaktra-developer',
+    creator_type: 'shaktra:shaktra-developer',
     briefing,
     phase_label: 'QUALITY',
   })
@@ -211,7 +211,7 @@ if (heavyTier && !done.has('quality')) {
     log(`Consistency gate: ${missing.length} briefing entr${missing.length > 1 ? 'ies' : 'y'} unverified — dispatching sw-quality`)
     const extra = await agent(
       `Consistency check pass. These memory briefing entries were never verified against the story's code: ${JSON.stringify(missing)}. Full briefing: ${JSON.stringify(briefing)}.\n${base}\nVerify each listed entry id against the implemented code and return one consistency-check observation per id (type: "consistency-check", principle_id: the entry id). You are read-only.`,
-      { agentType: 'shaktra-sw-quality', schema: S.QUALITY_VERDICT, label: `consistency#${i + 1}`, phase: 'QUALITY' },
+      { agentType: 'shaktra:shaktra-sw-quality', schema: S.QUALITY_VERDICT, label: `consistency#${i + 1}`, phase: 'QUALITY' },
     )
     observations = observations.concat(extra?.observations || [])
     missing = briefingIds.filter((id) =>

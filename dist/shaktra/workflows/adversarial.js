@@ -14,7 +14,7 @@ export const meta = {
 //   max_adversarial_tests, test_persistence, p1_threshold,
 //   memory: { dir, retrieval_tier, max_briefing_entries, confidence_threshold } }
 
-const a = args
+const a = typeof args === 'string' ? JSON.parse(args) : args
 const lib = (name) => ({ scriptPath: `${a.plugin_root}/workflows/lib/${name}.js` })
 const S = await workflow(lib('schemas'))
 const subject = a.mode === 'pr-adversarial' ? `PR #${a.pr_number}` : `story ${a.story_id}`
@@ -29,7 +29,7 @@ const contract = await agent(
 Project: ${a.project_dir}
 Change source: ${source}
 Extract: changed_functions (file, function, line range, modified|added), acceptance criteria, invariants with verifying tests, external dependencies (database/api/file_io/queue/cache), test_files, and a runnable test_command scoped to those files (framework from .shaktra/settings.yml project.test_framework). Return it as JSON in your summary field; list test_files in artifacts. Status "blocked" only if the change set cannot be determined.`,
-  { agentType: 'shaktra-adversary', schema: S.PHASE_RESULT, label: 'contract', phase: 'Contract' },
+  { agentType: 'shaktra:shaktra-adversary', schema: S.PHASE_RESULT, label: 'contract', phase: 'Contract' },
 )
 if (!contract || contract.status !== 'complete') {
   return { status: 'blocked', phase: 'contract', blockers: contract?.blockers, findings: [], observations: [] }
@@ -54,7 +54,7 @@ if (testFiles.length) {
     `Mutation testing for ${subject}. Behavior contract: ${contract.summary}
 Project: ${a.project_dir}
 Follow mutation-strategy.md: for each changed function generate up to ${a.max_mutations_per_function} mutations, apply ONE at a time, run the contract's test_command (timeout ${a.mutation_timeout}s per run), record killed/survived, and RESTORE the original source after each mutation. When finished, verify with git status/diff that every source file is byte-identical to its pre-mutation state — restoring the working tree is mandatory. Score = killed / total * 100. Each surviving mutant means the tests missed a behavior — record it with why_survived.`,
-    { agentType: 'shaktra-adversary', schema: S.ADVERSARIAL_VERDICT, label: 'mutation', phase: 'Mutation' },
+    { agentType: 'shaktra:shaktra-adversary', schema: S.ADVERSARIAL_VERDICT, label: 'mutation', phase: 'Mutation' },
   )
   if (mutation) {
     findings = findings.concat((mutation.findings || []).map((f) => ({ ...f, gate: 'adversarial' })))
@@ -62,7 +62,7 @@ Follow mutation-strategy.md: for each changed function generate up to ${a.max_mu
   // Safety gate between phases: source tree must be clean of mutation leftovers.
   const clean = await agent(
     `Verify the working tree has no leftover mutations: run git status and git diff in ${a.project_dir}. If any source file still carries a mutation from mutation testing, restore it (git checkout -- <file>) and report what you restored. Status "complete" when the tree is verified clean of mutation artifacts, "blocked" if you cannot restore it.`,
-    { agentType: 'shaktra-adversary', schema: S.PHASE_RESULT, label: 'restore-check', phase: 'Mutation' },
+    { agentType: 'shaktra:shaktra-adversary', schema: S.PHASE_RESULT, label: 'restore-check', phase: 'Mutation' },
   )
   if (!clean || clean.status !== 'complete') {
     return { status: 'blocked', phase: 'mutation', reason: 'source_tree_not_restored', blockers: clean?.blockers, findings, observations }
@@ -79,11 +79,11 @@ Cap generated tests at ${a.max_adversarial_tests}. Test persistence policy "${a.
 const probes = await parallel([
   () => agent(
     `Input & boundary probing for ${subject}. Follow probe-strategies.md input/boundary sections: malformed inputs, boundary values, type confusion, injection payloads against the changed functions. RUN the probes as tests. ${probeShared}`,
-    { agentType: 'shaktra-adversary', schema: S.ADVERSARIAL_VERDICT, label: 'probes:input', phase: 'Probes' },
+    { agentType: 'shaktra:shaktra-adversary', schema: S.ADVERSARIAL_VERDICT, label: 'probes:input', phase: 'Probes' },
   ),
   () => agent(
     `Fault & resilience probing for ${subject}. Follow probe-strategies.md fault-injection sections: dependency failures, timeouts, partial writes, resource exhaustion, concurrent access against the contract's dependencies. RUN the probes as tests. ${probeShared}`,
-    { agentType: 'shaktra-adversary', schema: S.ADVERSARIAL_VERDICT, label: 'probes:fault', phase: 'Probes' },
+    { agentType: 'shaktra:shaktra-adversary', schema: S.ADVERSARIAL_VERDICT, label: 'probes:fault', phase: 'Probes' },
   ),
 ])
 let blindSpots = mutation?.blind_spots || []

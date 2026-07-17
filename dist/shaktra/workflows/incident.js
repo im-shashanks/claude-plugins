@@ -13,7 +13,7 @@ export const meta = {
 //   incident_confidence_multiplier, action_item_default_priority,
 //   memory: { dir, retrieval_tier, max_briefing_entries, confidence_threshold } }
 
-const a = args
+const a = typeof args === 'string' ? JSON.parse(args) : args
 const lib = (name) => ({ scriptPath: `${a.plugin_root}/workflows/lib/${name}.js` })
 const S = await workflow(lib('schemas'))
 
@@ -43,7 +43,7 @@ Handoff: ${a.handoff_path}
 Project: ${a.project_dir}
 Memory briefing: ${JSON.stringify(briefing)}
 Write all artifacts to ${a.incident_dir}/ following incident-schema.md. Default action-item priority: ${a.action_item_default_priority}. Return the timeline, root cause, contributing factors, detection gaps, action items, and artifact paths. Return non-routine insights as in-band observations — incident insights are high-value for anti-pattern detection.`,
-  { agentType: 'shaktra-incident-analyst', schema: S.INCIDENT_ANALYSIS, label: a.intent, phase: 'Analysis' },
+  { agentType: 'shaktra:shaktra-incident-analyst', schema: S.INCIDENT_ANALYSIS, label: a.intent, phase: 'Analysis' },
 )
 if (!analysis) {
   return { status: 'blocked', phase: 'analysis', reason: 'analyst_error', observations: [] }

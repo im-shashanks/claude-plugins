@@ -13,7 +13,7 @@ export const meta = {
 //   stories_dir,
 //   memory: { dir, retrieval_tier, max_briefing_entries, confidence_threshold } }
 
-const a = args
+const a = typeof args === 'string' ? JSON.parse(args) : args
 const lib = (name) => ({ scriptPath: `${a.plugin_root}/workflows/lib/${name}.js` })
 const S = await workflow(lib('schemas'))
 
@@ -36,7 +36,7 @@ Project: ${a.project_dir}
 Memory briefing: ${JSON.stringify(briefing)}
 Produce: (1) the diagnosis artifact at ${a.stories_dir}/diagnosis-<bug-id>.yml; (2) a story draft with scope: bug_fix at ${a.stories_dir}/ST-<NNN>.yml (next sequential id) whose test_specs include the reproduction test that must fail before the fix; set story_path in your result. Report root cause with evidence, the fix approach, affected files, confidence, and — if the same defect pattern exists elsewhere — list each blast-radius location as an observation (type "blast-radius", text describing file and needed change).
 If you cannot reproduce or establish a root cause, set confidence "low" and describe what you attempted in evidence — never invent a root cause.`,
-  { agentType: 'shaktra-bug-diagnostician', schema: S.DIAGNOSIS_RESULT, label: 'diagnose', phase: 'Diagnose' },
+  { agentType: 'shaktra:shaktra-bug-diagnostician', schema: S.DIAGNOSIS_RESULT, label: 'diagnose', phase: 'Diagnose' },
 )
 
 if (!diagnosis) {

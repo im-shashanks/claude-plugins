@@ -15,7 +15,7 @@ export const meta = {
 //   summary_token_budget,           // settings.analysis.summary_token_budget
 //   memory: { dir, retrieval_tier, max_briefing_entries, confidence_threshold } }
 
-const a = args
+const a = typeof args === 'string' ? JSON.parse(args) : args
 const lib = (name) => ({ scriptPath: `${a.plugin_root}/workflows/lib/${name}.js` })
 const S = await workflow(lib('schemas'))
 
@@ -38,7 +38,7 @@ if (a.mode === 'debt-strategy' || a.mode === 'dependency-audit') {
     : { input: 'dependencies.yml', guide: 'dependency-audit.md', out: 'dependency-audit.yml' }
   const r = await agent(
     `${a.mode} mode. Read ${a.analysis_dir}/${cfg.input} and follow ${a.skill_dir}/${cfg.guide} for categorization, scoring, and story generation rules. Write ${a.analysis_dir}/${cfg.out} per its schema.\nProject: ${a.project_dir}`,
-    { agentType: 'shaktra-cba-analyzer', schema: S.ANALYSIS_DIMENSION_RESULT, label: a.mode, phase: 'Dimensions' },
+    { agentType: 'shaktra:shaktra-cba-analyzer', schema: S.ANALYSIS_DIMENSION_RESULT, label: a.mode, phase: 'Dimensions' },
   )
   return {
     status: r && r.status === 'complete' ? 'complete' : 'blocked',
@@ -57,7 +57,7 @@ if (!a.stage1_complete) {
 (2) write ${a.analysis_dir}/overview.yml: project identity, repository structure, build system, tech stack, entry points — starting with a self-contained summary: section (~300 tokens);
 (3) update ${a.analysis_dir}/manifest.yml stage_1 status per analysis-manifest-schema.md.
 Every entry must come from actual tool output — never guess.`,
-    { agentType: 'shaktra-cba-analyzer', schema: S.PHASE_RESULT, label: 'stage1', phase: 'Pre-analysis' },
+    { agentType: 'shaktra:shaktra-cba-analyzer', schema: S.PHASE_RESULT, label: 'stage1', phase: 'Pre-analysis' },
   )
   if (!stage1 || stage1.status !== 'complete') {
     return { status: 'blocked', phase: 'stage1', blockers: stage1?.blockers, observations: [] }
@@ -76,7 +76,7 @@ INPUTS (read first): ${a.analysis_dir}/static.yml (ground truth), ${a.analysis_d
 SPECIFICATION: read ${a.skill_dir}/${d.spec}, find the ${id} section, follow its steps, evidence requirements, and output structure exactly.
 OUTPUT: write ${a.analysis_dir}/${d.file} matching its schema in ${a.skill_dir}/analysis-output-schemas.md — the file MUST begin with a self-contained summary: section (budget ~${a.summary_token_budget} tokens). Then update ${a.analysis_dir}/manifest.yml for ${id} only.
 RULES: analyze ALL files in static.yml's inventory across multiple directories; every finding cites file/line/pattern evidence you verified exists; code snippets are copied, never generated; report absence rather than guessing; actively hunt cross-file duplication and inconsistent handling of the same concern; canonical examples are 10-40 lines of real code; note dimension ${id} in your result.`,
-    { agentType: 'shaktra-cba-analyzer', schema: S.ANALYSIS_DIMENSION_RESULT, label: id, phase: 'Dimensions' },
+    { agentType: 'shaktra:shaktra-cba-analyzer', schema: S.ANALYSIS_DIMENSION_RESULT, label: id, phase: 'Dimensions' },
   )
 }))
 const dims = results.map((r, i) => ({ id: requested[i], ...(r || { status: 'error', summary: 'agent failed' }) }))
@@ -93,7 +93,7 @@ const consolidation = await agent(
 (4) DIAGRAMS: generate a Mermaid module-dependency diagram from structure.yml into its diagrams: key.
 (5) MANIFEST: set completed dimensions to complete, record timestamp and execution_mode: workflow.
 (6) ARCHITECTURE: report structure.yml's detected patterns and consistency in your summary (detected style + consistency level) — the orchestrator decides settings updates.`,
-  { agentType: 'shaktra-cba-analyzer', schema: S.PHASE_RESULT, label: 'consolidate', phase: 'Consolidate' },
+  { agentType: 'shaktra:shaktra-cba-analyzer', schema: S.PHASE_RESULT, label: 'consolidate', phase: 'Consolidate' },
 )
 let observations = consolidation?.observations || []
 

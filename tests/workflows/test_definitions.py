@@ -13,6 +13,8 @@ import os
 import shutil
 from pathlib import Path
 
+import yaml
+
 from test_runner import VALIDATORS_DIR, build_prompt, build_smoke_prompt
 
 FIXTURES_DIR = Path(__file__).resolve().parent / "fixtures"
@@ -29,6 +31,7 @@ _TEST_OVERRIDES = """
 This is an automated test run. The following overrides apply:
 
 ### Workflow Constraints
+- **Missing-prerequisite stops are CORRECT behavior.** If a skill reports a missing prerequisite (no PRD, no design doc, no settings, no diagnosis), log it, print the verdict the validator expects, and END. Never fabricate the missing artifact, patch plugin files, or copy/modify workflow scripts to force progress.
 - **Quality review loops: 1 iteration maximum.** After the first review+fix pass, proceed to the next workflow step regardless of remaining findings.
 - **Story creation: 2 stories maximum.** Create only 2 stories (pick the 2 most representative). This is sufficient to prove the workflow works.
 - **Sprint planning: 1 sprint only.**
@@ -435,8 +438,18 @@ def get_test_definitions(test_dir: str) -> list[dict]:
             "timeout": 180,
             "max_turns": 10,
             "setup": lambda td: setup_greenfield(td),
-            "prompt": build_smoke_prompt("workflow", "shaktra-workflow")
-            + "\n\nWe need to add user authentication to our app.",
+            "prompt": (
+                'You are an automated test runner for the Shaktra workflow ROUTER.\n'
+                'STEP 1: Print "[TEST:workflow] Starting smoke test..."\n'
+                'STEP 2: Invoke Skill("shaktra-workflow") with the request: '
+                '"We need to add user authentication to our app."\n'
+                'STEP 3: This smoke test verifies ROUTING ONLY. The moment the router '
+                'announces its route decision (it should route to /shaktra:tpm for '
+                'feature-planning intent), print the verdict — do NOT execute the '
+                'routed planning pipeline.\n'
+                '  [TEST:workflow] VERDICT: PASS   (router chose /shaktra:tpm)\n'
+                '  [TEST:workflow] VERDICT: FAIL -- <reason>   (router errored or chose another route)'
+            ),
         },
         # =================================================================
         # Greenfield tests (standalone, own temp dir each)

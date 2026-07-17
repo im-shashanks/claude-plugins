@@ -15,7 +15,7 @@ export const meta = {
 //   gap_answers: {question: answer}|null,         // user answers on re-invocation
 //   memory: { dir, retrieval_tier, max_briefing_entries, confidence_threshold } }
 
-const a = args
+const a = typeof args === 'string' ? JSON.parse(args) : args
 const lib = (name) => ({ scriptPath: `${a.plugin_root}/workflows/lib/${name}.js` })
 const S = await workflow(lib('schemas'))
 let observations = []
@@ -33,7 +33,7 @@ for (let round = 1; round <= 3; round++) {
 ${base}
 Gap answers so far: ${Object.keys(gapAnswers).length ? JSON.stringify(gapAnswers) : 'none — first pass'}
 Follow your process: gather context, run gap analysis, then either write the design doc to ${a.design_path} (status "complete", per design-doc-schema.md) or — if requirement gaps block the design — return status "blocked" with each open question as one entry in blockers.`,
-    { agentType: 'shaktra-architect', schema: S.PHASE_RESULT, label: `design#${round}`, phase: 'Design' },
+    { agentType: 'shaktra:shaktra-architect', schema: S.PHASE_RESULT, label: `design#${round}`, phase: 'Design' },
   )
   if (!design) return { status: 'blocked', phase: 'design', reason: 'architect_error', observations }
   observations = observations.concat(design.observations || [])
@@ -51,7 +51,7 @@ Follow your process: gather context, run gap analysis, then either write the des
 ${JSON.stringify(gaps)}
 ${base}
 Search priority: PRD -> architecture doc -> .shaktra/memory/principles.yml -> anti-patterns.yml. Return status "complete" with a JSON object {question: answer} in your summary for everything you can ground in the sources. Any question that CANNOT be answered from the sources goes into blockers verbatim — never invent an answer.`,
-    { agentType: 'shaktra-product-manager', schema: S.PHASE_RESULT, label: `gaps#${round}`, phase: 'Design' },
+    { agentType: 'shaktra:shaktra-product-manager', schema: S.PHASE_RESULT, label: `gaps#${round}`, phase: 'Design' },
   )
   observations = observations.concat(pm?.observations || [])
   if (pm?.blockers?.length) {
@@ -71,8 +71,8 @@ const g = await workflow(lib('quality-loop'), {
   gate: 'design',
   review_mode: 'DESIGN_REVIEW',
   artifact_paths: [a.design_path],
-  reviewer_type: 'shaktra-tpm-quality',
-  creator_type: 'shaktra-architect',
+  reviewer_type: 'shaktra:shaktra-tpm-quality',
+  creator_type: 'shaktra:shaktra-architect',
   context: `Design doc for ${a.project_name}. Review against the design review checklist and design-doc-schema.md. Source PRD: ${a.prd_path}.`,
   project_dir: a.project_dir,
   handoff_path: null,

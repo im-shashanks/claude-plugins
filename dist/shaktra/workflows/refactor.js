@@ -18,7 +18,7 @@ export const meta = {
 //   completed_phases: [..],
 //   memory: { dir, retrieval_tier, max_briefing_entries, confidence_threshold } }
 
-const a = args
+const a = typeof args === 'string' ? JSON.parse(args) : args
 const lib = (name) => ({ scriptPath: `${a.plugin_root}/workflows/lib/${name}.js` })
 const S = await workflow(lib('schemas'))
 const done = new Set(a.completed_phases || [])
@@ -43,7 +43,7 @@ if (!done.has('assess')) {
   phase('ASSESS')
   assessment = await agent(
     `Refactoring-plan mode: assess the target for code smells using refactoring-smells.md. For each smell record id, location, severity; propose a transformation from refactoring-transforms.md; order transforms by risk (lowest first). Measure baseline metrics (test count, coverage, files in scope). Write the assessment (smells_detected, proposed_transforms, baseline_metrics) into ${a.handoff_path}, set current_phase: assess, append "assess" to completed_phases.\n${base}\nSummarize smells and transforms in your summary field; list transform ids in artifacts.`,
-    { agentType: 'shaktra-sw-engineer', schema: S.PHASE_RESULT, label: 'assess', phase: 'ASSESS' },
+    { agentType: 'shaktra:shaktra-sw-engineer', schema: S.PHASE_RESULT, label: 'assess', phase: 'ASSESS' },
   )
   if (!assessment || assessment.status !== 'complete') {
     return escalate('assess', { clarification: assessment?.clarification, blockers: assessment?.blockers, attempts: 1 })
@@ -62,7 +62,7 @@ if (!done.has('fortify')) {
   phase('FORTIFY')
   const fortify = await agent(
     `Characterization mode: run the existing tests and measure coverage for the target files. If coverage < ${a.safety_threshold}%, write characterization tests (capture CURRENT behavior — public API, boundaries, side effects; max ${a.max_characterization_tests}). Re-run and re-measure. Update ${a.handoff_path} with the fortify summary (coverage before/after, tests added, safety_threshold_met), set current_phase: fortify, append "fortify" to completed_phases.\n${base}\nIn your final message: status "complete" if coverage >= ${a.safety_threshold}%, else status "blocked" with the achieved coverage in blockers.`,
-    { agentType: 'shaktra-test-agent', schema: S.PHASE_RESULT, label: 'fortify', phase: 'FORTIFY' },
+    { agentType: 'shaktra:shaktra-test-agent', schema: S.PHASE_RESULT, label: 'fortify', phase: 'FORTIFY' },
   )
   absorb(fortify)
   if (!fortify || (fortify.status !== 'complete' && !a.force_mode)) {
@@ -82,7 +82,7 @@ if (!done.has('transform')) {
     : 'Apply every proposed transform from the assessment in order.'
   const transform = await agent(
     `Refactor mode: ${scope} Atomic protocol per transform: (1) verify all tests pass, (2) apply ONE transformation per refactoring-transforms.md, (3) run all tests, (4) pass -> log "applied" in the handoff transforms list; fail -> REVERT the files (git checkout), verify tests pass again, log "reverted" with the reason. Never batch transforms. Update ${a.handoff_path}: set current_phase: transform, append "transform" to completed_phases.\n${base}\nSummarize applied/reverted counts; status "blocked" only if NO transform could be applied.`,
-    { agentType: 'shaktra-developer', schema: S.PHASE_RESULT, label: 'transform', phase: 'TRANSFORM' },
+    { agentType: 'shaktra:shaktra-developer', schema: S.PHASE_RESULT, label: 'transform', phase: 'TRANSFORM' },
   )
   absorb(transform)
   if (!transform || transform.status === 'blocked') {
@@ -100,8 +100,8 @@ const verifyGate = await workflow(lib('quality-loop'), {
   gate: 'refactor',
   review_mode: a.tier === 'structural' ? 'COMPREHENSIVE' : 'QUICK_CHECK',
   artifact_paths: [a.target],
-  reviewer_type: 'shaktra-sw-quality',
-  creator_type: 'shaktra-developer',
+  reviewer_type: 'shaktra:shaktra-sw-quality',
+  creator_type: 'shaktra:shaktra-developer',
   context: `REFACTOR_VERIFY for ${a.target}: (1) full suite passes, (2) coverage >= baseline in ${a.handoff_path}, (3) no new P0/P1, (4) smell count reduced vs assessment, (5) metrics improved or neutral.${a.tier === 'structural' ? ' Structural tier: also verify architecture boundaries, no new circular dependencies, naming consistency.' : ''} A behavior regression or coverage decrease is a P0 finding.`,
   project_dir: a.project_dir,
   handoff_path: a.handoff_path,
