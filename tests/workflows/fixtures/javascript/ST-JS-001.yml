@@ -1,0 +1,27 @@
+id: ST-JS-001
+title: Add an email-validation utility
+description: >
+  Provide isValidEmail(email) that returns true only for a syntactically
+  valid email (exactly one @, a non-empty local part, a domain containing at
+  least one dot, and no whitespace), false otherwise.
+tier: small
+scope: feature
+files:
+  - src/email.js
+  - tests/email.test.js
+acceptance_criteria:
+  - id: AC-1
+    given: a syntactically valid email like "a@b.com"
+    when: isValidEmail is called
+    then: returns true
+    priority: must
+  - id: AC-2
+    given: an invalid email (no @, no dot in domain, whitespace, or empty)
+    when: isValidEmail is called
+    then: returns false
+    priority: must
+metadata:
+  story_points: 2
+  priority: medium
+  blocked_by: []
+  status: planned

@@ -1,0 +1,19 @@
+id: ST-SP-002
+title: Sprint candidate — rate-limit login attempts
+description: A small, self-contained feature to throttle repeated failed logins.
+tier: small
+scope: security
+files:
+  - src/services/rate_limiter.py
+  - tests/test_rate_limiter.py
+acceptance_criteria:
+  - id: AC-1
+    given: more than N failed logins in the window
+    when: another login is attempted
+    then: the attempt is rejected with 429
+    priority: must
+metadata:
+  story_points: 5
+  priority: high
+  blocked_by: []
+  status: planned

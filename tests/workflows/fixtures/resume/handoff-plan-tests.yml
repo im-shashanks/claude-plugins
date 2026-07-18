@@ -1,0 +1,29 @@
+story_id: ST-RESUME-001
+tier: small
+current_phase: tests
+completed_phases:
+  - plan
+  - tests
+quality_findings: []
+memory_captured: false
+plan_summary:
+  components:
+    - name: slugify
+      file: src/slugify.py
+      responsibility: Convert arbitrary text into a URL-safe slug
+  test_plan:
+    test_count: 4
+    test_types: [unit]
+    mocks_needed: []
+    edge_cases: [empty string, repeated separators, leading/trailing separators]
+  implementation_order:
+    - src/slugify.py
+test_summary:
+  all_tests_red: true
+  test_count: 4
+  test_files:
+    - tests/test_slugify.py
+briefing:
+  relevant_principles: []
+  relevant_anti_patterns: []
+  relevant_procedures: []

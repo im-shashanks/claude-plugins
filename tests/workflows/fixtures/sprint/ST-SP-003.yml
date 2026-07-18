@@ -1,0 +1,19 @@
+id: ST-SP-003
+title: Sprint candidate — logout endpoint
+description: A small, self-contained feature to invalidate the current session.
+tier: small
+scope: feature
+files:
+  - src/api/logout_routes.py
+  - tests/test_logout.py
+acceptance_criteria:
+  - id: AC-1
+    given: an authenticated session
+    when: POST /auth/logout is called
+    then: the session is invalidated and 204 returned
+    priority: must
+metadata:
+  story_points: 3
+  priority: medium
+  blocked_by: []
+  status: planned

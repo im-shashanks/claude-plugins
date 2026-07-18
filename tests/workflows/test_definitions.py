@@ -273,6 +273,142 @@ def setup_review(test_dir: Path) -> None:
                 shutil.copy2(item, dest)
 
 
+def setup_refactor(test_dir: Path) -> None:
+    """Refactor setup: greenfield .shaktra + a smelly-but-tested module."""
+    setup_git_init(test_dir)
+    setup_shaktra_from_templates(test_dir, _greenfield_settings())
+    src = FIXTURES_DIR / "refactor"
+    for sub in ("src", "tests"):
+        s = src / sub
+        if s.exists():
+            shutil.copytree(s, test_dir / sub, dirs_exist_ok=True)
+    _append_test_overrides(test_dir / "CLAUDE.md")
+
+
+def setup_dev_resume(test_dir: Path) -> None:
+    """Dev resume setup: a small story with a handoff already through plan+tests.
+
+    Verifies dev-tdd.js resumes at GREEN (skips the completed plan/tests phases)
+    rather than re-running them. Self-contained (a small slugify story) so GREEN
+    is fast and deterministic.
+    """
+    setup_git_init(test_dir)
+    setup_shaktra_from_templates(test_dir, _greenfield_settings())
+    shaktra = test_dir / ".shaktra"
+    res = FIXTURES_DIR / "resume"
+    story_dir = shaktra / "stories" / "ST-RESUME-001"
+    story_dir.mkdir(parents=True, exist_ok=True)
+    if (res / "ST-RESUME-001.yml").exists():
+        shutil.copy2(res / "ST-RESUME-001.yml", shaktra / "stories" / "ST-RESUME-001.yml")
+    if (res / "handoff-plan-tests.yml").exists():
+        shutil.copy2(res / "handoff-plan-tests.yml", story_dir / "handoff.yml")
+    if (res / "implementation_plan.md").exists():
+        shutil.copy2(res / "implementation_plan.md", story_dir / "implementation_plan.md")
+    if (res / "tests").exists():
+        shutil.copytree(res / "tests", test_dir / "tests", dirs_exist_ok=True)
+    _append_test_overrides(test_dir / "CLAUDE.md")
+
+
+def setup_javascript_dev(test_dir: Path) -> None:
+    """Non-Python dev setup: JavaScript project using Node's built-in test
+    runner (node --test) — zero install, so the pipeline runs in the sandbox."""
+    setup_git_init(test_dir)
+    setup_shaktra_from_templates(test_dir, {
+        "project": {
+            "name": "JsProject", "type": "greenfield", "language": "javascript",
+            "architecture": "layered", "test_framework": "node:test",
+            "coverage_tool": "node --test --experimental-test-coverage",
+            "package_manager": "npm",
+        }
+    })
+    shaktra = test_dir / ".shaktra"
+    js = FIXTURES_DIR / "javascript"
+    if (js / "ST-JS-001.yml").exists():
+        shutil.copy2(js / "ST-JS-001.yml", shaktra / "stories" / "ST-JS-001.yml")
+    if (js / "package.json").exists():
+        shutil.copy2(js / "package.json", test_dir / "package.json")
+    _append_test_overrides(test_dir / "CLAUDE.md")
+
+
+def setup_tpm_enrich(test_dir: Path) -> None:
+    """TPM enrich setup: greenfield + a sparse medium story to enrich."""
+    setup_greenfield(test_dir)
+    shaktra = test_dir / ".shaktra"
+    src = FIXTURES_DIR / "stories" / "enrich" / "ST-SPARSE-ENRICH.yml"
+    if src.exists():
+        shutil.copy2(src, shaktra / "stories" / "ST-SPARSE-ENRICH.yml")
+
+
+def setup_tpm_sprint(test_dir: Path) -> None:
+    """TPM sprint setup: greenfield + several complete stories to allocate."""
+    setup_greenfield(test_dir)
+    shaktra = test_dir / ".shaktra"
+    src = FIXTURES_DIR / "sprint"
+    if src.exists():
+        for f in src.glob("ST-*.yml"):
+            shutil.copy2(f, shaktra / "stories" / f.name)
+
+
+def setup_analyze_targeted(test_dir: Path) -> None:
+    """Analyze targeted setup: brownfield sample + a story-quality dimension request."""
+    setup_git_init(test_dir)
+    src_proj = FIXTURES_DIR / "brownfield" / "sample-project"
+    if src_proj.exists():
+        for item in src_proj.iterdir():
+            dest = test_dir / item.name
+            if item.is_dir():
+                shutil.copytree(item, dest, dirs_exist_ok=True)
+            else:
+                shutil.copy2(item, dest)
+    setup_shaktra_from_templates(test_dir, {
+        "project": {
+            "name": "BrownfieldTest", "type": "brownfield", "language": "python",
+            "architecture": "layered", "test_framework": "pytest",
+            "coverage_tool": "coverage", "package_manager": "pip",
+        }
+    })
+    _append_test_overrides(test_dir / "CLAUDE.md")
+
+
+def setup_pm_prioritize(test_dir: Path) -> None:
+    """PM prioritize setup: greenfield + stories to RICE-rank."""
+    setup_greenfield(test_dir)
+    shaktra = test_dir / ".shaktra"
+    src = FIXTURES_DIR / "sprint"
+    if src.exists():
+        for f in src.glob("ST-*.yml"):
+            shutil.copy2(f, shaktra / "stories" / f.name)
+
+
+def setup_incident_runbook(test_dir: Path) -> None:
+    """Incident runbook setup: same fixtures as the post-mortem incident test."""
+    setup_incident(test_dir)
+
+
+def setup_escalation(test_dir: Path) -> None:
+    """TPM design escalation setup: a PRD with a critical, unanswerable gap.
+
+    The PRD mandates a horizontally-scaled multi-instance backend and <200ms
+    peer fan-out but never specifies the realtime transport, and the arch doc
+    explicitly lacks one. The architect must escalate; the PM cannot answer
+    from sources; test-mode auto-answers and the SKILL re-invokes to completion.
+    """
+    setup_git_init(test_dir)
+    setup_shaktra_from_templates(test_dir, {
+        "project": {
+            "name": "CollabCursors", "type": "greenfield", "language": "python",
+            "architecture": "layered", "test_framework": "pytest",
+            "coverage_tool": "coverage", "package_manager": "pip",
+        }
+    })
+    shaktra = test_dir / ".shaktra"
+    esc = FIXTURES_DIR / "escalation"
+    for f in ("prd.md", "architecture.md"):
+        if (esc / f).exists():
+            shutil.copy2(esc / f, shaktra / f)
+    _append_test_overrides(test_dir / "CLAUDE.md")
+
+
 def setup_brownfield_no_shaktra(test_dir: Path) -> None:
     """Brownfield setup for init test: git + sample project but NO .shaktra/."""
     setup_git_init(test_dir)
@@ -700,6 +836,117 @@ def get_test_definitions(test_dir: str) -> list[dict]:
                 "incident-no-diagnosis", "shaktra-incident",
                 skill_args="post-mortem BUG-MISSING-001",
                 validator_cmd=_v("validate_negative.py", d, "no_incidents"),
+            ),
+        },
+        # =================================================================
+        # Extended coverage — previously-untested modes & mechanisms
+        # =================================================================
+        {
+            "name": "refactor",
+            "category": "extended",
+            "timeout": 2400,
+            "max_turns": 200,
+            "setup": lambda td: setup_refactor(td),
+            "prompt": build_prompt(
+                "refactor", "shaktra-dev",
+                skill_args="refactor src/order_pricing.py",
+                validator_cmd=_v("validate_refactor.py", d),
+            ),
+        },
+        {
+            "name": "dev-resume",
+            "category": "extended",
+            "timeout": 1800,
+            "max_turns": 160,
+            "setup": lambda td: setup_dev_resume(td),
+            "prompt": build_prompt(
+                "dev-resume", "shaktra-dev",
+                skill_args="resume story ST-RESUME-001",
+                validator_cmd=_v("validate_resume.py", d, "ST-RESUME-001"),
+            ),
+        },
+        {
+            "name": "dev-javascript",
+            "category": "extended",
+            "timeout": 2400,
+            "max_turns": 200,
+            "setup": lambda td: setup_javascript_dev(td),
+            "prompt": build_prompt(
+                "dev-javascript", "shaktra-dev",
+                skill_args="develop story ST-JS-001",
+                validator_cmd=_v("validate_js_dev.py", d, "ST-JS-001"),
+            ),
+        },
+        {
+            "name": "tpm-enrich",
+            "category": "extended",
+            "timeout": 900,
+            "max_turns": 120,
+            "setup": lambda td: setup_tpm_enrich(td),
+            "prompt": build_prompt(
+                "tpm-enrich", "shaktra-tpm",
+                skill_args="enrich story ST-SPARSE-ENRICH",
+                validator_cmd=_v("validate_modes.py", d, "enrich", "ST-SPARSE-ENRICH"),
+            ),
+        },
+        {
+            "name": "tpm-sprint",
+            "category": "extended",
+            "timeout": 900,
+            "max_turns": 120,
+            "setup": lambda td: setup_tpm_sprint(td),
+            "prompt": build_prompt(
+                "tpm-sprint", "shaktra-tpm",
+                skill_args="plan a sprint from the backlog stories in .shaktra/stories",
+                validator_cmd=_v("validate_modes.py", d, "sprint"),
+            ),
+        },
+        {
+            "name": "analyze-targeted",
+            "category": "extended",
+            "timeout": 1200,
+            "max_turns": 120,
+            "setup": lambda td: setup_analyze_targeted(td),
+            "prompt": build_prompt(
+                "analyze-targeted", "shaktra-analyze",
+                skill_args="analyze the coding practices and conventions",
+                validator_cmd=_v("validate_modes.py", d, "analyze_targeted"),
+            ),
+        },
+        {
+            "name": "pm-prioritize",
+            "category": "extended",
+            "timeout": 900,
+            "max_turns": 100,
+            "setup": lambda td: setup_pm_prioritize(td),
+            "prompt": build_prompt(
+                "pm-prioritize", "shaktra-pm",
+                skill_args="prioritize the backlog stories in .shaktra/stories using RICE",
+                validator_cmd=_v("validate_modes.py", d, "pm_prioritize"),
+            ),
+        },
+        {
+            "name": "incident-runbook",
+            "category": "extended",
+            "timeout": 1200,
+            "max_turns": 100,
+            "setup": lambda td: setup_incident_runbook(td),
+            "prompt": build_prompt(
+                "incident-runbook", "shaktra-incident",
+                skill_args="generate a runbook for BUG-TEST-001",
+                validator_cmd=_v("validate_modes.py", d, "incident_runbook", "BUG-TEST-001"),
+            ),
+        },
+        {
+            "name": "tpm-design-escalation",
+            "category": "extended",
+            "timeout": 1500,
+            "max_turns": 140,
+            "setup": lambda td: setup_escalation(td),
+            "prompt": build_prompt(
+                "tpm-design-escalation", "shaktra-tpm",
+                skill_args="create a design doc for the realtime collaboration cursors feature",
+                validator_cmd=_v("validate_modes.py", d, "escalation", "CollabCursors"),
             ),
         },
     ]

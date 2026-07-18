@@ -1,0 +1,27 @@
+id: ST-RESUME-001
+title: Add a slugify utility
+description: >
+  Provide slugify(text) that lowercases input, replaces runs of
+  non-alphanumeric characters with single hyphens, and strips leading/
+  trailing hyphens.
+tier: small
+scope: feature
+files:
+  - src/slugify.py
+  - tests/test_slugify.py
+acceptance_criteria:
+  - id: AC-1
+    given: a string with spaces and mixed case
+    when: slugify is called
+    then: returns a lowercase hyphenated slug
+    priority: must
+  - id: AC-2
+    given: a string with leading/trailing/repeated non-alphanumerics
+    when: slugify is called
+    then: no leading or trailing hyphens and no repeated hyphens
+    priority: must
+metadata:
+  story_points: 2
+  priority: medium
+  blocked_by: []
+  status: in_progress

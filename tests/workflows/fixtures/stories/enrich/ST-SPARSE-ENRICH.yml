@@ -1,0 +1,27 @@
+id: ST-SPARSE-ENRICH
+title: Add password reset request endpoint
+description: >
+  Provide POST /auth/password-reset/request that accepts an email, and if a
+  user exists, generates a time-limited reset token and enqueues a reset
+  email. Always returns 202 to avoid user enumeration.
+tier: medium
+files:
+  - src/api/password_reset_routes.py
+  - src/services/password_reset_service.py
+  - tests/test_password_reset.py
+acceptance_criteria:
+  - id: AC-1
+    given: a registered email
+    when: POST /auth/password-reset/request is called
+    then: a reset token is created and a reset email is enqueued, 202 returned
+    priority: must
+  - id: AC-2
+    given: an unregistered email
+    when: POST /auth/password-reset/request is called
+    then: 202 is still returned with no token created (no enumeration)
+    priority: must
+metadata:
+  story_points: 5
+  priority: high
+  blocked_by: []
+  status: planned

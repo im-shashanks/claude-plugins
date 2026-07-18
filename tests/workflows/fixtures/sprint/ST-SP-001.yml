@@ -1,0 +1,19 @@
+id: ST-SP-001
+title: Sprint candidate — user profile read endpoint
+description: A small, self-contained feature to fetch a user's public profile.
+tier: small
+scope: feature
+files:
+  - src/api/profile_routes.py
+  - tests/test_profile.py
+acceptance_criteria:
+  - id: AC-1
+    given: an existing user id
+    when: GET /users/{id}/profile is called
+    then: the public profile is returned with 200
+    priority: must
+metadata:
+  story_points: 2
+  priority: high
+  blocked_by: []
+  status: planned
