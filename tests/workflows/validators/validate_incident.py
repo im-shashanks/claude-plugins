@@ -115,19 +115,30 @@ def validate_incident(project_dir: str, bug_id: str) -> ValidationReport:
     # --- 12. No retired sidecar mechanisms ---
     check_no_sidecars(report, project_dir)
 
-    # --- 13. Memory capture: principles ---
-    principles_path = os.path.join(shaktra, "memory", "principles.yml")
-    if check_is_file(report, principles_path, "principles.yml exists"):
-        pr_data = check_valid_yaml(
-            report, principles_path, "principles.yml valid YAML",
-        )
-        if pr_data:
-            entries = pr_data.get("principles", [])
-            report.add(
-                "principles.yml has entries",
-                isinstance(entries, list) and len(entries) > 0,
-                f"found {len(entries) if isinstance(entries, list) else 0} entries",
-            )
+    # --- 13. Memory capture: any store grew ---
+    # Incident learnings legitimately land in ANY store — a failure pattern
+    # becomes an anti-pattern, a detection gap becomes a procedure, a broader
+    # lesson becomes a principle. Require capture in at least one store.
+    store_keys = {
+        "principles.yml": "principles",
+        "anti-patterns.yml": "anti_patterns",
+        "procedures.yml": "procedures",
+    }
+    total_entries = 0
+    per_store = {}
+    for fname, key in store_keys.items():
+        path = os.path.join(shaktra, "memory", fname)
+        data, _ = load_yaml_safe(path)
+        n = 0
+        if isinstance(data, dict) and isinstance(data.get(key), list):
+            n = len(data[key])
+        per_store[fname] = n
+        total_entries += n
+    report.add(
+        "incident learnings captured to memory (any store)",
+        total_entries > 0,
+        f"no memory entries in any store ({per_store})" if total_entries == 0 else "",
+    )
 
     # --- 14. Settings has incident section ---
     settings_path = os.path.join(shaktra, "settings.yml")
