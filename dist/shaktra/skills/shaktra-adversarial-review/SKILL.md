@@ -67,7 +67,7 @@ Wait for the background completion notification — no polling.
 2. Story mode: persist findings/observations via
    `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/shaktra_handoff.py <handoff_path> --merge-json -`
    with `{quality_findings: result.findings, observations: result.observations,
-   workflow_run: {script: "adversarial.js", status: "complete"}}`.
+   workflow_run: {script: "adversarial.js", status: "complete", verdict: result.verdict, mutation_score: result.mutation_score}}`.
 3. If `result.test_persistence` is `"ask"`: show the generated adversarial tests
    and ask via AskUserQuestion whether to keep them.
 4. Present `result.report_markdown` verbatim. Verdicts:

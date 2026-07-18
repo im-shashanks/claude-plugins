@@ -1,0 +1,12 @@
+schema_version: "1.0.0"
+execution_mode: workflow
+stage_1:
+  status: complete
+dimensions:
+  D6:
+    status: complete
+    artifact: tech-debt.yml
+  D5:
+    status: complete
+    artifact: dependencies.yml
+completed_at: "2026-07-18T00:00:00Z"

@@ -52,6 +52,21 @@ def validate_refactor(project_dir: str) -> ValidationReport:
                "assessment.smells_detected empty" if not smells else "")
     report.add("transforms proposed", len(transforms) > 0,
                "assessment.proposed_transforms empty" if not transforms else "")
+    # A no-op refactor (every transform reverted) must NOT pass — confirm at
+    # least one transform was actually applied.
+    applied = []
+    for key in ("transforms", "applied_transforms"):
+        lst = data.get(key) if isinstance(data, dict) else None
+        if isinstance(lst, list):
+            applied += [t for t in lst if isinstance(t, dict)
+                        and str(t.get("status", "")).lower() == "applied"]
+    # transform records may also live under a 'transform' phase summary
+    tphase = (data.get("transform") or {}) if isinstance(data, dict) else {}
+    if isinstance(tphase.get("applied"), int):
+        applied += [None] * tphase["applied"]
+    report.add("at least one transform applied (not a no-op refactor)",
+               len(applied) > 0,
+               "no transform with status 'applied' found in the handoff")
 
     # --- Behavior preserved: pinning tests still pass ---
     tests_dir = os.path.join(project_dir, "tests")

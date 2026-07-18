@@ -93,7 +93,14 @@ def validate_pm_prioritize(project_dir: str) -> ValidationReport:
     report.add("prioritization ran (ranked output in log or artifact)",
                has_artifact or has_log,
                "no RICE/ranking evidence in log or .shaktra/prioritization.md")
-    # sprints.yml must NOT have been written by prioritization (scrummaster owns it).
+    # sprints.yml must NOT have a current_sprint written by prioritization
+    # (the scrummaster owns allocation; pm prioritize only recommends).
+    sp = os.path.join(project_dir, ".shaktra", "sprints.yml")
+    data, _ = load_yaml_safe(sp)
+    cur = data.get("current_sprint") if isinstance(data, dict) else None
+    report.add("prioritization did NOT allocate a sprint (scrummaster owns that)",
+               not (isinstance(cur, dict) and cur.get("stories")),
+               "pm prioritize wrote a current_sprint — that is the scrummaster's job")
     return report
 
 
@@ -138,6 +145,45 @@ def validate_escalation(project_dir: str, project_name: str) -> ValidationReport
     return report
 
 
+def _analysis_artifact(project_dir: str, label: str, fname: str, sections) -> ValidationReport:
+    report = ValidationReport(f"/shaktra:analyze {label}")
+    path = os.path.join(project_dir, ".shaktra", "analysis", fname)
+    data, err = load_yaml_safe(path)
+    report.add(f"{fname} produced", isinstance(data, dict) and bool(data),
+               err or "missing/empty")
+    if isinstance(data, dict):
+        blob = str(data).lower()
+        report.add(f"{fname} has recognizable content",
+                   any(s in blob for s in sections),
+                   f"none of {sections} present")
+    return report
+
+
+def validate_debt_strategy(project_dir: str) -> ValidationReport:
+    return _analysis_artifact(project_dir, "debt-strategy", "debt-strategy.yml",
+                              ["debt", "priorit", "category", "remediation", "score", "story"])
+
+
+def validate_dependency_audit(project_dir: str) -> ValidationReport:
+    return _analysis_artifact(project_dir, "dependency-audit", "dependency-audit.yml",
+                              ["depend", "upgrade", "risk", "vulnerab", "version"])
+
+
+def validate_detection_gap(project_dir: str, bug_id: str) -> ValidationReport:
+    report = ValidationReport(f"/shaktra:incident detection-gap ({bug_id})")
+    path = os.path.join(project_dir, ".shaktra", "incidents", bug_id, "detection-gap.yml")
+    data, err = load_yaml_safe(path)
+    report.add("detection-gap.yml exists", isinstance(data, dict) and bool(data),
+               err or "missing/empty")
+    if isinstance(data, dict):
+        blob = str(data).lower()
+        report.add("detection-gap has gate/coverage analysis",
+                   any(s in blob for s in ("gate", "coverage", "gap", "detection",
+                                           "recommend", "missed")),
+                   "no recognizable detection-gap sections")
+    return report
+
+
 DISPATCH = {
     "enrich": lambda a: validate_enrich(a[0], a[1]),
     "sprint": lambda a: validate_sprint(a[0]),
@@ -145,6 +191,9 @@ DISPATCH = {
     "pm_prioritize": lambda a: validate_pm_prioritize(a[0]),
     "incident_runbook": lambda a: validate_incident_runbook(a[0], a[1]),
     "escalation": lambda a: validate_escalation(a[0], a[1] if len(a) > 1 else ""),
+    "debt_strategy": lambda a: validate_debt_strategy(a[0]),
+    "dependency_audit": lambda a: validate_dependency_audit(a[0]),
+    "detection_gap": lambda a: validate_detection_gap(a[0], a[1]),
 }
 
 if __name__ == "__main__":

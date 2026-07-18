@@ -387,6 +387,60 @@ def setup_incident_runbook(test_dir: Path) -> None:
     setup_incident(test_dir)
 
 
+def setup_trivial_dev(test_dir: Path) -> None:
+    """Trivial-tier dev setup: greenfield + a 3-field trivial story.
+
+    Verifies the tier gate matrix skips RED and comprehensive QUALITY.
+    """
+    setup_git_init(test_dir)
+    setup_shaktra_from_templates(test_dir, _greenfield_settings())
+    shaktra = test_dir / ".shaktra"
+    src = FIXTURES_DIR / "stories" / "ST-TRIVIAL-001.yml"
+    if src.exists():
+        shutil.copy2(src, shaktra / "stories" / "ST-TRIVIAL-001.yml")
+    _append_test_overrides(test_dir / "CLAUDE.md")
+
+
+def _setup_analyze_seeded(test_dir: Path) -> None:
+    """Brownfield sample + a pre-completed analysis (manifest + seed artifacts)."""
+    setup_git_init(test_dir)
+    src_proj = FIXTURES_DIR / "brownfield" / "sample-project"
+    if src_proj.exists():
+        for item in src_proj.iterdir():
+            dest = test_dir / item.name
+            if item.is_dir():
+                shutil.copytree(item, dest, dirs_exist_ok=True)
+            else:
+                shutil.copy2(item, dest)
+    setup_shaktra_from_templates(test_dir, {
+        "project": {
+            "name": "BrownfieldTest", "type": "brownfield", "language": "python",
+            "architecture": "layered", "test_framework": "pytest",
+            "coverage_tool": "coverage", "package_manager": "pip",
+        }
+    })
+    analysis = test_dir / ".shaktra" / "analysis"
+    analysis.mkdir(parents=True, exist_ok=True)
+    for f in ("tech-debt.yml", "dependencies.yml", "manifest.yml"):
+        src = FIXTURES_DIR / "analyze-seed" / f
+        if src.exists():
+            shutil.copy2(src, analysis / f)
+    _append_test_overrides(test_dir / "CLAUDE.md")
+
+
+def setup_analyze_debt(test_dir: Path) -> None:
+    _setup_analyze_seeded(test_dir)
+
+
+def setup_analyze_dependency(test_dir: Path) -> None:
+    _setup_analyze_seeded(test_dir)
+
+
+def setup_incident_detection_gap(test_dir: Path) -> None:
+    """Detection-gap setup: same fixtures as the post-mortem incident test."""
+    setup_incident(test_dir)
+
+
 def setup_escalation(test_dir: Path) -> None:
     """TPM design escalation setup: a PRD with a critical, unanswerable gap.
 
@@ -949,6 +1003,54 @@ def get_test_definitions(test_dir: str) -> list[dict]:
                 "tpm-design-escalation", "shaktra-tpm",
                 skill_args="create a design doc for the realtime collaboration cursors feature",
                 validator_cmd=_v("validate_modes.py", d, "escalation", "CollabCursors"),
+            ),
+        },
+        {
+            "name": "dev-trivial",
+            "category": "extended",
+            "timeout": 1200,
+            "max_turns": 120,
+            "setup": lambda td: setup_trivial_dev(td),
+            "prompt": build_prompt(
+                "dev-trivial", "shaktra-dev",
+                skill_args="develop story ST-TRIVIAL-001",
+                validator_cmd=_v("validate_trivial_dev.py", d, "ST-TRIVIAL-001"),
+            ),
+        },
+        {
+            "name": "incident-detection-gap",
+            "category": "extended",
+            "timeout": 1200,
+            "max_turns": 100,
+            "setup": lambda td: setup_incident_detection_gap(td),
+            "prompt": build_prompt(
+                "incident-detection-gap", "shaktra-incident",
+                skill_args="analyze the detection gap for BUG-TEST-001",
+                validator_cmd=_v("validate_modes.py", d, "detection_gap", "BUG-TEST-001"),
+            ),
+        },
+        {
+            "name": "analyze-debt-strategy",
+            "category": "extended",
+            "timeout": 1200,
+            "max_turns": 100,
+            "setup": lambda td: setup_analyze_debt(td),
+            "prompt": build_prompt(
+                "analyze-debt-strategy", "shaktra-analyze",
+                skill_args="produce a debt strategy from the existing analysis",
+                validator_cmd=_v("validate_modes.py", d, "debt_strategy"),
+            ),
+        },
+        {
+            "name": "analyze-dependency-audit",
+            "category": "extended",
+            "timeout": 1200,
+            "max_turns": 100,
+            "setup": lambda td: setup_analyze_dependency(td),
+            "prompt": build_prompt(
+                "analyze-dependency-audit", "shaktra-analyze",
+                skill_args="run a dependency audit from the existing analysis",
+                validator_cmd=_v("validate_modes.py", d, "dependency_audit"),
             ),
         },
     ]

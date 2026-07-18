@@ -65,10 +65,29 @@ def validate_review(project_dir: str, story_id: str) -> ValidationReport:
 
     # --- Findings persisted to handoff (in-band model) ---
     h_data, _ = load_yaml_safe(os.path.join(story_dir, "handoff.yml"))
-    findings = (h_data or {}).get("quality_findings", [])
-    report.add("review findings persisted to handoff",
-               isinstance(findings, list) and len(findings) >= 0 and h_data is not None,
-               "handoff.yml unreadable" if h_data is None else "")
+    report.add("handoff readable after review", isinstance(h_data, dict),
+               "handoff.yml unreadable")
+    h_data = h_data if isinstance(h_data, dict) else {}
+    findings = h_data.get("quality_findings", [])
+    report.add("review findings is a list", isinstance(findings, list),
+               f"quality_findings is {type(findings).__name__}")
+
+    # --- Verdict persisted, valid, and CONSISTENT with the merge gate ---
+    verdict = (h_data.get("workflow_run") or {}).get("verdict")
+    report.add("review verdict persisted and valid",
+               verdict in VALID_VERDICTS,
+               f"workflow_run.verdict={verdict!r} not in {VALID_VERDICTS}")
+    unresolved_p0 = [f for f in findings if isinstance(f, dict)
+                     and str(f.get("severity")).upper() == "P0" and not f.get("resolved")]
+    # The load-bearing consistency check: any unresolved P0 must force BLOCKED.
+    if unresolved_p0:
+        report.add("verdict BLOCKED when unresolved P0 present",
+                   verdict == "BLOCKED",
+                   f"{len(unresolved_p0)} unresolved P0 but verdict={verdict!r}")
+    else:
+        report.add("verdict not BLOCKED without P0",
+                   verdict != "BLOCKED" or verdict is None,
+                   f"verdict BLOCKED but no unresolved P0 finding")
 
     # --- No retired sidecar mechanisms ---
     check_no_sidecars(report, project_dir)

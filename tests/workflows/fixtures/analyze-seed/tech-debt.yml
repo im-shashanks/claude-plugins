@@ -1,0 +1,25 @@
+summary: >
+  Technical debt scan of the sample project. Two notable items: a god-function
+  in app.py handling routing + validation + persistence, and a missing-index
+  data-access hotspot in models.py. Overall health: moderate.
+details:
+  debt_items:
+    - id: TD-01
+      category: maintainability
+      location: "src/app.py:1"
+      severity: P2
+      description: "handle_request mixes routing, validation, and persistence"
+      estimated_effort: medium
+    - id: TD-02
+      category: performance
+      location: "src/models.py:1"
+      severity: P2
+      description: "find_all scans without an index; O(n) on every call"
+      estimated_effort: small
+    - id: TD-03
+      category: security
+      location: "src/app.py:1"
+      severity: P1
+      description: "user input passed to a query without parameterization"
+      estimated_effort: small
+  health_score: 62

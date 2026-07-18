@@ -104,7 +104,15 @@ if ((a.mode === 'create' || a.mode === 'sprint') && a.sprints_enabled) {
   )
   observations = observations.concat(allocation?.observations || [])
   sprintSummary = allocation?.summary
-  phaseSummaries.push({ name: 'Sprint planning', status: allocation?.status === 'complete' ? 'complete' : 'blocked', summary: sprintSummary })
+  const allocOk = allocation?.status === 'complete'
+  phaseSummaries.push({ name: 'Sprint planning', status: allocOk ? 'complete' : 'blocked', summary: sprintSummary })
+  if (!allocOk) {
+    return {
+      status: 'blocked', phase: 'sprint-allocation', mode: a.mode,
+      blockers: allocation?.blockers, stories, gates,
+      findings: allFindings, observations, sprint: sprintSummary,
+    }
+  }
 }
 
 if (a.mode === 'close-sprint') {

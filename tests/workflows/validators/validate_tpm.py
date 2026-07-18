@@ -244,9 +244,11 @@ def _validate_stories(
             )
 
         files_list = data.get("files", []) if isinstance(data, dict) else []
-        if isinstance(files_list, list) and tier in ("small", "medium", "large"):
+        # The "max 3 files" rule is a SMALL-tier constraint (story-schema.md);
+        # medium/large stories legitimately touch more. Only enforce for small.
+        if isinstance(files_list, list) and tier == "small":
             report.add(
-                f"{fname}: files ≤ 3",
+                f"{fname}: small-tier files ≤ 3",
                 len(files_list) <= 3,
                 f"got {len(files_list)}" if len(files_list) > 3 else "",
             )

@@ -1,0 +1,8 @@
+Probe artifact for quality-loop iterate self-test.
+
+Dimension A
+-----------
+ITERA7-1 (P1): Resolved. The seeded dimension-A finding has been addressed by
+this artifact, which now supplies the required dimension-A content that the
+gate checks for. This mirrors the resolution pattern used by
+probe-artifact.txt for its SEED-1 finding.

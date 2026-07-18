@@ -1,0 +1,13 @@
+Probe artifact for quality-loop escalate self-test.
+
+Dimension B
+-----------
+ESCQ3-1 (P0): Fix attempted. This artifact now supplies dimension-B content in
+a good-faith attempt to address the seeded dimension-B finding, mirroring the
+resolution pattern used by probe-artifact.txt (SEED-1) and probe-iterate.txt
+(ITERA7-1).
+
+Note: the escalate gate's reviewer is a deterministic stub that re-emits this
+P0 unconditionally regardless of artifact content, so the finding stays
+blocking by design. That is intentional — this gate exists to exercise loop
+exhaustion and escalation (max_loops_reached) rather than a real resolution.

@@ -23,7 +23,7 @@ from validate_common import (
 )
 
 VALID_SEVERITIES = ["P0", "P1", "P2", "P3"]
-VALID_VERDICTS = ["PASS", "CONCERN", "BLOCKED"]
+VALID_VERDICTS = ["pass", "concern", "blocked"]
 
 
 def validate_adversarial_review(project_dir: str, story_id: str) -> ValidationReport:
@@ -47,6 +47,25 @@ def validate_adversarial_review(project_dir: str, story_id: str) -> ValidationRe
     report.add("adversarial findings persisted to handoff",
                isinstance(wf_findings, list),
                "quality_findings is not a list" if not isinstance(wf_findings, list) else "")
+
+    # --- Verdict + mutation_score persisted and valid ---
+    wr = data.get("workflow_run") or {}
+    verdict = wr.get("verdict")
+    report.add("adversarial verdict persisted and valid",
+               verdict in VALID_VERDICTS,
+               f"workflow_run.verdict={verdict!r} not in {VALID_VERDICTS}")
+    # mutation_score is a number when tests existed, or null (skipped) — but the
+    # key must be present so downstream consumers can tell which case occurred.
+    report.add("mutation_score reported (number or explicit null)",
+               "mutation_score" in wr,
+               "workflow_run.mutation_score absent")
+    # Consistency: any unresolved P0 must force a 'blocked' verdict.
+    up0 = [f for f in wf_findings if isinstance(f, dict)
+           and str(f.get("severity")).upper() == "P0" and not f.get("resolved")]
+    if up0:
+        report.add("verdict blocked when unresolved P0 present",
+                   verdict == "blocked",
+                   f"{len(up0)} unresolved P0 but verdict={verdict!r}")
 
     # --- No retired sidecar mechanisms ---
     check_no_sidecars(report, project_dir)

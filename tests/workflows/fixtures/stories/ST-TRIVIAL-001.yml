@@ -1,0 +1,11 @@
+id: ST-TRIVIAL-001
+title: Add a project version constant
+description: >
+  Add a module-level __version__ = "0.1.0" string constant to src/version.py
+  so the app can report its version. Trivial, localized, no behavior change.
+tier: trivial
+metadata:
+  story_points: 1
+  priority: low
+  blocked_by: []
+  status: planned

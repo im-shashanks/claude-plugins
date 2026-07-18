@@ -50,10 +50,12 @@ def validate_js_dev(project_dir: str, story_id: str) -> ValidationReport:
             ["node", "--test"],
             cwd=project_dir, capture_output=True, text=True, timeout=120,
         )
-        ok = proc.returncode == 0 and "fail 0" in (proc.stdout + proc.stderr).replace("# ", "")
-        report.add("JavaScript tests pass (node --test)", proc.returncode == 0,
-                   (proc.stdout or proc.stderr or "").strip().splitlines()[-1]
-                   if proc.returncode else "")
+        out = (proc.stdout or "") + (proc.stderr or "")
+        # Guard against a runner that exits 0 while still reporting failures.
+        no_failures = "# fail 0" in out or "fail 0" in out.replace("# ", "")
+        report.add("JavaScript tests pass (node --test)",
+                   proc.returncode == 0 and no_failures,
+                   out.strip().splitlines()[-1] if out.strip() else "node --test failed")
 
     check_no_sidecars(report, project_dir)
     return report

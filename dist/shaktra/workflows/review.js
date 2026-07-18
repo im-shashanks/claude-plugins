@@ -83,6 +83,20 @@ Report each test in verification_tests (name, result, detail) and failures as fi
 const verificationTests = verification?.verification_tests || []
 findings = findings.concat((verification?.findings || []).map((f) => ({ ...f, gate: 'review' })))
 
+// Independent verification is the distinguishing gate of app-level review — it
+// must actually have run. If fewer than the required tests were produced, the
+// review cannot cleanly APPROVE regardless of finding counts (the reviewer may
+// have under-delivered, timed out, or silently failed).
+const verificationShortfall = verificationTests.length < a.min_verification_tests
+if (verificationShortfall) {
+  findings.push({
+    id: 'REV-VERIFY-GAP', severity: 'P1', dimension: 'I', gate: 'review',
+    issue: `Independent verification incomplete: ${verificationTests.length} of the required ${a.min_verification_tests} verification tests were produced.`,
+    recommendation: 'Re-run review so the independent verification suite is generated and executed.',
+    resolved: false,
+  })
+}
+
 // Merge gate (verdict ladder from severity-taxonomy.md).
 const count = (sev) => findings.filter((f) => f.severity === sev && !f.resolved).length
 const p0 = count('P0'); const p1 = count('P1'); const p2 = count('P2')

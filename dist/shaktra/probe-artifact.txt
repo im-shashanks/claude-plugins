@@ -1,0 +1,7 @@
+Probe artifact for gate-loop self-test.
+
+Dimension A
+-----------
+SEED-1 (P1): Resolved. The seeded probe finding for dimension A has been
+addressed by this artifact, which now provides the required dimension-A
+content the gate checks for.

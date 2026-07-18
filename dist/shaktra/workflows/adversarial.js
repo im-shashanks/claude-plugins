@@ -38,8 +38,10 @@ const testFiles = contract.artifacts || []
 let observations = contract.observations || []
 let findings = []
 
-// Config/docs-only changes: nothing to attack.
-if (contract.summary.includes('"changed_functions": []') || /no code changes/i.test(contract.summary)) {
+// Config/docs-only changes: nothing to attack. Match robustly (whitespace-
+// insensitive empty array, or an explicit "no code changes" note) rather than
+// an exact-substring grep of the agent's JSON formatting.
+if (/"changed_functions"\s*:\s*\[\s*\]/.test(contract.summary) || /no code changes/i.test(contract.summary)) {
   return {
     status: 'complete', verdict: 'pass', mutation_score: null, findings: [], observations,
     report_markdown: `## Adversarial review — ${subject}\n\nNo code changes detected (config/docs only). Verdict: PASS.`,
@@ -106,8 +108,11 @@ findings = [...byKey.values()]
 const count = (sev) => findings.filter((f) => f.severity === sev && !f.resolved).length
 const p0 = count('P0'); const p1 = count('P1')
 const score = mutation ? mutation.mutation_score : null
+// A null score means mutation testing did not run (no existing tests) — the
+// primary adversarial signal is absent, so this can never be a clean pass.
+const noMutationSignal = score == null
 const verdict = p0 > 0 ? 'blocked'
-  : (score != null && score < a.mutation_kill_threshold) || p1 > a.p1_threshold || blindSpots.length ? 'concern'
+  : (score != null && score < a.mutation_kill_threshold) || p1 > a.p1_threshold || blindSpots.length || noMutationSignal ? 'concern'
     : 'pass'
 
 // ---- Memory (story-linked only) ----

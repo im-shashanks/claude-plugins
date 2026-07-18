@@ -112,6 +112,20 @@ def validate_dev(project_dir: str, story_id: str) -> ValidationReport:
                            "all tests green")
         check_field_exists(report, data, "code_summary.coverage",
                            "coverage recorded")
+        # Coverage must actually MEET the tier threshold, not merely be present.
+        settings, _ = load_yaml_safe(os.path.join(shaktra, "settings.yml"))
+        tdd = (settings or {}).get("tdd", {}) if isinstance(settings, dict) else {}
+        tier = str(data.get("tier", "medium")).lower()
+        threshold = {
+            "trivial": tdd.get("hotfix_coverage_threshold", 70),
+            "small": tdd.get("small_coverage_threshold", 80),
+            "medium": tdd.get("coverage_threshold", 90),
+            "large": tdd.get("large_coverage_threshold", 95),
+        }.get(tier, tdd.get("coverage_threshold", 90))
+        cov = (data.get("code_summary", {}) or {}).get("coverage")
+        report.add(f"coverage meets {tier}-tier threshold ({threshold}%)",
+                   isinstance(cov, (int, float)) and cov >= threshold,
+                   f"coverage={cov} < {threshold}")
         # Accept either files_modified or files_created
         cs = data.get("code_summary", {}) or {}
         has_files = bool(cs.get("files_modified")) or bool(cs.get("files_created"))

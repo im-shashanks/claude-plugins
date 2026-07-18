@@ -1,0 +1,26 @@
+summary: >
+  Dependency inventory for the sample project. Flask is several minor versions
+  behind; requests has a known-CVE range; pytest is current. One transitive
+  dependency (urllib3) is pinned below the patched line.
+details:
+  direct:
+    - name: flask
+      current: "2.0.1"
+      latest: "3.0.3"
+      risk: outdated
+      notes: "3 minor versions behind; no known CVE but large drift"
+    - name: requests
+      current: "2.25.0"
+      latest: "2.32.3"
+      risk: vulnerable
+      notes: "current range includes a known CVE; upgrade advised"
+    - name: pytest
+      current: "8.2.0"
+      latest: "8.2.0"
+      risk: current
+      notes: "up to date"
+  transitive:
+    - name: urllib3
+      current: "1.26.4"
+      risk: vulnerable
+      notes: "below the patched 1.26.19 line"

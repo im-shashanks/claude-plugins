@@ -60,7 +60,7 @@ Wait for the background completion notification — no polling.
 
 1. Story mode: persist findings/observations —
    `{quality_findings: result.findings, observations: result.observations,
-   workflow_run: {script: "review.js", status: "complete"}}` piped to
+   workflow_run: {script: "review.js", status: "complete", verdict: result.verdict}}` piped to
    `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/shaktra_handoff.py <handoff_path> --merge-json -`
 2. If `result.verification_persistence` is `"ask"` and tests were generated:
    show the test results and ask via AskUserQuestion whether to keep them in the
