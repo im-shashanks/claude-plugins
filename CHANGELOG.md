@@ -48,7 +48,11 @@ prose pipelines. Same 15-command surface; quality content untouched.
   fail with a clear upgrade message otherwise (utility commands still work).
 
 ### Testing
-- Full 23-test E2E suite green (`tests/workflows/run_workflow_tests.py`) — each
+- Full 32-test E2E suite green (`tests/workflows/run_workflow_tests.py`) — 23
+  core + 9 extended tests covering refactor, cross-session resume, a non-Python
+  (JavaScript/`node --test`) pipeline, the escalation round-trip, and the
+  enrich/sprint/analyze-targeted/pm-prioritize/incident-runbook command modes.
+  Each
   test is a real headless `claude` session invoking a skill end-to-end, with
   artifacts inspected against schema/story requirements, not just validator
   pass/fail. Harden­ing during the run: agentType namespacing verified against
