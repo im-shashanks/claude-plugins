@@ -82,12 +82,20 @@ STEP 2: Use the Skill tool: Skill("{skill}"{', args="' + skill_args + '"' if ski
   This may involve spawning sub-agents, creating files, running quality checks, etc.
   Do NOT skip any part of the skill workflow.
 
-STEP 3: After the skill workflow is FULLY complete, log "Skill workflow complete"
+  IMPORTANT: The skill may legitimately HALT EARLY — a missing prerequisite,
+  a blocked/sparse story, an unavailable diagnosis, or any other pre-flight
+  stop. That is a VALID outcome, often exactly what a test is checking. When it
+  happens, do NOT fabricate the missing artifact and do NOT force the workflow
+  forward. Note that the skill halted, then CONTINUE to the remaining steps
+  regardless — the validator decides PASS/FAIL. You must always reach STEP 5.
+
+STEP 3: Once the skill has finished OR halted, log "Skill step done"
   Dump file state to log:
   echo "[$(date +%H:%M:%S)] files:" >> {log} && find .shaktra -type f 2>/dev/null | sort >> {log}
 {extra}
 {validator_block}
-STEP 5: Based on the validator output, print EXACTLY one of:
+STEP 5 (MANDATORY — always run this even if the skill halted early): Based on
+  the validator output, print EXACTLY one of:
   [TEST:{test_name}] VERDICT: PASS
   [TEST:{test_name}] VERDICT: FAIL
   Use PASS only if the validator shows all checks passed. Otherwise FAIL.

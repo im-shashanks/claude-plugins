@@ -49,11 +49,12 @@ const phaseSummaries = []
 
 if (a.mode === 'create' || a.mode === 'enrich' || a.mode === 'hotfix') {
   phase('Stories')
+  const metaRule = 'Every story\'s metadata block MUST include story_points (from [1,2,3,5,8,10]), priority, blocked_by (a list), and status: "planned" (the schema default on creation, per story-schema.md rule 8) — status is mandatory, never omit it.'
   const prompt = a.mode === 'create'
-    ? `Create mode: generate user stories from the design doc at ${a.design_path}. Follow story-creation.md steps 1-7 (the final verification loop is mandatory). Write stories as YAML files to ${a.stories_dir}/ST-<NNN>.yml per story-schema.md.`
+    ? `Create mode: generate user stories from the design doc at ${a.design_path}. Follow story-creation.md steps 1-7 (the final verification loop is mandatory). Write stories as YAML files to ${a.stories_dir}/ST-<NNN>.yml per story-schema.md. ${metaRule}`
     : a.mode === 'enrich'
-      ? `Enrich mode: enrich these existing stories to their tier's full field set: ${a.story_paths.join(', ')}. Follow story-creation.md enrich steps 1-6; preserve existing content; run final verification.`
-      : `Hotfix mode: create ONE trivial-tier story (minimum viable: id, title, description + metadata) for this hotfix: "${a.hotfix_description}". Write it to ${a.stories_dir}/ST-<NNN>.yml (next sequential id). Note in the description that hotfix_coverage_threshold applies.`
+      ? `Enrich mode: enrich these existing stories to their tier's full field set: ${a.story_paths.join(', ')}. Follow story-creation.md enrich steps 1-6; preserve existing content; run final verification. ${metaRule}`
+      : `Hotfix mode: create ONE trivial-tier story (minimum viable: id, title, description + metadata) for this hotfix: "${a.hotfix_description}". Write it to ${a.stories_dir}/ST-<NNN>.yml (next sequential id). Note in the description that hotfix_coverage_threshold applies. ${metaRule} Do not put a top-level scope on a trivial story (scope is a Medium+ field).`
   const batch = await agent(
     `${prompt}\nProject: ${a.project_dir}`,
     { agentType: 'shaktra:shaktra-scrummaster', schema: S.STORY_BATCH, label: a.mode, phase: 'Stories' },
