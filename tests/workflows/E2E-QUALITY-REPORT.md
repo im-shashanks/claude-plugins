@@ -1,28 +1,68 @@
 # Shaktra 1.0.0 — E2E Quality Report
 
-32-test suite (`tests/workflows/run_workflow_tests.py`) — the original 23 plus
-9 extended tests added to close coverage gaps. Each test = a real
-`claude --print` session invoking a skill end-to-end, then a validator. Beyond
-validator pass/fail, artifacts were inspected against story/schema requirements.
+38-test suite (`tests/workflows/run_workflow_tests.py`) — the original 23 plus
+15 extended tests — plus a deterministic quality-loop probe
+(`tests/workflows/probes/`). Each test = a real `claude --print` session
+invoking a skill end-to-end, then a validator. Beyond validator pass/fail,
+artifacts were inspected against story/schema requirements.
 
-## Extended coverage (9 new tests — the gaps flagged after the first 23)
+## Completeness push — bugs found by going past happy-path green
+
+A round of deeper coverage (an independent fresh-context code review, a
+quality-loop probe, PR-mode, resume, a non-Python pipeline, and the untested
+command modes) found real defects the original green suite missed — the payoff
+of not stopping at "passed once":
+
+- **P1 (quality-loop.js):** the gate short-circuited on the agent's self-declared
+  `verdict:"pass"`, so a reviewer returning pass while its findings carried an
+  unresolved P0 would slip through. Now gates solely on JS-counted severities.
+- **P1 (review.js):** `min_verification_tests` was never enforced — a review with
+  zero independent verification could APPROVE. Now a shortfall adds a blocking finding.
+- **Latent (dev-tdd.js):** returned a schema-invalid `completed_phases`
+  (`['plan','code']`) for trivial-tier, only saved by the handoff union-merge.
+  Now returns a valid contiguous prefix.
+- **3× P2:** tpm-stories swallowed sprint-allocation failure; adversarial could
+  `pass` with mutation skipped (now `concern`); brittle config-only substring match.
+- **7 validators hardened** — coverage now checked against the tier threshold,
+  review/adversarial verdicts persisted and consistency-checked, no-op refactors
+  fail, small-tier files rule no longer misapplied to medium/large, etc. These
+  weaknesses were *why* the plugin bugs shipped green.
+
+The quality-loop probe deterministically confirmed `lib/quality-loop.js`
+iterates (blocked→fix→pass, 2 attempts) and escalates at the cap
+(max_loops_reached).
+
+## Flake evidence (empirical, not a formal rate)
+
+Across the session most tests ran 2–3× as env/infra/plugin issues were fixed;
+every test converged to PASS once real issues were resolved. The only genuine
+*agent-behavior* non-determinism observed was the escalation self-correction
+wobble — fixed at the source (test-mode override) and re-confirmed clean. A
+formal statistical flake suite (each test ×N in CI) is the one item deferred to
+cost/account-limits; the accumulated repeat data is strong but not a measured rate.
+
+## Extended coverage (15 new tests — the gaps flagged after the first 23)
 
 | Test | Mechanism previously untested | Verified |
 |---|---|---|
 | refactor | `refactor.js` — ZERO prior coverage | 5 phases complete, 5 smells addressed, 7 pinning tests still green (behavior preserved) |
 | dev-resume | resume/idempotency | pre-seeded [plan,tests] handoff → jumped to BRANCH+GREEN, no PLAN/RED re-run, test_count preserved |
 | dev-javascript | language-agnostic pipeline | full TDD on a Node project, 13 tests green under `node --test`, coverage 100% |
-| tpm-design-escalation | the escalation round-trip | architect flags unanswerable gap → PM won't fabricate → needs_clarification → SKILL auto-answers + re-invokes → design completes addressing the gap (3/3) |
+| dev-trivial | trivial tier gate matrix | RED skipped (no test-agent ran), comprehensive QUALITY skipped, schema-valid completed_phases |
+| tpm-design-escalation | the escalation round-trip | gap → needs_clarification → SKILL auto-answers + re-invokes → design completes addressing the gap; deterministic after fix |
 | tpm-enrich | enrich mode | sparse medium story → all 8 medium fields filled, ACs preserved |
 | tpm-sprint | sprint allocation | 3 stories → SP-001, 10/15 pts, velocity-aware |
 | analyze-targeted | targeted dimension | Stage-1 + only practices.yml (not all 9), checksum written |
-| pm-prioritize | RICE prioritization | ranked backlog produced |
+| analyze-debt-strategy | debt-strategy mode | debt-strategy.yml produced from seeded tech-debt |
+| analyze-dependency-audit | dependency-audit mode | dependency-audit.yml produced from seeded dependencies |
+| pm-prioritize | RICE prioritization | ranked backlog; no sprint written (scrummaster owns that) |
 | incident-runbook | runbook intent | runbook.yml with operational sections |
+| incident-detection-gap | detection-gap intent | detection-gap.yml with gate/coverage analysis |
+| pr-review | PR-mode review (gh path) | gh-shim diff fetched, verification tests generated for the diff, valid verdict |
+| pr-adversarial | PR-mode adversarial (gh path) | gh-shim diff fetched, adversarial analysis + verdict |
 
-One finding from the escalation test: the test-mode override conflated a
-mid-workflow `needs_clarification` escalation with a terminal prerequisite halt
-(the agent self-corrected, but non-deterministically). Fixed by separating the
-two in the overrides — the round-trip is now deterministic.
+Plus `probes/quality_loop_probe.js` — a deterministic integration test of the
+real `lib/quality-loop.js` (iteration + escalation).
 
 ## Original results — 23/23 green
 

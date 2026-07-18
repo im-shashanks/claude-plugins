@@ -48,10 +48,15 @@ prose pipelines. Same 15-command surface; quality content untouched.
   fail with a clear upgrade message otherwise (utility commands still work).
 
 ### Testing
-- Full 32-test E2E suite green (`tests/workflows/run_workflow_tests.py`) — 23
-  core + 9 extended tests covering refactor, cross-session resume, a non-Python
-  (JavaScript/`node --test`) pipeline, the escalation round-trip, and the
-  enrich/sprint/analyze-targeted/pm-prioritize/incident-runbook command modes.
+- Full 38-test E2E suite green (`tests/workflows/run_workflow_tests.py`) — 23
+  core + 15 extended tests + a deterministic quality-loop probe. Extended
+  coverage: refactor, cross-session resume, a non-Python (JavaScript/`node
+  --test`) pipeline, the trivial-tier gate matrix, the escalation round-trip,
+  PR-mode review/adversarial (offline via a `gh` shim), and the
+  enrich/sprint/analyze-targeted/debt-strategy/dependency-audit/pm-prioritize/
+  incident-runbook/detection-gap command modes. An independent fresh-context
+  code review during testing found and fixed 2 P1 + 3 P2 workflow defects and
+  a latent schema-invalid handoff state that the happy-path suite had missed.
   Each
   test is a real headless `claude` session invoking a skill end-to-end, with
   artifacts inspected against schema/story requirements, not just validator
