@@ -47,6 +47,15 @@ prose pipelines. Same 15-command surface; quality content untouched.
 - Requires a Claude Code version with the Workflow tool; orchestrator commands
   fail with a clear upgrade message otherwise (utility commands still work).
 
+### Testing
+- Full 23-test E2E suite green (`tests/workflows/run_workflow_tests.py`) — each
+  test is a real headless `claude` session invoking a skill end-to-end, with
+  artifacts inspected against schema/story requirements, not just validator
+  pass/fail. Harden­ing during the run: agentType namespacing verified against
+  the installed plugin, `handoff.briefing` persistence confirmed, and every
+  workflow (dev TDD, review, adversarial, tpm, analyze, bugfix→dev chain,
+  incident, pm) exercised on real fixtures.
+
 ### Removed
 - All 29 guard tokens and `guard-tokens.md` — replaced by structured outputs.
 - Sidecar file protocols: `.quality.yml`, `.briefing.yml`, `.observations.yml`,
