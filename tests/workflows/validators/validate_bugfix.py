@@ -9,7 +9,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from validate_common import (
-    ValidationReport, check_is_file, check_valid_yaml, print_report,
+    ValidationReport, check_is_file, check_valid_yaml, load_yaml_safe, print_report,
 )
 
 
@@ -95,18 +95,38 @@ def validate_bugfix(project_dir: str) -> ValidationReport:
     report.add("root cause identified", rc_found,
                "no root cause reference in .shaktra/" if not rc_found else "")
 
-    # --- Memory: bugfix principles ---
-    pp = os.path.join(shaktra, "memory", "principles.yml") if has_shaktra else ""
-    if os.path.isfile(pp):
-        pd = check_valid_yaml(report, pp, "principles.yml valid YAML")
-        if isinstance(pd, dict):
-            entries = pd.get("principles", []) or []
-            bp = [e for e in entries if isinstance(e, dict)
-                  and any(k in str(e.get("source", "")).lower()
-                          for k in ["bugfix", "bug"])]
-            report.add("bugfix principles captured", len(bp) > 0,
-                       f"no bugfix source principles (total: {len(entries)})"
-                       if not bp else "")
+    # --- Memory: bugfix learning captured (any store) ---
+    # A bug-fix learning legitimately lands in principles, anti-patterns, OR
+    # procedures, and is sourced by the originating story id (its bugfix nature
+    # shows in tags/applies_to/text, not necessarily the source field).
+    store_keys = {
+        "principles.yml": "principles",
+        "anti-patterns.yml": "anti_patterns",
+        "procedures.yml": "procedures",
+    }
+    total = 0
+    bugfix_related = 0
+    for fname, key in store_keys.items():
+        path = os.path.join(shaktra, "memory", fname)
+        data, _ = load_yaml_safe(path) if has_shaktra else (None, None)
+        entries = (data or {}).get(key, []) if isinstance(data, dict) else []
+        if not isinstance(entries, list):
+            continue
+        total += len(entries)
+        for e in entries:
+            if not isinstance(e, dict):
+                continue
+            blob = " ".join(str(e.get(f, "")) for f in ("source", "text")).lower()
+            blob += " " + " ".join(str(t).lower() for t in (e.get("tags") or []))
+            blob += " " + " ".join(str(t).lower() for t in (e.get("applies_to") or []))
+            if "bug" in blob:
+                bugfix_related += 1
+    report.add(
+        "bugfix learning captured to memory (any store)",
+        bugfix_related > 0,
+        f"no bugfix-related memory entry (total across stores: {total})"
+        if bugfix_related == 0 else "",
+    )
 
     return report
 
