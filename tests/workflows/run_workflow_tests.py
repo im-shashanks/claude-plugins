@@ -84,6 +84,35 @@ def main() -> int:
     return 0 if all(r.passed for r in results) else 1
 
 
+def _resolve_verdict_via_validator(prompt: str, test_dir: Path, result) -> None:
+    """When the agent emitted no verdict, run the validator ourselves.
+
+    Extracts the validator command embedded in the prompt (the line following
+    'Run this validator command via Bash:') and runs it against the final
+    filesystem state, setting the verdict from its exit code (0 = PASS).
+    """
+    import re
+
+    m = re.search(r"Run this validator command via Bash:\s*\n\s*(.+)", prompt)
+    if not m:
+        return  # no validator (e.g. smoke test) — leave UNKNOWN
+    validator_cmd = m.group(1).strip()
+    try:
+        proc = subprocess.run(
+            validator_cmd, shell=True, cwd=str(test_dir),
+            capture_output=True, text=True, timeout=120,
+        )
+    except (subprocess.SubprocessError, OSError) as e:
+        result.error = f"fallback validator failed to run: {e}"
+        return
+    result.verdict = "PASS" if proc.returncode == 0 else "FAIL"
+    result.error = (result.error + " " if result.error else "") + \
+        "(verdict resolved by runner fallback — agent emitted no verdict)"
+    tail = (proc.stdout or proc.stderr or "").strip().splitlines()[-3:]
+    for line in tail:
+        result.output_lines.append(line)
+
+
 def _run_selected_tests(
     selected: list[dict], temp_dirs: list[Path], model: str = "",
 ) -> list[TestResult]:
@@ -128,6 +157,14 @@ def _run_selected_tests(
             max_turns=test_def["max_turns"],
             model=model,
         )
+
+        # Fallback: if the agent produced no parseable verdict (e.g. it correctly
+        # halted at a prerequisite and stopped before running the validator),
+        # run the validator ourselves against the final filesystem state. The
+        # validator is the objective check — the agent only drives the skill.
+        if result.verdict == "UNKNOWN":
+            _resolve_verdict_via_validator(prompt, test_dir, result)
+
         results.append(result)
 
         icon = "PASS" if result.passed else result.verdict
