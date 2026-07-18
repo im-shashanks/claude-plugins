@@ -54,11 +54,11 @@ def validate_bugfix(project_dir: str) -> ValidationReport:
                         os.path.join(shaktra, "memory", "principles.yml")),
                     "no stories or memory updates found")
 
-    # --- Diagnosis artifact ---
+    # --- Diagnosis artifact (canonical location: .shaktra/stories/diagnosis-*.yml) ---
     diag_exists = (has_shaktra and (
         os.path.isdir(os.path.join(shaktra, "diagnosis"))
-        or list(Path(shaktra).glob("*diagnosis*"))
-        or list(Path(shaktra).glob("*bug-report*"))))
+        or list(Path(shaktra).rglob("*diagnosis*"))
+        or list(Path(shaktra).rglob("*bug-report*"))))
     report.add("diagnosis artifact exists", bool(diag_exists),
                "no diagnosis directory or files found" if not diag_exists else "")
 
