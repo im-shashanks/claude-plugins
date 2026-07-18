@@ -31,7 +31,9 @@ _TEST_OVERRIDES = """
 This is an automated test run. The following overrides apply:
 
 ### Workflow Constraints
-- **Missing-prerequisite stops are CORRECT behavior.** If a skill reports a missing prerequisite (no PRD, no design doc, no settings, no diagnosis), log it, print the verdict the validator expects, and END. Never fabricate the missing artifact, patch plugin files, or copy/modify workflow scripts to force progress.
+- **Two distinct stop types — do not confuse them:**
+  - **Pre-flight prerequisite stops** (a skill's pre-flight reports missing settings / PRD / design doc / diagnosis, or a blocked/sparse story) are terminal and CORRECT: log it, print the verdict the validator expects, and END. Never fabricate the missing artifact, patch plugin files, or copy/modify workflow scripts to force progress.
+  - **Mid-workflow clarifications** are different: when a WORKFLOW returns `needs_clarification` (e.g. a design gap the architect flagged, an ambiguous requirement) it is asking you to resolve an in-flight decision, not reporting a missing prerequisite. Resolve it the way the skill instructs — make a reasonable assumption (the auto-answer) and RE-INVOKE the workflow with that answer (`resumeFromRunId` + `gap_answers`/`clarifications`). Completing this escalation round-trip is the correct, expected behavior; do NOT halt on it.
 - **Quality review loops: 1 iteration maximum.** After the first review+fix pass, proceed to the next workflow step regardless of remaining findings.
 - **Story creation: 2 stories maximum.** Create only 2 stories (pick the 2 most representative). This is sufficient to prove the workflow works.
 - **Sprint planning: 1 sprint only.**
