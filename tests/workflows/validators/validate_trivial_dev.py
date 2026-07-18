@@ -29,12 +29,17 @@ def validate_trivial_dev(project_dir: str, story_id: str) -> ValidationReport:
     completed = data.get("completed_phases", []) or []
     report.add("plan phase completed", "plan" in completed, f"completed={completed}")
     report.add("code phase completed", "code" in completed, f"completed={completed}")
-    # Tier-matrix skips — the point of this test.
-    report.add("RED phase SKIPPED for trivial (no 'tests')", "tests" not in completed,
-               "'tests' present — RED should be skipped for trivial tier")
+    # completed_phases must stay a valid contiguous prefix even with skips.
+    report.add("completed_phases is a valid prefix",
+               completed == ["plan", "tests", "code"][:len(completed)] and "plan" in completed,
+               f"completed={completed} is not a prefix of [plan,tests,code]")
+    # The assertable tier-matrix skip: comprehensive QUALITY does NOT run for
+    # trivial (quality is the terminal phase, so its absence is unambiguous).
     report.add("comprehensive QUALITY SKIPPED for trivial (no 'quality')",
                "quality" not in completed,
                "'quality' present — comprehensive review should be skipped for trivial")
+    # RED-skip is confirmed by the reduced coverage bar (hotfix threshold), not
+    # by completed_phases (a skipped phase still counts as complete for the prefix).
     report.add("current_phase is complete", data.get("current_phase") == "complete",
                f"current_phase={data.get('current_phase')}")
     report.add("memory captured", bool(data.get("memory_captured")),

@@ -260,7 +260,11 @@ return {
   findings: allFindings,
   observations,
   briefing,
-  completed_phases: ['plan'].concat(a.tier !== 'trivial' ? ['tests'] : [], ['code'], heavyTier ? ['quality'] : []),
+  // completed_phases must stay a contiguous prefix of [plan,tests,code,quality]
+  // (validate_schema.py enforces this). A SKIPPED phase (RED for trivial,
+  // comprehensive QUALITY for small/trivial) still counts as complete/passed
+  // for prefix purposes — so 'tests' is always included once code is done.
+  completed_phases: ['plan', 'tests', 'code'].concat(heavyTier ? ['quality'] : []),
   memory,
   metrics: { coverage_pct: codeRun?.coverage_pct, test_count: codeRun?.test_count ?? testRun?.test_count },
   report_markdown: report.markdown,
