@@ -156,6 +156,7 @@ def _run_selected_tests(
             timeout_secs=test_def["timeout"],
             max_turns=test_def["max_turns"],
             model=model,
+            extra_env=test_def.get("env"),
         )
 
         # Fallback: if the agent produced no parseable verdict (e.g. it correctly

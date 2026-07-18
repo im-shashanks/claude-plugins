@@ -219,6 +219,7 @@ def run_test(
     timeout_secs: int = 600,
     max_turns: int = 30,
     model: str = "",
+    extra_env: dict | None = None,
 ) -> TestResult:
     """Launch a claude --print session and capture output with timeout."""
     result = TestResult(name=name)
@@ -230,6 +231,9 @@ def run_test(
     # Workflows run as background tasks; --print kills them after 600s by
     # default. 0 = wait indefinitely (the per-test timeout still bounds us).
     env["CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS"] = "0"
+    # Per-test env (e.g. PATH prepend for a `gh` shim). {TEST_DIR} is resolved.
+    for k, v in (extra_env or {}).items():
+        env[k] = str(v).replace("{TEST_DIR}", test_dir)
 
     cmd = [
         "claude", "--print",

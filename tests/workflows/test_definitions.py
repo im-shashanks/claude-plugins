@@ -441,6 +441,74 @@ def setup_incident_detection_gap(test_dir: Path) -> None:
     setup_incident(test_dir)
 
 
+def _write_gh_shim(test_dir: Path) -> None:
+    """Write a fake `gh` onto a bin dir so PR-mode workflows run offline.
+
+    Handles `gh auth status`, `gh pr view <n> --json ...` (canned metadata), and
+    `gh pr diff <n>` (the real branch diff computed via git).
+    """
+    bin_dir = test_dir / ".bin"
+    bin_dir.mkdir(parents=True, exist_ok=True)
+    shim = bin_dir / "gh"
+    shim.write_text(
+        "#!/usr/bin/env bash\n"
+        "set -e\n"
+        'if [ "$1" = "auth" ]; then echo "Logged in to github.com as tester"; exit 0; fi\n'
+        'if [ "$1" = "pr" ] && [ "$2" = "view" ]; then\n'
+        '  cat <<JSON\n'
+        '{"title":"Add safe divide helper","body":"Adds divide() to math_utils. Closes #12.",'
+        '"baseRefName":"main","headRefName":"feature/add-divide",'
+        '"files":[{"path":"src/math_utils.py","additions":6,"deletions":0}]}\n'
+        'JSON\n'
+        '  exit 0\n'
+        'fi\n'
+        'if [ "$1" = "pr" ] && [ "$2" = "diff" ]; then\n'
+        '  git -C "$(dirname "$0")/.." diff main...feature/add-divide 2>/dev/null || '
+        'git diff main...feature/add-divide\n'
+        '  exit 0\n'
+        'fi\n'
+        'echo "gh shim: unhandled args: $*" >&2; exit 0\n'
+    )
+    shim.chmod(0o755)
+
+
+def setup_pr_review(test_dir: Path) -> None:
+    """PR-review setup: a git repo with a feature branch diff + a gh shim.
+
+    Exercises the pr-review code path (fetch change set via `gh pr diff`) rather
+    than the story handoff. The diff intentionally contains a divide-by-zero
+    gap so the reviewer has something real to find.
+    """
+    import subprocess as _sp
+    setup_shaktra_from_templates(test_dir, _greenfield_settings())
+    _run = lambda *c: _sp.run(list(c), cwd=test_dir, capture_output=True)
+    _run("git", "init", "-b", "main")
+    _run("git", "config", "user.email", "t@example.com")
+    _run("git", "config", "user.name", "tester")
+    src = test_dir / "src"
+    src.mkdir(exist_ok=True)
+    (src / "math_utils.py").write_text('def add(a, b):\n    return a + b\n')
+    _run("git", "add", "-A")
+    _run("git", "commit", "-m", "base: math_utils.add")
+    _run("git", "checkout", "-b", "feature/add-divide")
+    (src / "math_utils.py").write_text(
+        'def add(a, b):\n    return a + b\n\n\n'
+        'def divide(a, b):\n'
+        '    # BUG: no zero-division guard, no type validation\n'
+        '    return a / b\n'
+    )
+    _run("git", "add", "-A")
+    _run("git", "commit", "-m", "feat: add divide helper")
+    _run("git", "checkout", "main")
+    _write_gh_shim(test_dir)
+    _append_test_overrides(test_dir / "CLAUDE.md")
+
+
+def setup_pr_adversarial(test_dir: Path) -> None:
+    """PR adversarial-review setup: same repo + gh shim as pr-review."""
+    setup_pr_review(test_dir)
+
+
 def setup_escalation(test_dir: Path) -> None:
     """TPM design escalation setup: a PRD with a critical, unanswerable gap.
 
@@ -1051,6 +1119,44 @@ def get_test_definitions(test_dir: str) -> list[dict]:
                 "analyze-dependency-audit", "shaktra-analyze",
                 skill_args="run a dependency audit from the existing analysis",
                 validator_cmd=_v("validate_modes.py", d, "dependency_audit"),
+            ),
+        },
+        {
+            "name": "pr-review",
+            "category": "extended",
+            "timeout": 1500,
+            "max_turns": 130,
+            "setup": lambda td: setup_pr_review(td),
+            "env": {"PATH": "{TEST_DIR}/.bin:" + os.environ.get("PATH", "")},
+            "prompt": build_prompt(
+                "pr-review", "shaktra-review",
+                skill_args="review PR 1",
+                validator_cmd=_v("validate_pr_review.py", d, "review"),
+                extra=(
+                    "\nPR-MODE LOGGING (mandatory): the moment you fetch the PR diff, "
+                    "log `echo \"PR-GH-DIFF-FETCHED\" >> .shaktra-test.log`. When the "
+                    "review finishes, log the final verdict: "
+                    "`echo \"PR-VERDICT: <APPROVED|APPROVED_WITH_NOTES|CHANGES_REQUESTED|BLOCKED>\" >> .shaktra-test.log`."
+                ),
+            ),
+        },
+        {
+            "name": "pr-adversarial",
+            "category": "extended",
+            "timeout": 1800,
+            "max_turns": 150,
+            "setup": lambda td: setup_pr_adversarial(td),
+            "env": {"PATH": "{TEST_DIR}/.bin:" + os.environ.get("PATH", "")},
+            "prompt": build_prompt(
+                "pr-adversarial", "shaktra-adversarial-review",
+                skill_args="adversarial review PR 1",
+                validator_cmd=_v("validate_pr_review.py", d, "adversarial-review"),
+                extra=(
+                    "\nPR-MODE LOGGING (mandatory): the moment you fetch the PR diff, "
+                    "log `echo \"PR-GH-DIFF-FETCHED\" >> .shaktra-test.log`. When the "
+                    "review finishes, log the final verdict: "
+                    "`echo \"PR-VERDICT: <pass|concern|blocked>\" >> .shaktra-test.log`."
+                ),
             ),
         },
     ]
